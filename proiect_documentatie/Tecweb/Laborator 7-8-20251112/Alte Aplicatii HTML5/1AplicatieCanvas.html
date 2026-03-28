@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title> Aplicatie Canvas</title>
+<style type="text/css">
+<!--
+#NewCanvas {
+	background-color: #FFFF00;
+	border: medium dashed #000000;
+}
+-->
+</style>
+</head>
+
+<body>
+
+<canvas id="NewCanvas" width="300" height="400">
+
+</canvas>
+<script>
+var IDcanvas=document.getElementById("NewCanvas");
+var continutJs=IDcanvas.getContext("2d");
+
+continutJs.fillStyle;
+continutJs.fillRect(40,100,100,100);
+
+continutJs.fillStyle="#FF00FF";
+continutJs.fillRect(160,100,100,100);
+
+//arc(x,y,raza,start,stop)
+
+continutJs.arc(150, 270, 50, 0, Math.PI * 2);
+continutJs.strokeStyle="red";
+continutJs.lineWidth=5;
+continutJs.fill();
+continutJs.stroke();
+
+</script>
+
+</body>
+
+</html>

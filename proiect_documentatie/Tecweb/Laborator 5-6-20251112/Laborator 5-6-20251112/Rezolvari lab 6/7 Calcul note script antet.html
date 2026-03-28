@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+
+<script type="text/javascript">
+function Calcul()
+{
+if((form1.ne.value=="")||(form1.nl.value==""))
+  alert("Nu ati completat notele");
+else 
+  if (!parseInt(form1.ne.value)|| (!parseInt(form1.nl.value)))
+    alert("Nota trebuie sa fie numar");
+	else
+	    if ((parseInt(form1.ne.value)<1)||(parseInt(form1.ne.value)>10))
+		  alert("Notele trebe sa fie intre 1 si 10");
+         else
+		 {
+
+			var ne=eval(form1.ne.value);
+			var nl=eval(form1.nl.value);
+			if((ne>=5) &&(nl>=5))
+			  n= (2*ne+nl)/3;
+			else
+			   n=4;
+			form1.nf.value=n;
+			if(n>=5)
+			  form1.rez.value="promovat";
+			else
+			  form1.rez.value="nepromovat";       
+       }
+}
+</script>
+
+</head>
+
+<body>
+<form id="form1" name="form1" method="post" action="">
+  <p>Nota examen 
+    <label>
+    <input name="ne" type="text" id="ne" size="10" />
+    </label>
+  </p>
+  <p>Nota laborator 
+    <label>
+    <input name="nl" type="text" id="nl" size="10" />
+    </label>
+  </p>
+  <p>Nota finala 
+    <label>
+    <input name="nf" type="text" id="nf" size="10" />
+    </label>
+    Rezultat 
+    <label>
+    <input type="text" name="rez" id="rez" />
+    </label>
+  </p>
+  <p>
+    <label>
+    <input type="button" name="button" id="button" value="Calcul" onclick="Calcul();"/>
+    </label>
+    <label>
+    <input type="reset" name="button2" id="button2" value="Reincearca" />
+    </label>
+  </p>
+  <p>&nbsp;</p>
+  <p>&nbsp;</p>
+  <p>&nbsp;</p>
+</form>
+</body>
+</html>

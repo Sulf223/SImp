@@ -1,0 +1,20 @@
+@charset "utf-8";
+h1 {
+	background-color: #8CDCC8;
+}
+ul {
+	background-color: #C8A0C8;
+}
+ol {
+	background-color: #DAFFC3;
+	text-indent: 5px;
+}
+p {
+	background-color: gray;
+	text-indent: 1cm;
+}
+body {
+	background-image: url(smile.jpg);
+	background-repeat: no-repeat;
+	background-position: center bottom;
+}

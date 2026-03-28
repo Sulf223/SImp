@@ -1,0 +1,5 @@
+# Ignoră fișierul de configurare care conține date sensibile
+PHP/config.ini
+
+# Ignoră fișierele specifice IDE-urilor
+.vscode/

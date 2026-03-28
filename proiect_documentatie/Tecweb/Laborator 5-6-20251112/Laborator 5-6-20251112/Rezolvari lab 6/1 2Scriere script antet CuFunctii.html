@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+<script type="text/javascript">
+function Afisare1()
+{
+  var nume="Popescu";
+  var varsta=23;
+  document.write("<B> Un text exempleficativ </B> si un alt text <BR>");
+  document.write(nume);
+  document.write(" Ma numesc " +nume);
+  document.write("<BR>Ma numescu <I>" +nume+"</I> si am varsta <B>"+varsta+" de ani</B>");
+}
+function Afisare2()
+{
+ document.write("<H1> O alta functie </H1>");
+}
+function Afisare3()
+{
+ alert("La revedere ca a venit toamna ");
+}
+</script>
+
+</head>
+
+<body >
+<form id="form1" name="form1" method="post" action="">
+  <label>
+  <input type="button" name="button" id="button" value="Executie functie"  onclick="Afisare1()" />
+  </label>
+  
+ 
+</form>
+<p>&nbsp;</p>
+ <p><img src="LAKE.jpg" width="147" height="100" onclick="Afisare2();"/></p>
+<p>&nbsp;</p>
+<p><a href="http://www.fih.upt.ro/v4/" onclick="Afisare3();" >Link</a></p>
+</body>
+</html>

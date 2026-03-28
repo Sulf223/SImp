@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+
+<html>
+	<head>
+	  <title>A black and white image filter</title>
+
+		<style> 
+		   body {
+				background: rgba(100, 145, 250, 0.3);
+			}
+
+			#canvas {
+			   margin-left: 20px;
+            margin-right: 0;
+            margin-bottom: 20px;
+				border: thin solid #aaaaaa;
+				cursor: crosshair;
+            padding: 0;
+			}
+
+         #controls {
+            margin: 20px 0px 20px 20px;
+         }
+
+         a {
+            font: 18px Times Roman;
+            text-decoration: none;
+            margin-right: 15px;
+         }
+		</style>
+	</head>
+
+  <body>
+      <div id='controls'>
+         <input type='checkbox'
+                id='colorToggleCheckbox' checked/>
+         Color
+      </div>
+      
+      <canvas id='canvas' width='800' height='520'>
+      
+      </canvas>
+
+     <script src='exemplu.js'></script>
+  </body>
+</html>

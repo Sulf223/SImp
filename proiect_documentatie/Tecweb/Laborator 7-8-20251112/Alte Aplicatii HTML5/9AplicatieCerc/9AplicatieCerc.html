@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Aplicatie cerc</title>
+
+    <style>
+      body {
+         background: #efefef;
+      }
+      
+      #canvas {
+         background: #ffffff;
+         -webkit-box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+         -moz-box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+         box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+      }
+
+      .floatingControls {
+         position: absolute;
+         left: 475px;
+         top: 20px;
+      }
+
+      #canvas {
+         margin: 10px;
+      }
+    </style>
+  </head>
+
+   <body>
+      <div class='floatingControls'>
+         <input id='directionCheckbox' type='checkbox'/>Same direction<br/>
+         <input id='annotationCheckbox' type='checkbox'/>Annotations<br/>
+      </div>
+      
+      <canvas id='canvas' width='600' height='400'>
+       
+      </canvas>
+
+    <script src = 'cerc.js'></script>
+  </body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Untitled Document</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body>
+<form name="form1" method="post" action="">
+  <p> 
+    <label> 
+    <input name="RadioGroup1" type="radio" value="radio" checked>
+    val1</label>
+    <br>
+    <label> 
+    <input type="radio" name="RadioGroup1" value="radio">
+    val2&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; </label>
+    <input type="button" name="Button" value="Verifica valoarea selectata" onClick="Test()" >
+  </p>
+  <p>sex 
+    <label></label>
+  </p>
+  <p>
+  <label>
+    <input type="checkbox" name="checkbox" value="checkbox" >
+  masculin
+  </label></p>
+  <p>
+  <label>
+    <input type="checkbox" name="checkbox2" value="checkbox"> 
+    feminin
+    </label>
+&nbsp;&nbsp;&nbsp;&nbsp; 
+    <input name="xxx" type="button" id="xxx" value="Determina" onClick="ver()">
+    <br>
+  </p>
+</form>
+<p> 
+  <script language="JavaScript" type="text/JavaScript">
+var x;
+function  Test()
+{
+ if (form1.RadioGroup1[0].checked== true)
+   alert ("Bine ai selctat primul ");
+ else
+  alert ("Bine ai selectat pe al doilea ")
+}
+</script>
+  <script language="JavaScript" type="text/JavaScript">
+function ver()
+{var nr=0;
+if (form1.checkbox.checked==true)
+nr=1;
+
+if (form1.checkbox2.checked==true)
+nr=2;
+if (form1.checkbox.checked==true && form1.checkbox2.checked==true)
+ nr=3;
+
+if(nr==0) alert("Nu ai ales nicun sex!");
+else if (nr==1)alert("Ai ales sexul masculin!");
+else if (nr==2)alert("Ai ales sexul feminin!");
+else alert("Ai ales amandoua sexele!");
+}
+</script>
+</p>
+</body>
+</html>

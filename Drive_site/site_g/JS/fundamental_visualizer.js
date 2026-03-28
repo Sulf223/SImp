@@ -1,0 +1,118 @@
+(function () {
+    function buildSteps(topic) {
+        if (topic === "recursivitate") {
+            return [
+                "Apel principal: fact(4)",
+                "fact(4) -> fact(3)",
+                "fact(3) -> fact(2)",
+                "fact(2) -> fact(1)",
+                "fact(1) -> fact(0) (caz de baza)",
+                "Return: fact(0)=1",
+                "Return: fact(1)=1",
+                "Return: fact(2)=2",
+                "Return: fact(3)=6",
+                "Return final: fact(4)=24"
+            ];
+        }
+
+        if (topic === "backtracking") {
+            return [
+                "Pornire: x = [_, _, _]",
+                "x[1] = 1 (pas inainte)",
+                "x[2] = 1 (invalid, deja folosit)",
+                "x[2] = 2 (valid)",
+                "x[3] = 3 -> solutie: 1 2 3",
+                "Pas inapoi la x[3] si x[2]",
+                "x[2] = 3, x[3] = 2 -> solutie: 1 3 2",
+                "Pas inapoi la x[1], alegem 2",
+                "Generam urmatoarele solutii...",
+                "Final: toate permutarile generate"
+            ];
+        }
+
+        if (topic === "greedy") {
+            return [
+                "Problema: suma = 87, monede = {50, 10, 5, 1}",
+                "Alegem 50 (cea mai mare moneda posibila)",
+                "Ramas: 37, alegem 10",
+                "Ramas: 27, alegem 10",
+                "Ramas: 17, alegem 10",
+                "Ramas: 7, alegem 5",
+                "Ramas: 2, alegem 1",
+                "Ramas: 1, alegem 1",
+                "Ramas: 0, stop",
+                "Rezultat: 50 + 10 + 10 + 10 + 5 + 1 + 1"
+            ];
+        }
+
+        return [
+            "Problema: cautam 23 in vector sortat",
+            "Interval initial: [0, n-1]",
+            "Calculam mijlocul si comparam",
+            "Daca 23 e mai mare, pastram jumatatea dreapta",
+            "Recalculam mijlocul in intervalul nou",
+            "Daca 23 e mai mic, pastram jumatatea stanga",
+            "Continuam pana gasim valoarea",
+            "Sau pana intervalul devine vid",
+            "Numar de pasi ~ log2(n)",
+            "Concluzie: mult mai rapid decat cautarea liniara"
+        ];
+    }
+
+    function render(container, steps, index) {
+        var safeIndex = Math.max(0, Math.min(index, steps.length - 1));
+        var current = steps[safeIndex];
+
+        var html = "";
+        html += '<div class="visualizer-controls">';
+        html += '<button class="btn btn-primary" data-action="prev">Pas anterior</button>';
+        html += '<button class="btn btn-ghost" data-action="next">Pas urmator</button>';
+        html += '<button class="btn" data-action="reset">Reset</button>';
+        html += '</div>';
+
+        html += '<div class="viz-panel">';
+        html += '<h3>Pas ' + (safeIndex + 1) + ' / ' + steps.length + '</h3>';
+        html += '<p>' + current + '</p>';
+        html += '</div>';
+
+        html += '<div class="table-wrapper" style="margin-top:12px;">';
+        html += '<table><thead><tr><th>Istoric pasi</th></tr></thead><tbody>';
+        for (var i = 0; i <= safeIndex; i++) {
+            html += '<tr><td>' + steps[i] + '</td></tr>';
+        }
+        html += '</tbody></table></div>';
+
+        container.innerHTML = html;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var container = document.getElementById("fundamental-visualizer");
+        if (!container) return;
+
+        var topic = container.getAttribute("data-topic") || "recursivitate";
+        var steps = buildSteps(topic);
+        var index = 0;
+
+        function refresh() {
+            render(container, steps, index);
+            var prev = container.querySelector('[data-action="prev"]');
+            var next = container.querySelector('[data-action="next"]');
+            var reset = container.querySelector('[data-action="reset"]');
+
+            prev.addEventListener("click", function () {
+                index = Math.max(0, index - 1);
+                refresh();
+            });
+            next.addEventListener("click", function () {
+                index = Math.min(steps.length - 1, index + 1);
+                refresh();
+            });
+            reset.addEventListener("click", function () {
+                index = 0;
+                refresh();
+            });
+        }
+
+        refresh();
+    });
+})();

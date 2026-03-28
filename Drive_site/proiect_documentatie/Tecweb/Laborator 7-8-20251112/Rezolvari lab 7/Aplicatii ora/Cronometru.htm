@@ -1,0 +1,44 @@
+
+<html>
+<head>
+<title>Untitled Document</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body onLoad="setTimeout('Afisare();',1000);">
+<FORM NAME="F">
+ <INPUT TYPE=text SIZE=9 NAME="Data">
+ <INPUT TYPE=text SIZE=9 NAME="Ora">
+ <INPUT TYPE=text SIZE=9 NAME="Mst">
+ <INPUT TYPE=text SIZE=9 NAME="Sst">
+ <INPUT TYPE=text SIZE=9 NAME="Sec">
+</FORM>
+<script language="JavaScript" type="text/JavaScript">
+var Ms,Ss,SecSc;
+var A = new Date();
+Ms=A.getMinutes();
+Ss=A.getSeconds();
+document.F.Mst.value=Ms;
+document.F.Sst.value=Ss;
+document.F.Sec.value=0;
+SecSc=0;
+function Afisare()
+{
+var Azi = new Date();
+var  Luna = Azi.getMonth() + 1;
+var Zi = Azi.getDate();
+var An = Azi.getYear();
+var  S = "/";
+document.F.Data.value = Luna+S+Zi+S+An ;
+document.F.Ora.value=Azi.getHours() + ":" + Azi.getMinutes() + ":" + Azi.getSeconds();
+var Mc,Sc;
+Mc=Azi.getMinutes();
+Sc=Azi.getSeconds()
+setTimeout('Afisare();',1000);
+SecSc++;
+document.F.Sec.value=SecSc;
+
+}
+</script>
+</body>
+</html>

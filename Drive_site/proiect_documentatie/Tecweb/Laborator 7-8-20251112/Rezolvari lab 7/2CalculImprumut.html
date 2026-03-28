@@ -1,0 +1,70 @@
+<html>
+<head>
+<title>Untitled Document</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body>
+<form name="form1" method="post" action="">
+  <p>Nume client 
+    <input name="Nume" type="text" id="Nume">
+  </p>
+  <p> Tip imprumut </p>
+  <table width="200">
+    <tr>
+      <td><label>
+        <input name="RadioGroup1" type="radio" value="radio">
+        Credit auto</label></td>
+    </tr>
+    <tr>
+      <td><label>
+        <input type="radio" name="RadioGroup1" value="radio">
+        Credit nevoi personale</label></td>
+    </tr>
+    <tr>
+      <td><label>
+        <input type="radio" name="RadioGroup1" value="radio">
+        Credit ipotecar</label></td>
+    </tr>
+  </table>
+  <p>Suma imprumutata 
+    <input name="S" type="text" id="S">
+  </p>
+  <p>Nr de rate 
+    <input name="Nr" type="text" id="Nr">
+  </p>
+  <p>Rata lunara 
+    <input name="Rl" type="text" id="Rl">
+  </p>
+  <p> 
+    <input type="button" name="Button" onClick="Calcul()" value="Calcul rate">
+  </p>
+</form>
+<script language="JavaScript" type="text/JavaScript">
+function Validare()
+{ var corect=true;
+ nume=form1.Nume.value;
+ if (nume.length==0){corect=false;
+  				alert("Nu ai completat numele");
+  				}
+  
+ imprumutat=form1.S.value;
+ if (imprumutat.length==0)
+ {corect=false;
+  alert("Nu ai completat suma imprumutata");}
+ if ((form1.RadioGroup1[0].checked==false) && (form1.RadioGroup1[1].checked==false) && (form1.RadioGroup1[2].checked==false)){corect=false;
+   alert ("Nu ati ales tipul de credit");  }
+   return corect;
+} 
+function Calcul()
+{
+   if(Validare()){
+   nrRate=parseInt(form1.Nr.value);
+    if (nrRate>0)
+     form1.Rl.value= eval(form1.S.value) / eval(form1.Nr.value)
+   else
+      alert ("Trebuie sa ai cel putin o rata ")}
+}
+</script>
+</body>
+</html>

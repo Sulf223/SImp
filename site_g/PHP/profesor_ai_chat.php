@@ -7,6 +7,50 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// Verificăm Rate Limiting pe baza adresei IP și sesiunii
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$user_identifier = !empty($_SESSION['user_id']) ? $_SESSION['user_id'] : $_SERVER['REMOTE_ADDR'];
+$rate_limit_key = 'rate_limit_' . md5($user_identifier);
+$rate_limit_messages = (int)(getenv('RATE_LIMIT_MESSAGES') ?: 20);
+$rate_limit_window = (int)(getenv('RATE_LIMIT_WINDOW') ?: 3600);
+
+// Inițializăm sau actualizăm contorul de rate limiting
+$current_time = time();
+if (!isset($_SESSION[$rate_limit_key])) {
+    $_SESSION[$rate_limit_key] = [
+        'count' => 0,
+        'window_start' => $current_time
+    ];
+}
+
+$rate_data = $_SESSION[$rate_limit_key];
+
+// Verificăm dacă fereastra de timp a expirat
+if ($current_time - $rate_data['window_start'] > $rate_limit_window) {
+    // Resetează contorul dacă fereastra a expirat
+    $rate_data = [
+        'count' => 0,
+        'window_start' => $current_time
+    ];
+}
+
+// Incrementez contorul
+$rate_data['count']++;
+$_SESSION[$rate_limit_key] = $rate_data;
+
+// Verificez dacă utilizatorul a depășit limita
+if ($rate_data['count'] > $rate_limit_messages) {
+    http_response_code(429);
+    echo json_encode([
+        'ok' => false,
+        'error' => 'Prea multe mesaje în scurt timp. Te rugăm să aștepți înainte de a trimite alt mesaj.'
+    ]);
+    exit;
+}
+
 $input = json_decode(file_get_contents('php://input'), true);
 if (!is_array($input)) {
     http_response_code(400);

@@ -1,5 +1,35 @@
-# Ignoră fișierul de configurare care conține date sensibile
+# Variabile de mediu - NU comite niciodată în Git
+.env
+.env.local
+.env.*.local
+
+# Fișiere de configurare sensibile
 PHP/config.ini
 
-# Ignoră fișierele specifice IDE-urilor
+# Fișiere de sistem
+.DS_Store
+Thumbs.db
+*.log
+
+# IDE și editor
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+*.sublime-workspace
+
+# Pachete și dependențe
+vendor/
+node_modules/
+composer.lock
+package-lock.json
+yarn.lock
+
+# Alte fișiere temporare
+tmp/
+temp/
+cache/
+*.tmp

@@ -10,7 +10,10 @@ $db   = $config['db'];
 $con = mysqli_connect($host, $user, $pass, $db);
 
 if (!$con) {
-    die("Eroare conectare MySQL: " . mysqli_connect_error());
+    // Logăm eroarea reală în logurile serverului (ex: error.log)
+    error_log("Eroare conectare MySQL: " . mysqli_connect_error());
+    // Afișăm un mesaj generic utilizatorului
+    die("Eroare internă a serverului. Te rugăm să revii mai târziu.");
 }
 
 mysqli_set_charset($con, "utf8");

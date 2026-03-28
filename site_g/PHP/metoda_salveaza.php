@@ -43,13 +43,15 @@ if ($id > 0) {
         // "sssssi" - 5 string-uri (s) și 1 integer (i)
         mysqli_stmt_bind_param($stmt, "sssssi", $nume, $categorie, $complexitate, $descriere, $fisier_cpp, $id);
 
-        // Executăm interogarea
+        // Executăm interogarea (exemplu pentru UPDATE)
         if (!mysqli_stmt_execute($stmt)) {
-            die("Eroare la actualizare: " . mysqli_stmt_error($stmt));
+            error_log("Eroare la actualizare metoda ID $id: " . mysqli_stmt_error($stmt));
+            die("A apărut o eroare la salvarea datelor în baza de date.");
         }
         mysqli_stmt_close($stmt);
     } else {
-        die("Eroare la pregătirea interogării de actualizare: " . mysqli_error($con));
+        error_log("Eroare la pregătirea interogării de actualizare: " . mysqli_error($con));
+        die("A apărut o eroare tehnică. Te rugăm să revii mai târziu.");
     }
 
 } else {
@@ -63,11 +65,13 @@ if ($id > 0) {
 
         // Executăm interogarea
         if (!mysqli_stmt_execute($stmt)) {
-            die("Eroare la inserare: " . mysqli_stmt_error($stmt));
+            error_log("Eroare la inserare metodă: " . mysqli_stmt_error($stmt));
+            die("A apărut o eroare la salvarea datelor în baza de date.");
         }
         mysqli_stmt_close($stmt);
     } else {
-        die("Eroare la pregătirea interogării de inserare: " . mysqli_error($con));
+        error_log("Eroare la pregătirea interogării de inserare: " . mysqli_error($con));
+        die("A apărut o eroare tehnică. Te rugăm să revii mai târziu.");
     }
 }
 

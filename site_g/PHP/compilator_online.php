@@ -14,7 +14,9 @@ if ($run_id > 0) {
         if ($row = $result->fetch_assoc()) {
             $fisier_cpp = $row['fisier_cpp'];
             if (!empty($fisier_cpp)) {
-                $file_path = '../CPP/' . $fisier_cpp;
+                // Securitate adițională: Extragem doar numele fișierului, ignorând orice directoare ascunse
+                $nume_fisier_sigur = basename($fisier_cpp);
+                $file_path = '../CPP/' . $nume_fisier_sigur;
                 if (file_exists($file_path)) {
                     $cod_sursa = file_get_contents($file_path);
                 }

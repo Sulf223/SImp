@@ -1,10 +1,10 @@
 <?php
 // Fișier de configurare securizat (PHP)
-// Acesta nu poate fi citit direct din browser deoarece este executat ca script PHP.
+// Valorile sunt preluate din variabilele de mediu pentru a preveni expunerea lor în codul sursă.
 
 return [
-    'host' => 'localhost',
-    'user' => 'root',
-    'pass' => 'Parola_imposibila223$',
-    'db'   => 'dbsortari'
+    'host' => getenv('DB_HOST') ?: 'localhost',
+    'user' => getenv('DB_USER') ?: 'root',
+    'pass' => getenv('DB_PASS') ?: '',
+    'db'   => getenv('DB_NAME') ?: 'dbsortari'
 ];

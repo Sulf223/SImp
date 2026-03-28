@@ -1,0 +1,421 @@
+/* CSS actualizat pentru pagina de Bun Venit (Landing Page) cu Sistem Solar */
+:root {
+    --color-primary-green: #28a745;
+    --color-primary-blue: #007bff;
+    --color-deep-blue: #0056b3;
+    --color-background-landing: #ffffff;
+    --color-text-landing: #213447;
+    --color-footer-bg: #f8f9fa;
+    --solar-system-width: 700px;
+    --solar-system-height: 420px;
+}
+
+.landing-shell {
+    background:
+        radial-gradient(circle at 8% 8%, rgba(40, 167, 69, 0.14), transparent 24%),
+        radial-gradient(circle at 92% 14%, rgba(0, 123, 255, 0.18), transparent 28%),
+        linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+    border: 1px solid #e0e8f1;
+    border-radius: 20px;
+    margin: 1.5rem auto;
+    max-width: 1200px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(13, 35, 67, 0.08);
+}
+
+.landing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.6rem;
+    border-bottom: 1px solid #e9eef3;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+}
+
+.logo-landing {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--color-text-landing);
+}
+
+.tagline {
+    font-size: 0.95rem;
+    color: #496277;
+}
+
+.social-icons-landing {
+    display: flex;
+    gap: 0.55rem;
+}
+
+.social-icons-landing .icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.74rem;
+    font-weight: 700;
+    transition: transform 0.2s ease;
+}
+
+.social-icons-landing .icon.fb { background: #1877f2; }
+.social-icons-landing .icon.ig { background: #d62976; }
+.social-icons-landing .icon.yt { background: #ff0000; }
+
+.social-icons-landing .icon:hover {
+    transform: translateY(-2px);
+}
+
+.landing-main {
+    padding: 2.3rem 1.6rem 2.4rem;
+    text-align: center;
+}
+
+.innovation-section h1 {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: var(--color-text-landing);
+}
+
+.solar-system-container {
+    width: min(var(--solar-system-width), 100%);
+    height: var(--solar-system-height);
+    margin: 2.2rem auto 1.2rem;
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    perspective: 1000px;
+    background:
+        radial-gradient(circle at 50% 50%, #f3fbf7 0%, #eef5ff 54%, #ffffff 100%);
+    border: 1px solid #dce8f6;
+}
+
+.central-sun {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 112px;
+    height: 112px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 1.9rem;
+    font-weight: 800;
+    background: radial-gradient(circle at 30% 25%, #ffbe63 0%, #ff9730 62%, #ef7f14 100%);
+    box-shadow: 0 0 32px rgba(255, 159, 67, 0.8), 0 0 74px rgba(255, 201, 136, 0.6);
+    z-index: 10;
+}
+
+.orbit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border-radius: 50%;
+    border: 1px dashed rgba(90, 123, 156, 0.5);
+    transform: translate(-50%, -50%) rotateX(65deg);
+    transform-style: preserve-3d;
+}
+
+.planet {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) rotateX(-65deg);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    box-shadow: 0 6px 15px rgba(6, 22, 44, 0.25);
+}
+
+@keyframes orbit-rotation {
+    0% {
+        transform: translate(-50%, -50%) rotateX(65deg) rotateZ(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotateX(65deg) rotateZ(360deg);
+    }
+}
+
+.orbit-python {
+    width: 170px;
+    height: 170px;
+    animation: orbit-rotation 16s linear infinite;
+    z-index: 5;
+}
+
+.planet-python {
+    background: #3572a5;
+}
+
+.orbit-bubble {
+    width: 250px;
+    height: 250px;
+    animation: orbit-rotation 24s linear infinite;
+    z-index: 4;
+}
+
+.planet-bubble {
+    background: #22a66d;
+}
+
+.orbit-merge {
+    width: 330px;
+    height: 330px;
+    animation: orbit-rotation 32s linear infinite;
+    z-index: 3;
+}
+
+.planet-merge {
+    background: #2f8eff;
+}
+
+.orbit-selection {
+    width: 410px;
+    height: 410px;
+    animation: orbit-rotation 40s linear infinite;
+    z-index: 2;
+}
+
+.planet-selection {
+    background: #0f6fdb;
+}
+
+.orbit-quick {
+    width: 490px;
+    height: 490px;
+    animation: orbit-rotation 50s linear infinite;
+    z-index: 1;
+}
+
+.planet-quick {
+    background: #11a057;
+}
+
+.planet::after {
+    content: attr(data-stage);
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #425e76;
+    font-size: 0.72rem;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.planet:hover::after,
+.planet:focus-visible::after {
+    opacity: 1;
+}
+
+.solar-actions {
+    margin-top: 0.4rem;
+    margin-bottom: 0.4rem;
+}
+
+.btn-landing {
+    display: inline-block;
+    padding: 0.82rem 1.5rem;
+    border-radius: 10px;
+    text-decoration: none;
+    border: none;
+    font-weight: 700;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-start {
+    background: var(--color-primary-green);
+    color: #fff;
+    box-shadow: 0 10px 20px rgba(40, 167, 69, 0.2);
+}
+
+.btn-start:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 24px rgba(40, 167, 69, 0.24);
+}
+
+.link-more {
+    display: inline-block;
+    margin-left: 0.8rem;
+    color: #2b5d8f;
+    text-decoration: none;
+    border-bottom: 1px dashed #6c9cc8;
+    padding-bottom: 2px;
+}
+
+.link-more:hover {
+    color: #184168;
+}
+
+.tech-section {
+    margin-top: 2rem;
+    padding: 1.5rem 1rem;
+    border-top: 1px solid #e2eaf3;
+    border-bottom: 1px solid #e2eaf3;
+    background: #f8fbff;
+    border-radius: 14px;
+}
+
+.tech-section h2,
+.connect-section h2 {
+    margin: 0;
+    text-align: center;
+    color: #173f63;
+}
+
+.tech-list {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.tech-item {
+    background: #fff;
+    border: 1px solid #d7e4f3;
+    border-radius: 999px;
+    padding: 0.45rem 0.8rem;
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: #1d4b73;
+}
+
+.connect-section {
+    margin-top: 2.2rem;
+}
+
+.profile-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.profile-placeholder {
+    width: 102px;
+    height: 102px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e9eef5, #d8e3f1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #4d6680;
+    font-size: 2rem;
+    font-weight: 700;
+    border: 2px solid #cdd9e8;
+}
+
+.connect-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.btn-signup {
+    background: var(--color-deep-blue);
+    color: #fff;
+}
+
+.btn-login {
+    background: var(--color-primary-blue);
+    color: #fff;
+}
+
+.btn-signup:hover,
+.btn-login:hover {
+    transform: translateY(-2px);
+}
+
+.landing-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    padding: 0.95rem 1.6rem;
+    border-top: 1px solid #e9eef3;
+    background: var(--color-footer-bg);
+    color: #5b7286;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 900px) {
+    .landing-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .solar-system-container {
+        height: 360px;
+    }
+
+    .orbit-python { width: 140px; height: 140px; }
+    .orbit-bubble { width: 200px; height: 200px; }
+    .orbit-merge { width: 260px; height: 260px; }
+    .orbit-selection { width: 320px; height: 320px; }
+    .orbit-quick { width: 380px; height: 380px; }
+}
+
+@media (max-width: 600px) {
+    .landing-main {
+        padding: 1.5rem 1rem 2rem;
+    }
+
+    .solar-system-container {
+        height: 320px;
+    }
+
+    .central-sun {
+        width: 90px;
+        height: 90px;
+        font-size: 1.55rem;
+    }
+
+    .planet {
+        width: 20px;
+        height: 20px;
+        font-size: 0.74rem;
+    }
+
+    .solar-actions .link-more {
+        display: block;
+        margin: 0.9rem auto 0;
+        width: fit-content;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .orbit-python,
+    .orbit-bubble,
+    .orbit-merge,
+    .orbit-selection,
+    .orbit-quick {
+        animation: none;
+    }
+}

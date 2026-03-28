@@ -22,6 +22,7 @@ require_once 'PHP/helpers.php';
 // Paginile permise pentru a preveni atacuri de tip LFI (Local File Inclusion)
 // Am adăugat și o cale către 'pagini/' pentru a păstra structura curată
 $pagini_permise = [
+    'bun_venit' => 'pagini/bun_venit.php',
     'acasa' => 'pagini/acasa.php',
     'algoritmi' => 'pagini/algoritmi.php',
     'profesor_ai' => 'pagini/profesor_ai.php',
@@ -49,20 +50,27 @@ $pagini_permise = [
     'lista_exercitii' => 'PHP/lista_exercitii.php'
 ];
 
-// Ce pagină încărcăm? Implicit, 'acasa'.
-$pagina_curenta = isset($_GET['page']) && isset($pagini_permise[$_GET['page']]) ? $_GET['page'] : 'acasa';
+// Ce pagină încărcăm implicit?
+// - utilizator neautentificat: bun_venit
+// - utilizator autentificat: acasa (dashboard)
+$pagina_implicita = !empty($_SESSION['user_id']) ? 'acasa' : 'bun_venit';
+$pagina_curenta = isset($_GET['page']) && isset($pagini_permise[$_GET['page']]) ? $_GET['page'] : $pagina_implicita;
 $fisier_de_incarcat = $pagini_permise[$pagina_curenta];
 
 // Paginile pe care nu afișăm widget-ul flotant AI
-$pagini_fara_ai_widget = ['login', 'register', 'logout'];
+$pagini_fara_ai_widget = ['bun_venit', 'login', 'register', 'logout'];
 $afiseaza_ai_widget = !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
 ?>
 <!DOCTYPE html>
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal C++ – Metode de sortare</title>
     <link rel="stylesheet" href="stil.css">
+    <?php if ($pagina_curenta === 'bun_venit'): ?>
+        <link rel="stylesheet" href="CSS/bun_venit.css">
+    <?php endif; ?>
 
     <!-- (opțional) font Poppins de la Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -78,6 +86,7 @@ $afiseaza_ai_widget = !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
 <nav>
     <ul>
         <!-- Link-urile au fost actualizate pentru a folosi noul sistem de paginare -->
+        <li><a href="index.php?page=bun_venit">Bun venit</a></li>
         <li><a href="index.php?page=acasa">Acasă</a></li>
         <li><a href="index.php?page=algoritmi">Algoritmi</a></li>
         <li><a href="index.php?page=profesor_ai">Profesor AI</a></li>

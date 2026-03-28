@@ -1,48 +1,261 @@
-<!-- HERO -->
-<section>
-    <span class="hero-pill">Portal didactic C++</span>
-    <h2 class="hero-title">Învață metode de sortare prin exemple și exerciții</h2>
-    <p class="hero-subtitle">
-        Site-ul folosește codurile din arhiva „metode de sortare” și le transformă
-        în explicații simple, exerciții tip W3Schools și un compilator online pentru testat codul.
-    </p>
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-    <div class="hero-actions">
-        <a href="index.php?page=algoritmi" class="btn btn-primary">Intră în Algoritmi</a>
-        <a href="index.php?page=compilator" class="btn btn-ghost">Rulează cod C++</a>
+if (empty($_SESSION['user_id'])) {
+    echo '<div class="alert alert-warning" style="margin:2rem auto; max-width:600px; text-align:center;">';
+    echo '<h3>Acces restrictionat</h3>';
+    echo '<p>Trebuie sa fii autentificat pentru a accesa Panoul de Control.</p>';
+    echo '<a href="index.php?page=login" class="btn btn-primary">Mergi la Logare</a>';
+    echo '</div>';
+    return;
+}
+
+$username = htmlspecialchars($_SESSION['username'] ?? 'Student', ENT_QUOTES, 'UTF-8');
+
+// Mock data: urmatorul pas este conectarea la noile tabele SQL
+$progres_curent = 65;
+$algoritm_zilei_titlu = 'Merge Sort (Interclasare)';
+$algoritm_zilei_desc = 'Azi aprofundam o tehnica eficienta (Divide et Impera) cu complexitate O(n log n).';
+?>
+
+<style>
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+}
+
+.dash-header h2 {
+    font-size: 2.2rem;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.dash-header p {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+.dash-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.dash-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    border-top: 4px solid transparent;
+    transition: transform 0.3s ease;
+}
+
+.dash-card:hover {
+    transform: translateY(-5px);
+}
+
+.progress-card {
+    border-top-color: #3498db;
+}
+
+.progress-card h3 {
+    margin-top: 0;
+    color: #2980b9;
+}
+
+.task-title {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.progress-bar-container {
+    background: #ecf0f1;
+    border-radius: 10px;
+    height: 12px;
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+    background: #3498db;
+    height: 100%;
+    border-radius: 10px;
+    transition: width 1s ease-in-out;
+}
+
+.progress-text {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin-bottom: 1.5rem;
+    text-align: right;
+}
+
+.algo-card {
+    border-top-color: #2ecc71;
+    background: linear-gradient(145deg, #ffffff, #f0fcf4);
+}
+
+.algo-badge {
+    display: inline-block;
+    background: #2ecc71;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.algo-card h3 {
+    margin-top: 0;
+    color: #27ae60;
+}
+
+.algo-card p {
+    color: #555;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.dash-recent h3 {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+}
+
+.recent-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+.recent-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid #e0e6ed;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.recent-card:hover {
+    border-color: #3498db;
+    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.1);
+}
+
+.recent-card .icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.recent-card h4 {
+    margin: 0 0 0.5rem 0;
+    color: #34495e;
+}
+
+.recent-card p {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin-bottom: 1rem;
+}
+
+.recent-card a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.recent-card a:hover {
+    text-decoration: underline;
+}
+
+.dash-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    text-align: center;
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.btn-outline {
+    border: 2px solid #2ecc71;
+    color: #27ae60;
+    background: transparent;
+}
+
+.btn-outline:hover {
+    background: #2ecc71;
+    color: white;
+}
+</style>
+
+<div class="dashboard-container">
+    <header class="dash-header">
+        <h2>Salutare, <?php echo $username; ?>! 👋</h2>
+        <p>Bine ai revenit in laboratorul tau de algoritmi.</p>
+    </header>
+
+    <div class="dash-grid">
+        <div class="dash-card progress-card">
+            <h3>Continua de unde ai ramas</h3>
+            <p class="task-title">Lectie: <strong>Bubble Sort (Metoda Bulelor)</strong></p>
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: <?php echo $progres_curent; ?>%;"></div>
+            </div>
+            <p class="progress-text"><?php echo $progres_curent; ?>% completat</p>
+            <a href="index.php?page=sort_bubble" class="dash-btn btn-primary">Continua invatarea</a>
+        </div>
+
+        <div class="dash-card algo-card">
+            <div class="algo-badge">Algoritmul Zilei</div>
+            <h3><?php echo htmlspecialchars($algoritm_zilei_titlu, ENT_QUOTES, 'UTF-8'); ?></h3>
+            <p><?php echo htmlspecialchars($algoritm_zilei_desc, ENT_QUOTES, 'UTF-8'); ?></p>
+            <a href="index.php?page=sort_merge" class="dash-btn btn-outline">Descopera metoda</a>
+        </div>
     </div>
-</section>
 
-<!-- CARDURI CU CE GĂSEȘTI PE SITE -->
-<section class="card-grid">
-    <a href="index.php?page=algoritmi" class="card-link">
-        <article class="card">
-            <h3>Algoritmi</h3>
-            <p>
-                Pagină centrală cu 2 direcții clare: algoritmi de sortare și
-                ceilalți algoritmi (recursivitate/backtracking).
-            </p>
-        </article>
-    </a>
-
-    <a href="index.php?page=lista_exercitii" class="card-link">
-        <article class="card">
-            <h3>Exerciții interactive</h3>
-            <p>
-                Completezi bucăți lipsă de cod C++ în stil W3Schools și primești
-                imediat feedback dacă soluția este corectă.
-            </p>
-        </article>
-    </a>
-
-    <a href="index.php?page=compilator" class="card-link">
-        <article class="card">
-            <h3>Compilator online</h3>
-            <p>
-                Poți testa rapid fragmente de cod C++ direct în browser,
-                folosind compilatorul online integrat (JDoodle).
-            </p>
-        </article>
-    </a>
-</section>
-
+    <div class="dash-recent">
+        <h3>Ultimele accesate</h3>
+        <div class="recent-grid">
+            <div class="recent-card">
+                <span class="icon">📖</span>
+                <h4>Sortare prin Selectie</h4>
+                <p>Lectie teoretica</p>
+                <a href="index.php?page=sort_selection">Reia citirea</a>
+            </div>
+            <div class="recent-card">
+                <span class="icon">📝</span>
+                <h4>Grile O(n^2)</h4>
+                <p>Scor precedent: 8/10</p>
+                <a href="index.php?page=grile">Rezolva iar</a>
+            </div>
+            <div class="recent-card">
+                <span class="icon">💻</span>
+                <h4>Compilator C++</h4>
+                <p>Testare cod sursa</p>
+                <a href="index.php?page=compilator">Deschide editorul</a>
+            </div>
+        </div>
+    </div>
+</div>

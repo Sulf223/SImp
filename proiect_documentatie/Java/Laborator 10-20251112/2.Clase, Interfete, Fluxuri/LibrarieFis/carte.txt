@@ -1,5 +1,0 @@
-Programare Java de Ion Nedelcu are 500 de pagini si pretul 90.0 de lei
-Tehnologii Web de Andrei Muresan are 650 de pagini si pretul 85.5 de lei
-Poezii de Mihai Eminescu are 98 de pagini si pretul 25.0 de lei
-Limbajul Python de Popescu Maria are 250 de pagini si pretul 45.5 de lei
-

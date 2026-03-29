@@ -16,7 +16,7 @@ $success = isset($_GET['success']) ? htmlspecialchars($_GET['success']) : '';
     <h2>Creare Cont Nou</h2>
     <p>Completează formularul de mai jos pentru a-ți crea un cont de utilizator.</p>
 
-    <form method="post" action="php/register_post.php" onsubmit="return validatePassword()">
+    <form method="post" action="PHP/register_post.php" onsubmit="return validatePassword()">
         <?php csrf_field(); ?>
         <label for="username">Utilizator</label>
         <input type="text" id="username" name="username" required>

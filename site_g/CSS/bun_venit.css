@@ -8,6 +8,7 @@
     --color-footer-bg: #f8f9fa;
     --solar-system-width: 700px;
     --solar-system-height: 420px;
+    --orbit-speed-factor: 1;
 }
 
 .landing-shell {
@@ -160,7 +161,7 @@
 .orbit-python {
     width: 170px;
     height: 170px;
-    animation: orbit-rotation 16s linear infinite;
+    animation: orbit-rotation calc(16s * var(--orbit-speed-factor)) linear infinite;
     z-index: 5;
 }
 
@@ -171,7 +172,7 @@
 .orbit-bubble {
     width: 250px;
     height: 250px;
-    animation: orbit-rotation 24s linear infinite;
+    animation: orbit-rotation calc(24s * var(--orbit-speed-factor)) linear infinite;
     z-index: 4;
 }
 
@@ -182,7 +183,7 @@
 .orbit-merge {
     width: 330px;
     height: 330px;
-    animation: orbit-rotation 32s linear infinite;
+    animation: orbit-rotation calc(32s * var(--orbit-speed-factor)) linear infinite;
     z-index: 3;
 }
 
@@ -204,14 +205,31 @@
 .orbit-quick {
     width: 490px;
     height: 490px;
-    animation: orbit-rotation 50s linear infinite;
+    animation: orbit-rotation calc(50s * var(--orbit-speed-factor)) linear infinite;
     z-index: 1;
+}
+.orbit-insertion {
+    width: 290px;
+    height: 290px;
+    animation: orbit-rotation calc(28s * var(--orbit-speed-factor)) linear infinite reverse;
+    z-index: 3;
+}
+.planet-insertion {
+    background: #0ea86b;
+}
+.orbit-counting {
+    width: 450px;
+    height: 450px;
+    animation: orbit-rotation calc(44s * var(--orbit-speed-factor)) linear infinite reverse;
+    z-index: 2;
+}
+.planet-counting {
+    background: #1b7ae0;
 }
 
 .planet-quick {
     background: #11a057;
 }
-
 .planet::after {
     content: attr(data-stage);
     position: absolute;
@@ -233,6 +251,81 @@
 .solar-actions {
     margin-top: 0.4rem;
     margin-bottom: 0.4rem;
+}
+.solar-controls {
+    margin-top: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.solar-controls button {
+    border: 1px solid #bed2e8;
+    border-radius: 999px;
+    background: #fff;
+    color: #204562;
+    font-weight: 600;
+    padding: 0.35rem 0.7rem;
+    cursor: pointer;
+}
+.solar-controls button.is-active {
+    background: #1e7adb;
+    color: #fff;
+    border-color: #1e7adb;
+}
+.solar-legend {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.6rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid #d5e2f1;
+    background: #fff;
+    color: #21445f;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+.fundamental-links {
+    margin-top: 1.2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.8rem;
+}
+.fundamental-link {
+    display: block;
+    text-decoration: none;
+    color: #174164;
+    background: #fff;
+    border: 1px solid #d7e6f6;
+    border-radius: 12px;
+    padding: 0.7rem 0.8rem;
+    text-align: left;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.fundamental-link strong {
+    display: block;
+    margin-bottom: 0.2rem;
+}
+.fundamental-link span {
+    font-size: 0.85rem;
+    color: #4b667f;
+}
+.fundamental-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(10, 46, 82, 0.09);
 }
 
 .btn-landing {
@@ -377,8 +470,10 @@
 
     .orbit-python { width: 140px; height: 140px; }
     .orbit-bubble { width: 200px; height: 200px; }
+    .orbit-insertion { width: 230px; height: 230px; }
     .orbit-merge { width: 260px; height: 260px; }
     .orbit-selection { width: 320px; height: 320px; }
+    .orbit-counting { width: 350px; height: 350px; }
     .orbit-quick { width: 380px; height: 380px; }
 }
 
@@ -413,8 +508,10 @@
 @media (prefers-reduced-motion: reduce) {
     .orbit-python,
     .orbit-bubble,
+    .orbit-insertion,
     .orbit-merge,
     .orbit-selection,
+    .orbit-counting,
     .orbit-quick {
         animation: none;
     }

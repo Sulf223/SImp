@@ -15,7 +15,7 @@ $err = isset($_GET['err']) ? (string)$_GET['err'] : '';
     <h2>Autentificare</h2>
     <p>Autentifică-te pentru a putea adăuga, edita sau șterge în baza de date.</p>
     
-    <form method="post" action="php/login_post.php">
+    <form method="post" action="PHP/login_post.php">
         <?php csrf_field(); ?>
         <label>Utilizator</label><br>
         <input type="text" name="username" required><br><br>

@@ -36,7 +36,7 @@ include "auth.php"; // Includem auth.php pentru funcțiile is_logged_in() și is
             echo "<a href=\"$url_detalii\">Vezi detalii</a>";
             if (is_admin()) { // Afișăm link-urile de editare și ștergere doar pentru admini
                 echo " | <a href=\"index.php?page=metoda_form&id=".$row['id_metoda']."\">Editează</a>";
-                echo " | <a href=\"php/metoda_sterge.php?id=".$row['id_metoda']."\" onclick=\"return confirm('Sunteți sigur că doriți să ștergeți această metodă?');\">Șterge</a>";
+                echo " | <a href=\"PHP/metoda_sterge.php?id=".$row['id_metoda']."\" onclick=\"return confirm('Sunteți sigur că doriți să ștergeți această metodă?');\">Șterge</a>";
             }
             echo "</td>";
             echo "</tr>";

@@ -121,7 +121,7 @@ if (!empty($metoda['fisier_cpp'])) {
     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
         <a href="index.php?page=metoda_form&id=<?php echo $id_metoda; ?>" class="btn btn-ghost">Editează Metoda</a>
         
-        <form method="post" action="php/metoda_sterge.php" style="display: inline;" onsubmit="return confirm('Sunteți sigur că doriți să ștergeți această metodă?');">
+        <form method="post" action="PHP/metoda_sterge.php" style="display: inline;" onsubmit="return confirm('Sunteți sigur că doriți să ștergeți această metodă?');">
             <?php csrf_field(); ?>
             <input type="hidden" name="id" value="<?php echo $id_metoda; ?>">
             <button type="submit" class="btn btn-ghost" style="background:none;border:2px solid #667eea;color:#667eea;cursor:pointer;font:inherit;padding:10px 20px;border-radius:12px;">Șterge Metoda</button>

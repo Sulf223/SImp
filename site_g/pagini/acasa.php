@@ -12,10 +12,20 @@ if (empty($_SESSION['user_id'])) {
     return;
 }
 
+require_once __DIR__ . '/../PHP/conexiune.php';
+require_once __DIR__ . '/../PHP/progres_learning.php';
+
+$userId = (int)$_SESSION['user_id'];
 $username = htmlspecialchars($_SESSION['username'] ?? 'Student', ENT_QUOTES, 'UTF-8');
 
-// Mock data: urmatorul pas este conectarea la noile tabele SQL
-$progres_curent = 65;
+$continueData = get_continue_learning($con, $userId);
+$progres_curent = (int)($continueData['progress_percent'] ?? 0);
+$lectie_curenta_titlu = (string)($continueData['lesson_title'] ?? 'Bubble Sort (Metoda Bulelor)');
+$lectie_curenta_link = (string)($continueData['link'] ?? 'index.php?page=sort_bubble');
+
+$stats = get_exercise_stats($con, $userId, (string)($continueData['lesson_slug'] ?? 'sort_bubble'));
+$recentItems = get_recent_activity($con, $userId, 3);
+
 $algoritm_zilei_titlu = 'Merge Sort (Interclasare)';
 $algoritm_zilei_desc = 'Azi aprofundam o tehnica eficienta (Divide et Impera) cu complexitate O(n log n).';
 ?>
@@ -219,12 +229,13 @@ $algoritm_zilei_desc = 'Azi aprofundam o tehnica eficienta (Divide et Impera) cu
     <div class="dash-grid">
         <div class="dash-card progress-card">
             <h3>Continua de unde ai ramas</h3>
-            <p class="task-title">Lectie: <strong>Bubble Sort (Metoda Bulelor)</strong></p>
+            <p class="task-title">Lectie: <strong><?php echo htmlspecialchars($lectie_curenta_titlu, ENT_QUOTES, 'UTF-8'); ?></strong></p>
             <div class="progress-bar-container">
                 <div class="progress-bar" style="width: <?php echo $progres_curent; ?>%;"></div>
             </div>
             <p class="progress-text"><?php echo $progres_curent; ?>% completat</p>
-            <a href="index.php?page=sort_bubble" class="dash-btn btn-primary">Continua invatarea</a>
+            <p class="progress-text">Exercitii rezolvate: <?php echo (int)$stats['done']; ?>/<?php echo (int)$stats['total']; ?></p>
+            <a href="<?php echo htmlspecialchars($lectie_curenta_link, ENT_QUOTES, 'UTF-8'); ?>" class="dash-btn btn-primary">Continua invatarea</a>
         </div>
 
         <div class="dash-card algo-card">
@@ -238,24 +249,23 @@ $algoritm_zilei_desc = 'Azi aprofundam o tehnica eficienta (Divide et Impera) cu
     <div class="dash-recent">
         <h3>Ultimele accesate</h3>
         <div class="recent-grid">
-            <div class="recent-card">
-                <span class="icon">📖</span>
-                <h4>Sortare prin Selectie</h4>
-                <p>Lectie teoretica</p>
-                <a href="index.php?page=sort_selection">Reia citirea</a>
-            </div>
-            <div class="recent-card">
-                <span class="icon">📝</span>
-                <h4>Grile O(n^2)</h4>
-                <p>Scor precedent: 8/10</p>
-                <a href="index.php?page=grile">Rezolva iar</a>
-            </div>
-            <div class="recent-card">
-                <span class="icon">💻</span>
-                <h4>Compilator C++</h4>
-                <p>Testare cod sursa</p>
-                <a href="index.php?page=compilator">Deschide editorul</a>
-            </div>
+            <?php if (!empty($recentItems)): ?>
+                <?php foreach ($recentItems as $item): ?>
+                    <div class="recent-card">
+                        <span class="icon">📖</span>
+                        <h4><?php echo htmlspecialchars((string)$item['title'], ENT_QUOTES, 'UTF-8'); ?></h4>
+                        <p><?php echo htmlspecialchars((string)$item['activity_type'], ENT_QUOTES, 'UTF-8'); ?></p>
+                        <a href="<?php echo htmlspecialchars((string)$item['link_access'], ENT_QUOTES, 'UTF-8'); ?>">Reia activitatea</a>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="recent-card">
+                    <span class="icon">🚀</span>
+                    <h4>Incepe prima lectie</h4>
+                    <p>Nu ai activitate salvata inca</p>
+                    <a href="index.php?page=sort_bubble">Porneste cu Bubble Sort</a>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>

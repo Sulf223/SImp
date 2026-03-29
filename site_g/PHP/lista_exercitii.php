@@ -1,6 +1,6 @@
 <?php
 // Acest fișier este acum inclus în index.php
-include "conexiune.php";
+include __DIR__ . '/conexiune.php';
 ?>
 
 <section>
@@ -35,23 +35,15 @@ include "conexiune.php";
 </section>
 
 <section>
-    <h2>Exerciții interactive (tip W3Schools)</h2>
+    <h2>Exercitii interactive pe lectii</h2>
     <p>
-        Mai jos sunt câteva exerciții simple în care trebuie să completezi bucăți
-        lipsă de cod C++ pentru metodele de sortare.
+        Exercițiile tip W3Schools pentru algoritmii fundamentali au fost mutate direct
+        în fiecare lecție (Bubble, Selection, Insertion, Quick, Merge, Counting)
+        pentru progres contextual și contorizare corectă.
     </p>
-
-    <div id="exercitiu-container">
-        <!-- Conținutul exercițiului va fi încărcat aici de JavaScript -->
+    <div class="hero-actions">
+        <a href="index.php?page=sortare" class="btn btn-primary">Mergi la lectii fundamentale</a>
     </div>
-
-    <button onclick="verificaExercitiu()" class="btn btn-primary">Verifică</button>
-    <button onclick="afiseazaAjutor()" class="btn btn-ghost">Ajutor</button>
-
-    <p id="feedback"></p>
-    <p id="hint" class="hint" style="display: none;"></p>
-
-    <button onclick="urmatorulExercitiu()" class="btn">Următorul exercițiu</button>
 </section>
 
 <section id="ex-rec-bt" class="mt-4">
@@ -86,6 +78,5 @@ include "conexiune.php";
 
 <!-- Includem JS-ul necesar pentru interactivitate direct aici -->
 <!-- Calea este acum relativă la index.php -->
-<script src="JS/exercitii.js"></script>
 <script src="JS/exercitii_avansate.js"></script>
 <script src="JS/visualizer.js"></script>

@@ -475,7 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('feedback-explicatie').innerHTML = explicatie;
             
             // Mark as complete on server
-            fetch('php/ajax_progres.php', {
+            fetch('PHP/ajax_progres.php', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',

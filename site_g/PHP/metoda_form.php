@@ -50,7 +50,7 @@ if ($id > 0) {
         <a href="index.php?page=metode">Înapoi la lista de metode</a>
     </p>
 
-    <form method="post" action="php/metoda_salveaza.php" onsubmit="return valideazaMetoda();">
+    <form method="post" action="PHP/metoda_salveaza.php" onsubmit="return valideazaMetoda();">
         <?php csrf_field(); ?>
         <input type="hidden" name="id_metoda" value="<?php echo $id; ?>">
 

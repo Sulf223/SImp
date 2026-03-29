@@ -13,8 +13,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Adăugăm Content Security Policy header pentru a bloca atacurile XSS
-header("Content-Security-Policy: default-src 'self'; script-src 'self'; frame-src https://onecompiler.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;");
+// CSP compatibil cu scripturile inline existente din proiect.
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; frame-src https://onecompiler.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;");
 
 // Includem helper-ele (Flash messages, CSRF)
 require_once 'PHP/helpers.php';
@@ -38,15 +38,15 @@ $pagini_permise = [
     'sort_quick' => 'pagini/sort_quick.php',
     'sort_merge' => 'pagini/sort_merge.php',
     'sort_counting' => 'pagini/sort_counting.php',
-    'metode' => 'php/lista_metode.php',
-    'compilator' => 'php/compilator_online.php',
-    'metoda_form' => 'php/metoda_form.php',
-    'metoda' => 'php/metoda.php', // Pagină adăugată pentru detalii metodă
-    'login' => 'php/login.php',
-    'logout' => 'php/logout.php',
-    'grile' => 'php/grile.php',
-    'grila_interactiva' => 'php/grila_interactiva.php',
-    'register' => 'php/register.php',
+    'metode' => 'PHP/lista_metode.php',
+    'compilator' => 'PHP/compilator_online.php',
+    'metoda_form' => 'PHP/metoda_form.php',
+    'metoda' => 'PHP/metoda.php', // Pagină adăugată pentru detalii metodă
+    'login' => 'PHP/login.php',
+    'logout' => 'PHP/logout.php',
+    'grile' => 'PHP/grile.php',
+    'grila_interactiva' => 'PHP/grila_interactiva.php',
+    'register' => 'PHP/register.php',
     'lista_exercitii' => 'PHP/lista_exercitii.php'
 ];
 
@@ -97,7 +97,7 @@ $afiseaza_ai_widget = !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
         <?php if (!empty($_SESSION['user_id'])): ?>
             <li style="margin-left:auto"><a href="#">Utilizator: <?php echo htmlspecialchars($_SESSION['username'] ?? ''); ?></a></li>
             <li>
-                <form method="post" action="php/logout.php" style="display:inline;">
+                <form method="post" action="PHP/logout.php" style="display:inline;">
                     <?php csrf_field(); ?>
                     <button type="submit" class="btn-logout" style="background:none;border:none;color:inherit;cursor:pointer;font:inherit;padding:8px 16px;">Logout</button>
                 </form>

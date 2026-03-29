@@ -1,0 +1,12 @@
+.git
+.vscode
+**/.DS_Store
+**/Thumbs.db
+**/*.log
+**/node_modules
+**/vendor
+**/.env
+.smoke_cookie.txt
+C_tot
+proiect_documentatie
+WORKSPACE_FULL_DUMP.md

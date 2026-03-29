@@ -1,0 +1,58 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: simp_web
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASS: root123
+      DB_NAME: dbsortari
+      APP_ENV: production
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: simp_db
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: dbsortari
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./site_g/dbsortari.sql:/docker-entrypoint-initdb.d/01_dbsortari.sql:ro
+      - ./site_g/database/upgrade_dashboard_progress.sql:/docker-entrypoint-initdb.d/02_upgrade_dashboard_progress.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin:5-apache
+    container_name: simp_phpmyadmin
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root123
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "8081:80"
+    restart: unless-stopped
+
+volumes:
+  db_data:

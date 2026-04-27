@@ -17,6 +17,7 @@
 
 <section>
     <div class="hero-actions">
+        <a href="index.php?page=comparatii_sortare" class="btn btn-primary">Comparatii de performanta</a>
         <a href="index.php?page=metode" class="btn btn-ghost">Vezi si lista din baza de date</a>
         <a href="index.php?page=lista_exercitii" class="btn btn-primary">Mergi la exercitii</a>
     </div>

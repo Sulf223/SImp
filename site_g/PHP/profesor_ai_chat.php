@@ -67,27 +67,34 @@ if ($message === '') {
     exit;
 }
 
-$apiKey = getenv('GEMINI_API_KEY');
-if (!$apiKey && isset($_ENV['GEMINI_API_KEY'])) {
-    $apiKey = $_ENV['GEMINI_API_KEY'];
+$apiKey = getenv('GROQ_API_KEY');
+if (!$apiKey && isset($_ENV['GROQ_API_KEY'])) {
+    $apiKey = $_ENV['GROQ_API_KEY'];
 }
 
-if (!$apiKey && isset($_SERVER['GEMINI_API_KEY'])) {
-    $apiKey = $_SERVER['GEMINI_API_KEY'];
+if (!$apiKey && isset($_SERVER['GROQ_API_KEY'])) {
+    $apiKey = $_SERVER['GROQ_API_KEY'];
 }
 
 if (!$apiKey) {
     http_response_code(500);
     echo json_encode([
         'ok' => false,
-        'error' => 'Lipsește cheia API. Configurează variabila de mediu GEMINI_API_KEY pe server.'
+        'error' => 'Lipsește cheia API. Configurează variabila de mediu GROQ_API_KEY pe server.'
     ]);
     exit;
 }
 
+$model = trim((string)(getenv('GROQ_MODEL') ?: 'llama-3.3-70b-versatile'));
 $systemPrompt = "Ești un profesor de programare C++ experimentat, răbdător și încurajator. Obiectivul tău este să ajuți elevii să învețe. Când un elev îți pune o întrebare sau îți arată un cod greșit, NU îi da soluția directă imediat. Explică-i conceptul, arată-i unde greșește și ghidează-l cu indicii pentru a găsi singur răspunsul corect. Folosește exemple scurte de cod pentru a ilustra teoria. Vorbește în limba română.";
 
-$contents = [];
+$messages = [
+    [
+        'role' => 'system',
+        'content' => $systemPrompt,
+    ],
+];
+
 if (is_array($history)) {
     foreach ($history as $item) {
         if (!is_array($item)) {
@@ -100,38 +107,34 @@ if (is_array($history)) {
             continue;
         }
 
-        $contents[] = [
-            'role' => $role === 'assistant' ? 'model' : 'user',
-            'parts' => [['text' => $text]],
+        $messages[] = [
+            'role' => $role === 'assistant' ? 'assistant' : 'user',
+            'content' => $text,
         ];
     }
 }
 
-$contents[] = [
+$messages[] = [
     'role' => 'user',
-    'parts' => [['text' => $message]],
+    'content' => $message,
 ];
 
 $payload = [
-    'system_instruction' => [
-        'parts' => [
-            ['text' => $systemPrompt]
-        ]
-    ],
-    'contents' => $contents,
-    'generationConfig' => [
-        'temperature' => 0.6,
-        'maxOutputTokens' => 700,
-    ]
+    'model' => $model,
+    'messages' => $messages,
+    'temperature' => 0.6,
+    'max_tokens' => 700,
 ];
 
-$url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . urlencode($apiKey);
-
+$url = 'https://api.groq.com/openai/v1/chat/completions';
 $ch = curl_init($url);
 curl_setopt_array($ch, [
     CURLOPT_POST => true,
     CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+    CURLOPT_HTTPHEADER => [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $apiKey,
+    ],
     CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE),
     CURLOPT_TIMEOUT => 30,
 ]);
@@ -143,26 +146,24 @@ curl_close($ch);
 
 if ($response === false) {
     http_response_code(502);
-    echo json_encode(['ok' => false, 'error' => 'Eroare rețea către model: ' . $curlErr]);
+    echo json_encode(['ok' => false, 'error' => 'Eroare rețea către Groq: ' . $curlErr]);
     exit;
 }
 
 $data = json_decode($response, true);
 
 if ($httpCode >= 400) {
-    $err = $data['error']['message'] ?? 'Răspuns invalid de la model.';
+    $err = trim((string)($data['error']['message'] ?? 'Răspuns invalid de la Groq.'));
     http_response_code(502);
     echo json_encode(['ok' => false, 'error' => $err]);
     exit;
 }
 
-$reply = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
-$reply = trim((string)$reply);
-
+$reply = trim((string)($data['choices'][0]['message']['content'] ?? ''));
 if ($reply === '') {
     http_response_code(502);
     echo json_encode(['ok' => false, 'error' => 'Modelul nu a returnat text.']);
     exit;
 }
 
-echo json_encode(['ok' => true, 'reply' => $reply], JSON_UNESCAPED_UNICODE);
+echo json_encode(['ok' => true, 'reply' => $reply, 'model' => $model], JSON_UNESCAPED_UNICODE);

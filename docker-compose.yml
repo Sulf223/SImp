@@ -13,8 +13,10 @@ services:
       DB_PASS: root123
       DB_NAME: dbsortari
       APP_ENV: production
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}
     ports:
-      - "8080:80"
+      - "8082:80"
     restart: unless-stopped
 
   db:
@@ -25,7 +27,7 @@ services:
       MYSQL_ROOT_PASSWORD: root123
       MYSQL_DATABASE: dbsortari
     ports:
-      - "3307:3306"
+      - "3308:3306"
     volumes:
       - db_data:/var/lib/mysql
       - ./site_g/dbsortari.sql:/docker-entrypoint-initdb.d/01_dbsortari.sql:ro

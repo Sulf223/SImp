@@ -38,6 +38,7 @@ $pagini_permise = [
     'sort_quick' => 'pagini/sort_quick.php',
     'sort_merge' => 'pagini/sort_merge.php',
     'sort_counting' => 'pagini/sort_counting.php',
+    'comparatii_sortare' => 'pagini/comparatii_sortare.php',
     'metode' => 'PHP/lista_metode.php',
     'compilator' => 'PHP/compilator_online.php',
     'metoda_form' => 'PHP/metoda_form.php',
@@ -89,6 +90,7 @@ $afiseaza_ai_widget = !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
         <li><a href="index.php?page=bun_venit">Bun venit</a></li>
         <li><a href="index.php?page=acasa">Acasă</a></li>
         <li><a href="index.php?page=algoritmi">Algoritmi</a></li>
+        <li><a href="index.php?page=comparatii_sortare">Comparatii</a></li>
         <li><a href="index.php?page=profesor_ai">Profesor AI</a></li>
         <li><a href="index.php?page=lista_exercitii">Exerciții</a></li>
         <li><a href="index.php?page=compilator">Compilator C++ online</a></li>

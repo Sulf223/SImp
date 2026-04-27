@@ -10,6 +10,15 @@ class SortingVisualizer {
         if (!this.container) return;
 
         this.algorithmName = (this.container.getAttribute("data-algorithm") || "bubble").toLowerCase();
+        this.algorithmLabelMap = {
+            bubble: "Bubble Sort",
+            selection: "Selection Sort",
+            insertion: "Insertion Sort",
+            quick: "Quick Sort",
+            merge: "Merge Sort",
+            counting: "Counting Sort"
+        };
+
         this.canvas = document.createElement("canvas");
         this.canvas.width = Math.max(this.container.clientWidth, 320);
         this.canvas.height = 300;
@@ -17,13 +26,39 @@ class SortingVisualizer {
         this.ctx = this.canvas.getContext("2d");
 
         this.array = [];
+        this.valueLabels = null;
         this.size = 30;
         this.delay = 35;
         this.isSorting = false;
 
+        this.comparisons = 0;
+        this.swaps = 0;
+        this.soundEnabled = false;
+        this.audioContext = null;
+
+        this.quizCurrentAlgorithm = null;
+        this.lastRunAlgorithm = this.resolveAlgorithmName(this.algorithmName);
+
         this.initControls();
+        this.createInfoPanels();
         this.resetArray();
         window.addEventListener("resize", () => this.onResize());
+    }
+
+    resolveAlgorithmName(name) {
+        const lower = String(name || "").toLowerCase();
+        if (lower.includes("bubble")) return "bubble";
+        if (lower.includes("select")) return "selection";
+        if (lower.includes("insert")) return "insertion";
+        if (lower.includes("quick")) return "quick";
+        if (lower.includes("merge") || lower.includes("interclasare")) return "merge";
+        if (lower.includes("count")) return "counting";
+        return "bubble";
+    }
+
+    formatAlgorithmName(name) {
+        const key = this.resolveAlgorithmName(name);
+        return this.algorithmLabelMap[key] || "Bubble Sort";
     }
 
     onResize() {
@@ -32,8 +67,11 @@ class SortingVisualizer {
     }
 
     initControls() {
-        const controls = document.createElement("div");
-        controls.className = "visualizer-controls";
+        const controlsMain = document.createElement("div");
+        controlsMain.className = "visualizer-controls";
+
+        const controlsAdvanced = document.createElement("div");
+        controlsAdvanced.className = "visualizer-controls";
 
         const btnStart = document.createElement("button");
         btnStart.textContent = "Start vizualizare";
@@ -45,27 +83,290 @@ class SortingVisualizer {
         btnReset.className = "btn btn-ghost";
         btnReset.onclick = () => this.resetArray();
 
-        controls.appendChild(btnStart);
-        controls.appendChild(btnReset);
-        this.container.appendChild(controls);
+        const speedWrap = document.createElement("label");
+        speedWrap.className = "viz-inline-label";
+        speedWrap.textContent = "Viteza:";
+
+        const speedInput = document.createElement("input");
+        speedInput.type = "range";
+        speedInput.min = "5";
+        speedInput.max = "120";
+        speedInput.step = "5";
+        speedInput.value = String(this.delay);
+        speedInput.oninput = () => {
+            this.delay = parseInt(speedInput.value, 10);
+        };
+        speedWrap.appendChild(speedInput);
+
+        const sizeWrap = document.createElement("label");
+        sizeWrap.className = "viz-inline-label";
+        sizeWrap.textContent = "Elemente:";
+
+        const sizeInput = document.createElement("input");
+        sizeInput.type = "range";
+        sizeInput.min = "10";
+        sizeInput.max = "90";
+        sizeInput.step = "1";
+        sizeInput.value = String(this.size);
+        sizeInput.oninput = () => {
+            if (this.isSorting) return;
+            this.size = parseInt(sizeInput.value, 10);
+            this.valueLabels = null;
+            this.resetArray();
+        };
+        sizeWrap.appendChild(sizeInput);
+
+        this.customInput = document.createElement("input");
+        this.customInput.type = "text";
+        this.customInput.className = "viz-custom-input";
+        this.customInput.placeholder = "Input custom: 5,3,9 sau text";
+
+        const btnApplyInput = document.createElement("button");
+        btnApplyInput.className = "btn btn-ghost";
+        btnApplyInput.textContent = "Aplica input";
+        btnApplyInput.onclick = () => this.applyCustomInput();
+
+        const btnBest = document.createElement("button");
+        btnBest.className = "btn";
+        btnBest.textContent = "Best";
+        btnBest.onclick = () => this.generateCase("best");
+
+        const btnWorst = document.createElement("button");
+        btnWorst.className = "btn";
+        btnWorst.textContent = "Worst";
+        btnWorst.onclick = () => this.generateCase("worst");
+
+        const btnAverage = document.createElement("button");
+        btnAverage.className = "btn";
+        btnAverage.textContent = "Average";
+        btnAverage.onclick = () => this.generateCase("average");
+
+        const soundWrap = document.createElement("label");
+        soundWrap.className = "viz-inline-label";
+        soundWrap.textContent = "Sunet";
+
+        this.soundToggle = document.createElement("input");
+        this.soundToggle.type = "checkbox";
+        this.soundToggle.onchange = () => {
+            this.soundEnabled = this.soundToggle.checked;
+            this.updateStats(this.soundEnabled ? "Mod audio activ." : "Mod audio oprit.");
+        };
+        soundWrap.appendChild(this.soundToggle);
+
+        const btnQuiz = document.createElement("button");
+        btnQuiz.className = "btn btn-primary";
+        btnQuiz.textContent = "Mod quiz";
+        btnQuiz.onclick = () => this.startQuiz();
+
+        this.quizSelect = document.createElement("select");
+        this.quizSelect.className = "viz-select";
+        this.quizSelect.innerHTML = [
+            "<option value='bubble'>Bubble Sort</option>",
+            "<option value='selection'>Selection Sort</option>",
+            "<option value='insertion'>Insertion Sort</option>",
+            "<option value='quick'>Quick Sort</option>",
+            "<option value='merge'>Merge Sort</option>",
+            "<option value='counting'>Counting Sort</option>"
+        ].join("");
+
+        const btnCheckQuiz = document.createElement("button");
+        btnCheckQuiz.className = "btn";
+        btnCheckQuiz.textContent = "Verifica raspuns";
+        btnCheckQuiz.onclick = () => this.checkQuizAnswer();
+
+        const btnExplain = document.createElement("button");
+        btnExplain.className = "btn btn-ghost";
+        btnExplain.textContent = "Explica-mi";
+        btnExplain.onclick = () => this.explainCurrentAlgorithm();
+
+        controlsMain.appendChild(btnStart);
+        controlsMain.appendChild(btnReset);
+        controlsMain.appendChild(speedWrap);
+        controlsMain.appendChild(sizeWrap);
+        controlsMain.appendChild(soundWrap);
+
+        controlsAdvanced.appendChild(this.customInput);
+        controlsAdvanced.appendChild(btnApplyInput);
+        controlsAdvanced.appendChild(btnBest);
+        controlsAdvanced.appendChild(btnWorst);
+        controlsAdvanced.appendChild(btnAverage);
+        controlsAdvanced.appendChild(btnQuiz);
+        controlsAdvanced.appendChild(this.quizSelect);
+        controlsAdvanced.appendChild(btnCheckQuiz);
+        controlsAdvanced.appendChild(btnExplain);
+
+        this.container.appendChild(controlsMain);
+        this.container.appendChild(controlsAdvanced);
+    }
+
+    createInfoPanels() {
+        this.statsEl = document.createElement("div");
+        this.statsEl.className = "viz-meta";
+        this.container.appendChild(this.statsEl);
+
+        this.explainPanel = document.createElement("div");
+        this.explainPanel.className = "viz-panel viz-explain";
+        this.explainPanel.innerHTML = "<div class='step-log'>Apasa \"Explica-mi\" pentru explicatii AI in romana.</div>";
+        this.container.appendChild(this.explainPanel);
+    }
+
+    resetCounters() {
+        this.comparisons = 0;
+        this.swaps = 0;
+        this.updateStats("Contoare resetate.");
+    }
+
+    updateStats(message) {
+        if (!this.statsEl) return;
+        const algorithm = this.formatAlgorithmName(this.lastRunAlgorithm || this.algorithmName);
+        this.statsEl.innerHTML = "<strong>Algoritm:</strong> " + algorithm +
+            " <span>|</span> <strong>Comparatii:</strong> " + this.comparisons +
+            " <span>|</span> <strong>Swap-uri:</strong> " + this.swaps +
+            (message ? " <span>|</span> " + message : "");
+    }
+
+    ensureAudioContext() {
+        if (!this.audioContext) {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (Ctx) {
+                this.audioContext = new Ctx();
+            }
+        }
+    }
+
+    playTone(value, kind) {
+        if (!this.soundEnabled) return;
+        this.ensureAudioContext();
+        if (!this.audioContext) return;
+
+        if (this.audioContext.state === "suspended") {
+            this.audioContext.resume();
+        }
+
+        const osc = this.audioContext.createOscillator();
+        const gain = this.audioContext.createGain();
+        const freq = 140 + Math.max(0, Math.min(900, Number(value || 0) * 8));
+
+        osc.type = kind === "swap" ? "square" : "sine";
+        osc.frequency.value = freq;
+        gain.gain.value = kind === "swap" ? 0.03 : 0.018;
+
+        osc.connect(gain);
+        gain.connect(this.audioContext.destination);
+        osc.start();
+        osc.stop(this.audioContext.currentTime + (kind === "swap" ? 0.04 : 0.02));
+    }
+
+    registerComparison(a, b) {
+        this.comparisons++;
+        this.playTone(Math.round((Math.abs(a) + Math.abs(b)) / 2), "compare");
+        this.updateStats();
+    }
+
+    registerSwap(a, b) {
+        this.swaps++;
+        this.playTone(Math.round((Math.abs(a) + Math.abs(b)) / 2), "swap");
+        this.updateStats();
     }
 
     resetArray() {
         if (this.isSorting) return;
         this.array = [];
+        this.valueLabels = null;
         for (let i = 0; i < this.size; i++) {
             this.array.push(Math.floor(Math.random() * 90) + 10);
         }
+        this.resetCounters();
         this.draw();
+    }
+
+    applyCustomInput() {
+        if (this.isSorting) return;
+        const raw = String(this.customInput.value || "").trim();
+        if (!raw) {
+            this.updateStats("Introdu un sir de numere sau text.");
+            return;
+        }
+
+        const numericTokens = raw.match(/-?\d+/g);
+        if (numericTokens && numericTokens.length >= 2) {
+            const numbers = numericTokens.slice(0, 120).map(n => Math.max(-999, Math.min(999, parseInt(n, 10))));
+            this.array = numbers;
+            this.valueLabels = null;
+            this.size = numbers.length;
+            this.resetCounters();
+            this.draw();
+            this.updateStats("Input numeric personalizat aplicat.");
+            return;
+        }
+
+        const text = raw.replace(/\s+/g, "");
+        if (text.length < 2) {
+            this.updateStats("Inputul trebuie sa aiba cel putin 2 elemente.");
+            return;
+        }
+
+        const chars = text.slice(0, 50).split("");
+        this.array = chars.map(ch => ch.charCodeAt(0));
+        this.valueLabels = chars;
+        this.size = this.array.length;
+        this.resetCounters();
+        this.draw();
+        this.updateStats("Input text personalizat aplicat (ordonare alfabetica prin cod ASCII).");
+    }
+
+    generateCase(type) {
+        if (this.isSorting) return;
+        const n = Math.max(8, this.size || 30);
+        const algo = this.resolveAlgorithmName(this.algorithmName);
+        let arr = [];
+
+        if (type === "average") {
+            arr = this.makeRandomArray(n, 10, 99);
+        } else if (type === "best") {
+            if (algo === "quick") {
+                arr = this.makeRandomArray(n, 10, 99);
+            } else {
+                arr = this.makeRandomArray(n, 10, 99).sort((a, b) => a - b);
+            }
+        } else {
+            if (algo === "quick") {
+                arr = this.makeRandomArray(n, 10, 99).sort((a, b) => a - b);
+            } else {
+                arr = this.makeRandomArray(n, 10, 99).sort((a, b) => b - a);
+            }
+        }
+
+        this.array = arr;
+        this.valueLabels = null;
+        this.size = arr.length;
+        this.resetCounters();
+        this.draw();
+        this.updateStats("Dataset " + type.toUpperCase() + " generat pentru " + this.formatAlgorithmName(algo) + ".");
+    }
+
+    makeRandomArray(size, minValue, maxValue) {
+        const arr = [];
+        for (let i = 0; i < size; i++) {
+            arr.push(Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue);
+        }
+        return arr;
     }
 
     draw(highlightIndices = [], pivotIndex = -1, sortedTail = -1) {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        const barWidth = this.canvas.width / this.size;
+        if (!this.array.length) return;
 
-        for (let i = 0; i < this.size; i++) {
+        const length = this.array.length;
+        const barWidth = this.canvas.width / length;
+        const minVal = Math.min(...this.array);
+        const maxVal = Math.max(...this.array);
+        const range = Math.max(1, maxVal - minVal + 1);
+
+        for (let i = 0; i < length; i++) {
             const value = this.array[i];
-            const barHeight = (value / 100) * this.canvas.height;
+            const normalized = value - minVal + 1;
+            const barHeight = (normalized / range) * this.canvas.height;
 
             if (i >= sortedTail && sortedTail !== -1) {
                 this.ctx.fillStyle = "#10b981";
@@ -77,24 +378,106 @@ class SortingVisualizer {
                 this.ctx.fillStyle = "#667eea";
             }
 
-            this.ctx.fillRect(i * barWidth, this.canvas.height - barHeight, Math.max(1, barWidth - 2), barHeight);
+            const x = i * barWidth;
+            const y = this.canvas.height - barHeight;
+            const w = Math.max(1, barWidth - 2);
+            this.ctx.fillRect(x, y, w, barHeight);
+
+            if (this.valueLabels && this.valueLabels[i] && length <= 35) {
+                this.ctx.fillStyle = "#111827";
+                this.ctx.font = "11px Poppins, sans-serif";
+                this.ctx.textAlign = "center";
+                this.ctx.fillText(this.valueLabels[i], x + w / 2, Math.max(12, y - 4));
+            }
         }
     }
 
-    async runSort() {
+    async runSort(forcedAlgorithm, quizMode) {
         if (this.isSorting) return;
         this.isSorting = true;
 
-        if (this.algorithmName.includes("bubble")) await this.bubbleSort();
-        else if (this.algorithmName.includes("select")) await this.selectionSort();
-        else if (this.algorithmName.includes("insert")) await this.insertionSort();
-        else if (this.algorithmName.includes("quick")) await this.quickSort(0, this.array.length - 1);
-        else if (this.algorithmName.includes("merge") || this.algorithmName.includes("interclasare")) await this.mergeSort(0, this.array.length - 1);
-        else if (this.algorithmName.includes("count")) await this.countingSort();
+        const activeAlgorithm = this.resolveAlgorithmName(forcedAlgorithm || this.algorithmName);
+        this.lastRunAlgorithm = activeAlgorithm;
+        this.resetCounters();
+        this.updateStats("Ruleaza animatia...");
+
+        if (activeAlgorithm === "bubble") await this.bubbleSort();
+        else if (activeAlgorithm === "selection") await this.selectionSort();
+        else if (activeAlgorithm === "insertion") await this.insertionSort();
+        else if (activeAlgorithm === "quick") await this.quickSort(0, this.array.length - 1);
+        else if (activeAlgorithm === "merge") await this.mergeSort(0, this.array.length - 1);
+        else if (activeAlgorithm === "counting") await this.countingSort();
         else await this.bubbleSort();
 
         this.draw([], -1, 0);
         this.isSorting = false;
+
+        if (quizMode) {
+            this.updateStats("Quiz: ghiceste algoritmul si apasa Verifica raspuns.");
+        } else {
+            this.updateStats("Sortare finalizata.");
+        }
+    }
+
+    startQuiz() {
+        if (this.isSorting) return;
+        const options = ["bubble", "selection", "insertion", "quick", "merge", "counting"];
+        const index = Math.floor(Math.random() * options.length);
+        this.quizCurrentAlgorithm = options[index];
+        this.resetArray();
+        this.updateStats("Quiz pornit: priveste animatia si ghiceste algoritmul.");
+        this.runSort(this.quizCurrentAlgorithm, true);
+    }
+
+    checkQuizAnswer() {
+        if (!this.quizCurrentAlgorithm) {
+            this.updateStats("Porneste mai intai Mod quiz.");
+            return;
+        }
+
+        const guess = this.resolveAlgorithmName(this.quizSelect.value);
+        if (guess === this.quizCurrentAlgorithm) {
+            this.updateStats("Corect! Ai ghicit: " + this.formatAlgorithmName(this.quizCurrentAlgorithm) + ".");
+        } else {
+            this.updateStats("Nu inca. Raspuns corect: " + this.formatAlgorithmName(this.quizCurrentAlgorithm) + ".");
+        }
+        this.quizCurrentAlgorithm = null;
+    }
+
+    async explainCurrentAlgorithm() {
+        const algorithm = this.formatAlgorithmName(this.lastRunAlgorithm || this.algorithmName);
+        const prompt = "Explica in romana, clar si pe scurt, cum functioneaza " + algorithm +
+            ". Include: idee, complexitate, cand este bun/slab, si aplica pe exemplul curent. " +
+            "Avem " + this.comparisons + " comparatii si " + this.swaps + " swap-uri in ultima rulare.";
+
+        this.explainPanel.innerHTML = "<div class='step-log'>Generez explicatia AI...</div>";
+
+        try {
+            const response = await fetch("PHP/profesor_ai_chat.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: prompt, history: [] })
+            });
+
+            const data = await response.json();
+            if (!response.ok || !data.ok) {
+                const err = (data && data.error) ? data.error : "Eroare la explicatia AI.";
+                this.explainPanel.innerHTML = "<div class='step-log'>" + this.escapeHtml(err) + "</div>";
+                return;
+            }
+
+            this.explainPanel.innerHTML = "<div class='step-log'>" + this.escapeHtml(String(data.reply || "")) + "</div>";
+        } catch (error) {
+            this.explainPanel.innerHTML = "<div class='step-log'>Nu am putut contacta serviciul AI. Incearca din nou.</div>";
+        }
+    }
+
+    escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\n/g, "<br>");
     }
 
     sleep() {
@@ -105,9 +488,11 @@ class SortingVisualizer {
         const len = this.array.length;
         for (let i = 0; i < len; i++) {
             for (let j = 0; j < len - i - 1; j++) {
+                this.registerComparison(this.array[j], this.array[j + 1]);
                 this.draw([j, j + 1], -1, len - i);
                 await this.sleep();
                 if (this.array[j] > this.array[j + 1]) {
+                    this.registerSwap(this.array[j], this.array[j + 1]);
                     [this.array[j], this.array[j + 1]] = [this.array[j + 1], this.array[j]];
                 }
             }
@@ -119,11 +504,13 @@ class SortingVisualizer {
         for (let i = 0; i < len; i++) {
             let min = i;
             for (let j = i + 1; j < len; j++) {
+                this.registerComparison(this.array[j], this.array[min]);
                 this.draw([i, j], min);
                 await this.sleep();
                 if (this.array[j] < this.array[min]) min = j;
             }
             if (min !== i) {
+                this.registerSwap(this.array[i], this.array[min]);
                 [this.array[i], this.array[min]] = [this.array[min], this.array[i]];
                 this.draw([i, min], min);
                 await this.sleep();
@@ -136,11 +523,17 @@ class SortingVisualizer {
         for (let i = 1; i < len; i++) {
             const key = this.array[i];
             let j = i - 1;
-            while (j >= 0 && this.array[j] > key) {
+            while (j >= 0) {
+                this.registerComparison(this.array[j], key);
                 this.draw([j, j + 1]);
                 await this.sleep();
-                this.array[j + 1] = this.array[j];
-                j--;
+                if (this.array[j] > key) {
+                    this.registerSwap(this.array[j], key);
+                    this.array[j + 1] = this.array[j];
+                    j--;
+                } else {
+                    break;
+                }
             }
             this.array[j + 1] = key;
             this.draw([j + 1]);
@@ -159,13 +552,16 @@ class SortingVisualizer {
         const pivotValue = this.array[end];
         let pivotIndex = start;
         for (let i = start; i < end; i++) {
+            this.registerComparison(this.array[i], pivotValue);
             this.draw([i, end], pivotIndex);
             await this.sleep();
             if (this.array[i] < pivotValue) {
+                this.registerSwap(this.array[i], this.array[pivotIndex]);
                 [this.array[i], this.array[pivotIndex]] = [this.array[pivotIndex], this.array[i]];
                 pivotIndex++;
             }
         }
+        this.registerSwap(this.array[pivotIndex], this.array[end]);
         [this.array[pivotIndex], this.array[end]] = [this.array[end], this.array[pivotIndex]];
         this.draw([pivotIndex, end], pivotIndex);
         await this.sleep();
@@ -188,6 +584,7 @@ class SortingVisualizer {
         let k = start;
 
         while (i < left.length && j < right.length) {
+            this.registerComparison(left[i], right[j]);
             this.draw([k]);
             await this.sleep();
             if (left[i] <= right[j]) {
@@ -211,17 +608,21 @@ class SortingVisualizer {
     }
 
     async countingSort() {
+        const min = Math.min(...this.array);
         const max = Math.max(...this.array);
-        const count = new Array(max + 1).fill(0);
+        const offset = min < 0 ? -min : 0;
+        const count = new Array(max + offset + 1).fill(0);
+
         for (let i = 0; i < this.array.length; i++) {
-            count[this.array[i]]++;
+            count[this.array[i] + offset]++;
             this.draw([i]);
             await this.sleep();
         }
+
         let idx = 0;
         for (let v = 0; v < count.length; v++) {
             while (count[v] > 0) {
-                this.array[idx] = v;
+                this.array[idx] = v - offset;
                 this.draw([idx]);
                 await this.sleep();
                 idx++;

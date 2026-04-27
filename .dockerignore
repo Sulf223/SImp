@@ -1,12 +1,72 @@
+# Git
 .git
+.gitattributes
+.gitignore
+**/.gitkeep
+
+# IDE & Editors
 .vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+.secrets
+**/*.pem
+**/*.key
+
+# Logs & Temporary
+**/*.log
+logs/
+tmp/
+temp/
+.smoke_cookie.txt
+
+# Dependencies (if synced to image)
+node_modules/
+vendor/
+composer.lock
+
+# Documentation (not needed in image)
+C_tot/
+proiect_documentatie/
+WORKSPACE_FULL_DUMP.md
+*.md
+!README.md
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# OS
 **/.DS_Store
 **/Thumbs.db
-**/*.log
-**/node_modules
-**/vendor
-**/.env
-.smoke_cookie.txt
-C_tot
-proiect_documentatie
-WORKSPACE_FULL_DUMP.md
+**/*.exe
+**/*.dll
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# Build artifacts
+build/
+dist/
+*.pyc
+__pycache__/
+.pytest_cache/
+.coverage
+
+# Backups
+*.bak
+*.backup
+*.orig
+

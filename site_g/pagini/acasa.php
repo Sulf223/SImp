@@ -1,271 +1,264 @@
 <?php
+/* ============================================================================
+   acasa.php — Dashboard (redesign Engineering-Modern, Bento Grid)
+   PHP logic preserved 1:1 from previous version.
+   Visual layer rebuilt on top of:
+     - CSS/modern_vars.css      (design tokens)
+     - CSS/dashboard_modern.css (component styles)
+   Icon set: Lucide (inlined as SVG).
+   ============================================================================ */
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 if (empty($_SESSION['user_id'])) {
-    echo '<div class="alert alert-warning" style="margin:2rem auto; max-width:600px; text-align:center;">';
-    echo '<h3>Acces restrictionat</h3>';
-    echo '<p>Trebuie sa fii autentificat pentru a accesa Panoul de Control.</p>';
-    echo '<a href="index.php?page=login" class="btn btn-primary">Mergi la Logare</a>';
-    echo '</div>';
+    ?>
+            <div data-component="dashboard-modern">
+        <div class="dash__guard">
+            <h3>Acces restricționat</h3>
+            <p>Trebuie să fii autentificat pentru a accesa Panoul de Control.</p>
+            <a href="index.php?page=login" class="btn btn--primary">
+                Mergi la logare
+                <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+        </div>
+    </div>
+    <?php
     return;
 }
 
 require_once __DIR__ . '/../PHP/conexiune.php';
 require_once __DIR__ . '/../PHP/progres_learning.php';
 
-$userId = (int)$_SESSION['user_id'];
+$userId   = (int)$_SESSION['user_id'];
 $username = htmlspecialchars($_SESSION['username'] ?? 'Student', ENT_QUOTES, 'UTF-8');
 
-$continueData = get_continue_learning($con, $userId);
-$progres_curent = (int)($continueData['progress_percent'] ?? 0);
-$lectie_curenta_titlu = (string)($continueData['lesson_title'] ?? 'Bubble Sort (Metoda Bulelor)');
-$lectie_curenta_link = (string)($continueData['link'] ?? 'index.php?page=sort_bubble');
+$continueData          = get_continue_learning($con, $userId);
+$progres_curent        = (int)($continueData['progress_percent'] ?? 0);
+$lectie_curenta_titlu  = (string)($continueData['lesson_title'] ?? 'Bubble Sort (Metoda Bulelor)');
+$lectie_curenta_link   = (string)($continueData['link'] ?? 'index.php?page=sort_bubble');
+$lectie_curenta_slug   = (string)($continueData['lesson_slug'] ?? 'sort_bubble');
 
-$stats = get_exercise_stats($con, $userId, (string)($continueData['lesson_slug'] ?? 'sort_bubble'));
-$recentItems = get_recent_activity($con, $userId, 3);
+$stats        = get_exercise_stats($con, $userId, $lectie_curenta_slug);
+$recentItems  = get_recent_activity($con, $userId, 3);
 
 $algoritm_zilei_titlu = 'Merge Sort (Interclasare)';
-$algoritm_zilei_desc = 'Azi aprofundam o tehnica eficienta (Divide et Impera) cu complexitate O(n log n).';
+$algoritm_zilei_desc  = 'Azi aprofundăm o tehnică eficientă (Divide et Impera) cu complexitate O(n log n).';
+
+/* Derived display values (no business logic — purely presentation) */
+$exDone   = (int)($stats['done']  ?? 0);
+$exTotal  = (int)($stats['total'] ?? 0);
+$nrRecent = is_array($recentItems) ? count($recentItems) : 0;
 ?>
 
-<style>
-.dashboard-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
-    font-family: 'Poppins', sans-serif;
-    color: #333;
-}
+<div data-component="dashboard-modern">
 
-.dash-header h2 {
-    font-size: 2.2rem;
-    color: #2c3e50;
-    margin-bottom: 0.5rem;
-}
-
-.dash-header p {
-    color: #7f8c8d;
-    font-size: 1.1rem;
-    margin-bottom: 2rem;
-}
-
-.dash-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-bottom: 3rem;
-}
-
-.dash-card {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 2rem;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-    border-top: 4px solid transparent;
-    transition: transform 0.3s ease;
-}
-
-.dash-card:hover {
-    transform: translateY(-5px);
-}
-
-.progress-card {
-    border-top-color: #3498db;
-}
-
-.progress-card h3 {
-    margin-top: 0;
-    color: #2980b9;
-}
-
-.task-title {
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-}
-
-.progress-bar-container {
-    background: #ecf0f1;
-    border-radius: 10px;
-    height: 12px;
-    width: 100%;
-    overflow: hidden;
-    margin-bottom: 0.5rem;
-}
-
-.progress-bar {
-    background: #3498db;
-    height: 100%;
-    border-radius: 10px;
-    transition: width 1s ease-in-out;
-}
-
-.progress-text {
-    font-size: 0.9rem;
-    color: #7f8c8d;
-    margin-bottom: 1.5rem;
-    text-align: right;
-}
-
-.algo-card {
-    border-top-color: #2ecc71;
-    background: linear-gradient(145deg, #ffffff, #f0fcf4);
-}
-
-.algo-badge {
-    display: inline-block;
-    background: #2ecc71;
-    color: white;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    margin-bottom: 1rem;
-}
-
-.algo-card h3 {
-    margin-top: 0;
-    color: #27ae60;
-}
-
-.algo-card p {
-    color: #555;
-    margin-bottom: 1.5rem;
-    line-height: 1.5;
-}
-
-.dash-recent h3 {
-    font-size: 1.5rem;
-    color: #2c3e50;
-    margin-bottom: 1.5rem;
-}
-
-.recent-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1.5rem;
-}
-
-.recent-card {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 10px;
-    border: 1px solid #e0e6ed;
-    text-align: center;
-    transition: all 0.2s;
-}
-
-.recent-card:hover {
-    border-color: #3498db;
-    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.1);
-}
-
-.recent-card .icon {
-    font-size: 2rem;
-    display: block;
-    margin-bottom: 1rem;
-}
-
-.recent-card h4 {
-    margin: 0 0 0.5rem 0;
-    color: #34495e;
-}
-
-.recent-card p {
-    font-size: 0.9rem;
-    color: #7f8c8d;
-    margin-bottom: 1rem;
-}
-
-.recent-card a {
-    color: #3498db;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-.recent-card a:hover {
-    text-decoration: underline;
-}
-
-.dash-btn {
-    display: inline-block;
-    padding: 10px 20px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 600;
-    text-align: center;
-}
-
-.btn-primary {
-    background: #3498db;
-    color: white;
-    border: none;
-}
-
-.btn-primary:hover {
-    background: #2980b9;
-}
-
-.btn-outline {
-    border: 2px solid #2ecc71;
-    color: #27ae60;
-    background: transparent;
-}
-
-.btn-outline:hover {
-    background: #2ecc71;
-    color: white;
-}
-</style>
-
-<div class="dashboard-container">
-    <header class="dash-header">
-        <h2>Salutare, <?php echo $username; ?>! 👋</h2>
-        <p>Bine ai revenit in laboratorul tau de algoritmi.</p>
+    <!-- ============================================================
+         HEADER
+         ============================================================ -->
+    <header class="dash__header">
+        <span class="dash__eyebrow">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
+            </svg>
+            Dashboard personal
+        </span>
+        <h1 class="dash__title">
+            Salutare, <span class="dash__title-accent"><?php echo $username; ?></span>
+        </h1>
+        <p class="dash__lede">
+            Continuă de unde ai rămas sau explorează un algoritm nou. Progresul tău este salvat automat.
+        </p>
     </header>
 
-    <div class="dash-grid">
-        <div class="dash-card progress-card">
-            <h3>Continua de unde ai ramas</h3>
-            <p class="task-title">Lectie: <strong><?php echo htmlspecialchars($lectie_curenta_titlu, ENT_QUOTES, 'UTF-8'); ?></strong></p>
-            <div class="progress-bar-container">
-                <div class="progress-bar" style="width: <?php echo $progres_curent; ?>%;"></div>
+    <!-- ============================================================
+         BENTO GRID
+         ============================================================ -->
+    <div class="bento">
+
+        <!-- ── HERO: Continue learning ────────────────────────── -->
+        <article class="card card--hero bento__card--hero">
+            <div class="card__head">
+                <span class="card__eyebrow">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+                    </svg>
+                    Continuă învățarea
+                </span>
+                <span class="badge badge--soft"><?php echo $progres_curent; ?>% complet</span>
             </div>
-            <p class="progress-text"><?php echo $progres_curent; ?>% completat</p>
-            <p class="progress-text">Exercitii rezolvate: <?php echo (int)$stats['done']; ?>/<?php echo (int)$stats['total']; ?></p>
-            <a href="<?php echo htmlspecialchars($lectie_curenta_link, ENT_QUOTES, 'UTF-8'); ?>" class="dash-btn btn-primary">Continua invatarea</a>
-        </div>
 
-        <div class="dash-card algo-card">
-            <div class="algo-badge">Algoritmul Zilei</div>
-            <h3><?php echo htmlspecialchars($algoritm_zilei_titlu, ENT_QUOTES, 'UTF-8'); ?></h3>
-            <p><?php echo htmlspecialchars($algoritm_zilei_desc, ENT_QUOTES, 'UTF-8'); ?></p>
-            <a href="index.php?page=sort_merge" class="dash-btn btn-outline">Descopera metoda</a>
-        </div>
-    </div>
+            <h2 class="card__title">
+                <?php echo htmlspecialchars($lectie_curenta_titlu, ENT_QUOTES, 'UTF-8'); ?>
+            </h2>
 
-    <div class="dash-recent">
-        <h3>Ultimele accesate</h3>
-        <div class="recent-grid">
+            <p class="card__meta">
+                <?php echo $exDone; ?> din <?php echo $exTotal; ?> exerciții rezolvate la această lecție
+            </p>
+
+            <div class="progress" role="progressbar" aria-valuenow="<?php echo $progres_curent; ?>" aria-valuemin="0" aria-valuemax="100" aria-label="Progres lecție curentă">
+                <div class="progress__bar" style="width: <?php echo $progres_curent; ?>%;"></div>
+            </div>
+
+            <div class="card__actions">
+                <a href="<?php echo htmlspecialchars($lectie_curenta_link, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn--primary">
+                    Reia lecția
+                    <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                    </svg>
+                </a>
+                <a href="index.php?page=sortare" class="btn btn--ghost">
+                    Vezi toate metodele
+                </a>
+            </div>
+        </article>
+
+        <!-- ── ACCENT: Algoritmul zilei ───────────────────────── -->
+        <article class="card card--accent bento__card--accent">
+            <span class="card__eyebrow">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+                </svg>
+                Algoritmul zilei
+            </span>
+
+            <h3 class="card__title-sm">
+                <?php echo htmlspecialchars($algoritm_zilei_titlu, ENT_QUOTES, 'UTF-8'); ?>
+            </h3>
+
+            <p class="card__body">
+                <?php echo htmlspecialchars($algoritm_zilei_desc, ENT_QUOTES, 'UTF-8'); ?>
+            </p>
+
+            <div class="card__actions">
+                <a href="index.php?page=sort_merge" class="link-arrow">
+                    Descoperă metoda
+                    <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+        </article>
+
+        <!-- ── STAT 1: Exerciții rezolvate ────────────────────── -->
+        <article class="card card--stat bento__card--stat">
+            <span class="stat__label">Exerciții rezolvate</span>
+            <span class="stat__value">
+                <?php echo $exDone; ?><span class="stat__unit">/ <?php echo $exTotal; ?></span>
+            </span>
+            <span class="stat__sub">la lecția curentă</span>
+        </article>
+
+        <!-- ── STAT 2: Progres lecție ─────────────────────────── -->
+        <article class="card card--stat bento__card--stat">
+            <span class="stat__label">Progres lecție</span>
+            <span class="stat__value">
+                <?php echo $progres_curent; ?><span class="stat__unit">%</span>
+            </span>
+            <span class="stat__delta stat__delta--up">
+                <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
+                </svg>
+                pe drumul cel bun
+            </span>
+        </article>
+
+        <!-- ── STAT 3: Activități recente ─────────────────────── -->
+        <article class="card card--stat bento__card--stat">
+            <span class="stat__label">Activități recente</span>
+            <span class="stat__value">
+                <?php echo $nrRecent; ?>
+            </span>
+            <span class="stat__sub">în ultimele zile</span>
+        </article>
+
+        <!-- ── AI: Profesor AI shortcut ───────────────────────── -->
+        <article class="card card--ai bento__card--ai">
+            <div class="ai__icon-wrap">
+                <svg class="icon icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                    <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
+                </svg>
+            </div>
+            <h3 class="card__title-sm">Profesor AI</h3>
+            <p class="card__body">
+                Pune întrebări despre C++ și primește indicii pas-cu-pas, fără soluții directe.
+            </p>
+            <div class="card__actions">
+                <a href="index.php?page=profesor_ai" class="btn btn--ghost btn--sm">
+                    Deschide chat
+                    <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+        </article>
+
+        <!-- ── TIMELINE: ultimele activități ──────────────────── -->
+        <article class="card card--timeline bento__card--timeline">
+            <header class="card__head">
+                <span class="card__eyebrow">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    Ultimele activități
+                </span>
+                <a href="index.php?page=lista_exercitii" class="link-arrow">
+                    Vezi toate
+                    <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                    </svg>
+                </a>
+            </header>
+
             <?php if (!empty($recentItems)): ?>
-                <?php foreach ($recentItems as $item): ?>
-                    <div class="recent-card">
-                        <span class="icon">📖</span>
-                        <h4><?php echo htmlspecialchars((string)$item['title'], ENT_QUOTES, 'UTF-8'); ?></h4>
-                        <p><?php echo htmlspecialchars((string)$item['activity_type'], ENT_QUOTES, 'UTF-8'); ?></p>
-                        <a href="<?php echo htmlspecialchars((string)$item['link_access'], ENT_QUOTES, 'UTF-8'); ?>">Reia activitatea</a>
-                    </div>
-                <?php endforeach; ?>
+                <ul class="timeline">
+                    <?php foreach ($recentItems as $item): ?>
+                        <li class="timeline__item">
+                            <span class="timeline__icon" aria-hidden="true">
+                                <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                                </svg>
+                            </span>
+                            <div class="timeline__body">
+                                <span class="timeline__title">
+                                    <?php echo htmlspecialchars((string)$item['title'], ENT_QUOTES, 'UTF-8'); ?>
+                                </span>
+                                <span class="timeline__meta">
+                                    <?php echo htmlspecialchars((string)$item['activity_type'], ENT_QUOTES, 'UTF-8'); ?>
+                                </span>
+                            </div>
+                            <a href="<?php echo htmlspecialchars((string)$item['link_access'], ENT_QUOTES, 'UTF-8'); ?>" class="btn btn--quiet btn--sm">
+                                Reia
+                                <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                                </svg>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
             <?php else: ?>
-                <div class="recent-card">
-                    <span class="icon">🚀</span>
-                    <h4>Incepe prima lectie</h4>
-                    <p>Nu ai activitate salvata inca</p>
-                    <a href="index.php?page=sort_bubble">Porneste cu Bubble Sort</a>
+                <div class="empty-state">
+                    <span class="empty-state__icon" aria-hidden="true">
+                        <svg class="icon icon--lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+                            <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+                            <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
+                            <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+                        </svg>
+                    </span>
+                    <p>Nu ai activitate salvată încă. Începe prima lecție și construiește-ți istoricul.</p>
+                    <a href="index.php?page=sort_bubble" class="btn btn--primary">
+                        Începe cu Bubble Sort
+                        <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                        </svg>
+                    </a>
                 </div>
             <?php endif; ?>
-        </div>
+        </article>
+
     </div>
 </div>

@@ -1,60 +1,182 @@
+version: '3.8'
+
 services:
   web:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - APP_VERSION=2.0
     container_name: simp_web
+    hostname: simp-web
+    image: simp:2.0-php8.2
     depends_on:
       db:
         condition: service_healthy
     environment:
+      # Database
       DB_HOST: db
+      DB_PORT: 3306
       DB_USER: root
       DB_PASS: root123
       DB_NAME: dbsortari
+      
+      # Application
       APP_ENV: production
-      GROQ_API_KEY: ${GROQ_API_KEY}
+      APP_DEBUG: "false"
+      
+      # AI/Profesor
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
       GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}
+      
+      # Server
+      APACHE_RUN_USER: www-data
+      APACHE_RUN_GROUP: www-data
+      
     ports:
       - "8082:80"
+    
+    volumes:
+      # Application code (read-only for production)
+      - ./site_g:/var/www/html:ro
+      # Writable directories
+      - ./site_g/uploads:/var/www/html/uploads:rw
+      - ./site_g/logs:/var/www/html/logs:rw
+    
+    networks:
+      - simp_network
+    
     restart: unless-stopped
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 512M
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/index.php?page=bun_venit", "-H", "Host: localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    labels:
+      - "com.simp.description=SImp Portal Web Application"
+      - "com.simp.version=2.0"
 
   db:
-    image: mysql:8.0
+    image: mysql:8.0.37
     container_name: simp_db
-    command: --default-authentication-plugin=mysql_native_password
+    hostname: simp-mysql
+    
+    command: 
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max_connections=1000
+      - --max_allowed_packet=256M
+    
     environment:
       MYSQL_ROOT_PASSWORD: root123
       MYSQL_DATABASE: dbsortari
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_INITDB_SKIP_TZINFO: "yes"
+    
     ports:
       - "3308:3306"
+    
     volumes:
+      # Database persistence
       - db_data:/var/lib/mysql
+      # SQL initialization scripts
       - ./site_g/dbsortari.sql:/docker-entrypoint-initdb.d/01_dbsortari.sql:ro
       - ./site_g/database/upgrade_dashboard_progress.sql:/docker-entrypoint-initdb.d/02_upgrade_dashboard_progress.sql:ro
+    
+    networks:
+      - simp_network
+    
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot123"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 20s
+    
     restart: unless-stopped
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+    
+    labels:
+      - "com.simp.description=SImp Portal MySQL Database"
+      - "com.simp.version=8.0"
 
   phpmyadmin:
     image: phpmyadmin:5-apache
     container_name: simp_phpmyadmin
+    hostname: simp-pma
+    
     depends_on:
       db:
         condition: service_healthy
+    
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
       PMA_USER: root
       PMA_PASSWORD: root123
+      PMA_DB: dbsortari
       UPLOAD_LIMIT: 64M
+      MAX_EXECUTION_TIME: 600
+      MEMORY_LIMIT: 256M
+    
     ports:
       - "8081:80"
+    
+    networks:
+      - simp_network
+    
     restart: unless-stopped
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/", "-H", "Host: localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    
+    labels:
+      - "com.simp.description=phpMyAdmin Database Administration"
+      - "com.simp.version=5"
+
+networks:
+  simp_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
 
 volumes:
   db_data:
+    driver: local
+

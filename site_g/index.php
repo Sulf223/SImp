@@ -68,78 +68,120 @@ $afiseaza_ai_widget = !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal C++ – Metode de sortare</title>
+
+    <!-- font Poppins de la Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="CSS/modern_vars.css">
     <link rel="stylesheet" href="stil.css">
+    <link rel="stylesheet" href="CSS/dashboard_modern.css">
     <?php if ($pagina_curenta === 'bun_venit'): ?>
         <link rel="stylesheet" href="CSS/bun_venit.css">
     <?php endif; ?>
-
-    <!-- (opțional) font Poppins de la Google -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Fix: Anulează pointer-events din stil.css pentru a face butoanele clickabile */
+        nav, 
+        nav * {
+            pointer-events: auto !important;
+        }
+        nav a, 
+        nav button,
+        .btn,
+        button {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+        }
+        /* Asigură-te că linkurile sunt clickabile */
+        a[href] {
+            pointer-events: auto !important;
+        }
+        /* Dezactiveaza pointer-events: none universal */
+        *:not(.ai-widget-panel):not(.ai-widget) {
+            pointer-events: auto !important;
+        }
+        /* Reactivează pointer-events: none doar pentru ai-widget când e închis */
+        .ai-widget-panel {
+            pointer-events: none;
+        }
+        .ai-widget.open .ai-widget-panel {
+            pointer-events: auto;
+        }
+    </style>
 </head>
-<body>
-<header>
-    <h1>Portal C++ – Metode de sortare</h1>
-    <p>Un mini-laborator online pentru studenți: cod, explicații și exerciții interactive</p>
-</header>
+<body data-theme="dark" style="background: var(--color-bg); color: var(--color-fg); font-family: var(--font-sans); margin: 0; min-height: 100vh; display: flex; flex-direction: column;">
 
-<nav>
-    <ul>
-        <!-- Link-urile au fost actualizate pentru a folosi noul sistem de paginare -->
-        <li><a href="index.php?page=bun_venit">Bun venit</a></li>
-        <li><a href="index.php?page=acasa">Acasă</a></li>
-        <li><a href="index.php?page=algoritmi">Algoritmi</a></li>
-        <li><a href="index.php?page=comparatii_sortare">Comparatii</a></li>
-        <li><a href="index.php?page=profesor_ai">Profesor AI</a></li>
-        <li><a href="index.php?page=lista_exercitii">Exerciții</a></li>
-        <li><a href="index.php?page=compilator">Compilator C++ online</a></li>
-        <li><a href="index.php?page=grile">Grile Interactive</a></li>
-        <!-- Am eliminat link-ul către frames.html -->
+<nav style="position: sticky; top: 0; z-index: var(--z-sticky); background: rgba(14, 14, 17, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--color-border); padding: var(--space-3) var(--space-6); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4);">
+    <!-- LOGO -->
+    <div style="display: flex; align-items: center; gap: var(--space-3);">
+        <svg class="icon icon--lg" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
+        <div style="display: flex; flex-direction: column; gap: 0;">
+            <span style="font-weight: 700; font-size: var(--text-lg); letter-spacing: var(--tracking-tight); color: var(--color-fg);">SImp <span style="color: var(--color-primary);">Portal</span></span>
+            <span style="font-size: var(--text-xs); color: var(--color-fg-muted); letter-spacing: var(--tracking-wide); text-transform: uppercase;">C++ Learning Hub</span>
+        </div>
+    </div>
+    
+    <!-- MENU + THEME TOGGLE -->
+    <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center;">
+        <li><a href="index.php?page=bun_venit" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Bun venit</a></li>
+        <li><a href="index.php?page=acasa" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Acasă</a></li>
+        <li><a href="index.php?page=algoritmi" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Algoritmi</a></li>
+        <li><a href="index.php?page=comparatii_sortare" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Comparații</a></li>
+        <li><a href="index.php?page=profesor_ai" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Profesor AI</a></li>
+        <li><a href="index.php?page=lista_exercitii" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Exerciții</a></li>
+        <li><a href="index.php?page=compilator" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Compilator</a></li>
+        <li><a href="index.php?page=grile" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Grile</a></li>
+        
+        <!-- THEME TOGGLE -->
+        <li style="margin-left: var(--space-2); border-left: 1px solid var(--color-border); padding-left: var(--space-2);">
+            <button id="theme-toggle" class="btn btn--ghost btn--sm" title="Toggle dark/light mode" style="display: flex; align-items: center; gap: var(--space-1);">
+                <svg id="theme-icon-sun" class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                <svg id="theme-icon-moon" class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+        </li>
+        
+        <!-- AUTH -->
         <?php if (!empty($_SESSION['user_id'])): ?>
-            <li style="margin-left:auto"><a href="#">Utilizator: <?php echo htmlspecialchars($_SESSION['username'] ?? ''); ?></a></li>
+            <li style="margin-left: var(--space-2); border-left: 1px solid var(--color-border); padding-left: var(--space-2);"><span class="badge badge--soft"><?php echo htmlspecialchars($_SESSION['username'] ?? ''); ?></span></li>
             <li>
-                <form method="post" action="PHP/logout.php" style="display:inline;">
+                <form method="post" action="PHP/logout.php" style="display:inline; margin: 0;">
                     <?php csrf_field(); ?>
-                    <button type="submit" class="btn-logout" style="background:none;border:none;color:inherit;cursor:pointer;font:inherit;padding:8px 16px;">Logout</button>
+                    <button type="submit" class="btn btn--ghost btn--sm">Logout</button>
                 </form>
             </li>
         <?php else: ?>
-            <li style="margin-left:auto"><a href="index.php?page=register">Creare cont</a></li>
-            <li><a href="index.php?page=login">Login</a></li>
+            <li style="margin-left: var(--space-2);"><a href="index.php?page=login" class="btn btn--ghost btn--sm">Login</a></li>
+            <li><a href="index.php?page=register" class="btn btn--primary btn--sm">Cont Nou</a></li>
         <?php endif; ?>
     </ul>
 </nav>
 
-<main>
+<main style="flex: 1; padding: var(--space-6); max-width: var(--measure-wide); margin: 0 auto; width: 100%;">
     <?php
-    // Afișăm mesajele flash (erori, succes)
     display_flash();
-
-    // Afișează un mesaj de succes la delogare
     if (isset($_GET['msg']) && $_GET['msg'] === 'logout_success') {
-        echo '<div class="alert alert-success">Ați fost delogat cu succes!</div>';
+        echo '<div class="alert alert--success" style="margin-bottom: var(--space-4); padding: var(--space-3); border-radius: var(--radius-md); background: var(--color-success-soft); color: var(--color-success); border: 1px solid var(--color-success);">Ați fost delogat cu succes!</div>';
     }
 
-    // Aici se încarcă dinamic conținutul paginii cerute
     if (file_exists($fisier_de_incarcat)) {
         include $fisier_de_incarcat;
     } else {
-        // Afișează o eroare dacă fișierul nu este găsit
-        echo "<h2>Eroare 404</h2>";
-        echo "<p>Pagina cerută nu a fost găsită. Verificați URL-ul.</p>";
+        echo "<div data-component='dashboard-modern'><div class='dash__guard'><h3>Eroare 404</h3><p>Pagina cerută nu a fost găsită.</p></div></div>";
     }
     ?>
 </main>
 
-<footer>
-    <p>&copy; 2025 Portal C++ – Metode de sortare</p>
+<footer style="text-align: center; padding: var(--space-6); color: var(--color-fg-muted); font-size: var(--text-sm); border-top: 1px solid var(--color-border); margin-top: auto;">
+    <p style="margin: 0;">&copy; <?php echo date('Y'); ?> SImp Portal C++ – Inovație în învățare</p>
 </footer>
 
 <?php if ($afiseaza_ai_widget): ?>
 <div id="ai-widget" class="ai-widget">
     <button id="ai-widget-toggle" class="ai-widget-toggle" type="button" aria-label="Deschide chat Profesor AI" aria-expanded="false">
-        <span class="ai-widget-icon">AI</span>
+        <svg class="ai-widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+            <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
+        </svg>
         <span id="ai-widget-badge" class="ai-widget-badge" hidden>0</span>
     </button>
 
@@ -162,7 +204,12 @@ $afiseaza_ai_widget = !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
                 placeholder="Scrie întrebarea ta aici..."
                 required
             ></textarea>
-            <button type="submit" class="btn btn-primary">Trimite</button>
+            <button type="submit" class="btn btn--primary btn-primary">
+                Trimite
+                <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>
+                </svg>
+            </button>
         </form>
     </section>
 </div>
@@ -170,4 +217,44 @@ $afiseaza_ai_widget = !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
 <script src="JS/ai_widget.js" defer></script>
 <?php endif; ?>
 </body>
+<script>
+// THEME TOGGLE
+(function() {
+  const button = document.getElementById('theme-toggle');
+  const sunIcon = document.getElementById('theme-icon-sun');
+  const moonIcon = document.getElementById('theme-icon-moon');
+  const html = document.documentElement;
+
+  function getTheme() {
+    return localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  }
+
+  function setTheme(theme) {
+    localStorage.setItem('theme', theme);
+    html.setAttribute('data-theme', theme);
+    updateIcons(theme);
+  }
+
+  function updateIcons(theme) {
+    if (theme === 'dark') {
+      sunIcon.style.display = 'none';
+      moonIcon.style.display = 'block';
+    } else {
+      sunIcon.style.display = 'block';
+      moonIcon.style.display = 'none';
+    }
+  }
+
+  // Initialize on page load
+  const initialTheme = getTheme();
+  setTheme(initialTheme);
+
+  // Toggle on button click
+  button.addEventListener('click', () => {
+    const current = html.getAttribute('data-theme') || 'dark';
+    const next = current === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+  });
+})();
+</script>
 </html>

@@ -1,0 +1,301 @@
+/* ==========================================================================
+   modern_vars.css — SImp Design System v1
+   Engineering-Modern direction (Vercel / Linear / Stripe)
+   --------------------------------------------------------------------------
+   Single source of truth for color, type, spacing, radius, shadows, motion.
+   Dark-mode first; light mode via [data-theme="light"] or prefers-color-scheme.
+   ========================================================================== */
+
+:root {
+    color-scheme: dark light;
+
+    /* ====================================================================
+       1. COLOR — restrained palette, semantic naming
+       Surfaces are layered (bg < surface-1 < surface-2 < surface-3).
+       Text has 4 levels (fg / muted / subtle / disabled).
+       Brand: ONE primary + ONE accent. Everything else is feedback color.
+       ==================================================================== */
+
+    /* Surfaces — depth scale */
+    --color-bg:            #08080A;
+    --color-surface-1:     #0E0E11;
+    --color-surface-2:     #15151A;
+    --color-surface-3:     #1C1C22;
+    --color-surface-overlay: rgba(20, 20, 26, 0.72);
+
+    /* Borders */
+    --color-border:        #1F1F23;
+    --color-border-strong: #2A2A30;
+    --color-border-focus:  #6E56CF;
+
+    /* Foreground */
+    --color-fg:            #F4F4F5;
+    --color-fg-muted:      #A1A1AA;
+    --color-fg-subtle:     #71717A;
+    --color-fg-disabled:   #52525B;
+    --color-fg-on-primary: #FFFFFF;
+
+    /* Brand — Primary (indigo-violet, Linear-inspired) */
+    --color-primary:       #6E56CF;
+    --color-primary-hover: #7C66D9;
+    --color-primary-active:#5E47BF;
+    --color-primary-soft:  rgba(110, 86, 207, 0.12);
+    --color-primary-glow:  rgba(110, 86, 207, 0.28);
+
+    /* Brand — Accent (cyan, for data viz / secondary CTAs) */
+    --color-accent:        #06B6D4;
+    --color-accent-hover:  #22C8E2;
+    --color-accent-soft:   rgba(6, 182, 212, 0.10);
+    --color-accent-glow:   rgba(6, 182, 212, 0.22);
+
+    /* Feedback */
+    --color-success:       #10B981;
+    --color-success-soft:  rgba(16, 185, 129, 0.12);
+    --color-warning:       #F59E0B;
+    --color-warning-soft:  rgba(245, 158, 11, 0.12);
+    --color-danger:        #EF4444;
+    --color-danger-soft:   rgba(239, 68, 68, 0.12);
+
+    /* Decorative gradient stops (used SPARINGLY — hero card aura, accent stripes) */
+    --gradient-aurora:
+        radial-gradient(60% 60% at 20% 0%, rgba(110, 86, 207, 0.22) 0%, transparent 60%),
+        radial-gradient(40% 60% at 100% 100%, rgba(6, 182, 212, 0.16) 0%, transparent 60%);
+    --gradient-mesh:
+        radial-gradient(at 8% 8%, rgba(110, 86, 207, 0.18) 0px, transparent 50%),
+        radial-gradient(at 92% 0%, rgba(34, 200, 226, 0.12) 0px, transparent 55%),
+        radial-gradient(at 50% 100%, rgba(110, 86, 207, 0.10) 0px, transparent 50%);
+
+    /* ====================================================================
+       2. TYPOGRAPHY
+       Inter / Geist as primary sans, JetBrains Mono for code.
+       Modular type scale, ratio ~1.25 (major third).
+       Reading width capped at 70ch via .measure-prose utility.
+       ==================================================================== */
+
+    --font-sans:   "Inter", "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI",
+                   Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono:   "JetBrains Mono", "Geist Mono", "Fira Code", "SF Mono",
+                   Consolas, "Liberation Mono", monospace;
+    --font-display:"Inter", "Geist", -apple-system, sans-serif;
+
+    /* Sizes */
+    --text-xs:    0.75rem;    /* 12 */
+    --text-sm:    0.8125rem;  /* 13 */
+    --text-base:  0.9375rem;  /* 15 — slightly tighter than 16 for engineering feel */
+    --text-md:    1rem;       /* 16 */
+    --text-lg:    1.125rem;   /* 18 */
+    --text-xl:    1.25rem;    /* 20 */
+    --text-2xl:   1.5rem;     /* 24 */
+    --text-3xl:   1.875rem;   /* 30 */
+    --text-4xl:   2.25rem;    /* 36 */
+    --text-5xl:   3rem;       /* 48 */
+    --text-6xl:   3.75rem;    /* 60 */
+
+    /* Line heights */
+    --leading-none:    1;
+    --leading-tight:   1.15;
+    --leading-snug:    1.35;
+    --leading-normal:  1.55;
+    --leading-relaxed: 1.7;
+
+    /* Weights */
+    --font-regular:  400;
+    --font-medium:   500;
+    --font-semibold: 600;
+    --font-bold:     700;
+
+    /* Letter spacing — tight at display sizes, normal at body */
+    --tracking-tightest: -0.04em;
+    --tracking-tighter:  -0.02em;
+    --tracking-tight:    -0.01em;
+    --tracking-normal:   0;
+    --tracking-wide:     0.02em;
+    --tracking-wider:    0.04em;
+    --tracking-widest:   0.08em;
+
+    /* Reading widths */
+    --measure-prose:   70ch;
+    --measure-narrow:  50ch;
+    --measure-content: 1280px;
+    --measure-wide:    1440px;
+
+    /* ====================================================================
+       3. SPACING (8pt grid)
+       ==================================================================== */
+    --space-0:   0;
+    --space-px:  1px;
+    --space-1:   0.25rem;   /* 4 */
+    --space-2:   0.5rem;    /* 8 */
+    --space-3:   0.75rem;   /* 12 */
+    --space-4:   1rem;      /* 16 */
+    --space-5:   1.25rem;   /* 20 */
+    --space-6:   1.5rem;    /* 24 */
+    --space-8:   2rem;      /* 32 */
+    --space-10:  2.5rem;    /* 40 */
+    --space-12:  3rem;      /* 48 */
+    --space-14:  3.5rem;    /* 56 */
+    --space-16:  4rem;      /* 64 */
+    --space-20:  5rem;      /* 80 */
+    --space-24:  6rem;      /* 96 */
+
+    /* ====================================================================
+       4. RADIUS
+       ==================================================================== */
+    --radius-xs:   4px;
+    --radius-sm:   6px;
+    --radius-md:   8px;
+    --radius-lg:   12px;
+    --radius-xl:   16px;
+    --radius-2xl:  20px;
+    --radius-3xl:  28px;
+    --radius-full: 9999px;
+
+    /* ====================================================================
+       5. SHADOWS — dark-aware, layered
+       Use semantic names rather than t-shirt sizes when possible.
+       ==================================================================== */
+    --shadow-xs:    0 1px 2px 0 rgba(0, 0, 0, 0.5);
+    --shadow-sm:    0 1px 3px 0 rgba(0, 0, 0, 0.5),
+                    0 1px 2px -1px rgba(0, 0, 0, 0.4);
+    --shadow-md:    0 4px 8px -2px rgba(0, 0, 0, 0.55),
+                    0 2px 4px -2px rgba(0, 0, 0, 0.4);
+    --shadow-lg:    0 12px 24px -8px rgba(0, 0, 0, 0.6),
+                    0 4px 8px -4px rgba(0, 0, 0, 0.45);
+    --shadow-xl:    0 24px 48px -12px rgba(0, 0, 0, 0.65),
+                    0 8px 16px -8px rgba(0, 0, 0, 0.45);
+    --shadow-2xl:   0 32px 64px -16px rgba(0, 0, 0, 0.7);
+    --shadow-inset: inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+
+    /* Glow shadows — use on hover or focus only */
+    --shadow-glow-primary: 0 0 0 1px var(--color-primary-soft),
+                           0 8px 32px -4px var(--color-primary-glow);
+    --shadow-glow-accent:  0 0 0 1px var(--color-accent-soft),
+                           0 8px 32px -4px var(--color-accent-glow);
+
+    /* Focus ring — accessibility */
+    --shadow-focus: 0 0 0 2px var(--color-bg),
+                    0 0 0 4px var(--color-primary);
+
+    /* ====================================================================
+       6. MOTION
+       ==================================================================== */
+    --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    --duration-instant: 80ms;
+    --duration-fast:    120ms;
+    --duration-normal:  200ms;
+    --duration-slow:    320ms;
+    --duration-slower:  500ms;
+
+    /* ====================================================================
+       7. Z-INDEX (canonical scale)
+       ==================================================================== */
+    --z-base:    1;
+    --z-raised:  10;
+    --z-sticky:  100;
+    --z-overlay: 1000;
+    --z-modal:   1100;
+    --z-toast:   1200;
+    --z-tooltip: 1300;
+}
+
+/* ==========================================================================
+   LIGHT MODE OVERRIDES
+   Only color tokens change; type / spacing / radius / motion stay identical.
+   ========================================================================== */
+[data-theme="light"] {
+    color-scheme: light;
+
+    --color-bg:            #FAFAFA;
+    --color-surface-1:     #FFFFFF;
+    --color-surface-2:     #F4F4F5;
+    --color-surface-3:     #E4E4E7;
+    --color-surface-overlay: rgba(255, 255, 255, 0.78);
+
+    --color-border:        #E4E4E7;
+    --color-border-strong: #D4D4D8;
+
+    --color-fg:            #09090B;
+    --color-fg-muted:      #52525B;
+    --color-fg-subtle:     #71717A;
+    --color-fg-disabled:   #A1A1AA;
+
+    --color-primary-soft:  rgba(110, 86, 207, 0.08);
+    --color-accent-soft:   rgba(6, 182, 212, 0.08);
+
+    --gradient-aurora:
+        radial-gradient(60% 60% at 20% 0%, rgba(110, 86, 207, 0.10) 0%, transparent 60%),
+        radial-gradient(40% 60% at 100% 100%, rgba(6, 182, 212, 0.08) 0%, transparent 60%);
+    --gradient-mesh:
+        radial-gradient(at 8% 8%, rgba(110, 86, 207, 0.08) 0px, transparent 50%),
+        radial-gradient(at 92% 0%, rgba(34, 200, 226, 0.06) 0px, transparent 55%);
+
+    --shadow-xs:    0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm:    0 1px 3px 0 rgba(0, 0, 0, 0.07),
+                    0 1px 2px -1px rgba(0, 0, 0, 0.04);
+    --shadow-md:    0 4px 8px -2px rgba(0, 0, 0, 0.08),
+                    0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg:    0 12px 24px -8px rgba(0, 0, 0, 0.10),
+                    0 4px 8px -4px rgba(0, 0, 0, 0.06);
+    --shadow-xl:    0 24px 48px -12px rgba(0, 0, 0, 0.12),
+                    0 8px 16px -8px rgba(0, 0, 0, 0.08);
+    --shadow-2xl:   0 32px 64px -16px rgba(0, 0, 0, 0.16);
+    --shadow-inset: inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+
+    --shadow-focus: 0 0 0 2px var(--color-surface-1),
+                    0 0 0 4px var(--color-primary);
+}
+
+/* Honor system preference if no explicit theme is set */
+@media (prefers-color-scheme: light) {
+    :root:not([data-theme]) {
+        color-scheme: light;
+        --color-bg:            #FAFAFA;
+        --color-surface-1:     #FFFFFF;
+        --color-surface-2:     #F4F4F5;
+        --color-surface-3:     #E4E4E7;
+        --color-border:        #E4E4E7;
+        --color-border-strong: #D4D4D8;
+        --color-fg:            #09090B;
+        --color-fg-muted:      #52525B;
+        --color-fg-subtle:     #71717A;
+        --color-fg-disabled:   #A1A1AA;
+        --color-primary-soft:  rgba(110, 86, 207, 0.08);
+        --color-accent-soft:   rgba(6, 182, 212, 0.08);
+        --shadow-xs:    0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-sm:    0 1px 3px 0 rgba(0, 0, 0, 0.07), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+        --shadow-md:    0 4px 8px -2px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+        --shadow-lg:    0 12px 24px -8px rgba(0, 0, 0, 0.10), 0 4px 8px -4px rgba(0, 0, 0, 0.06);
+    }
+}
+
+/* ==========================================================================
+   READING WIDTH UTILITIES
+   ========================================================================== */
+.measure-prose  { max-width: var(--measure-prose); }
+.measure-narrow { max-width: var(--measure-narrow); }
+.measure-content{ max-width: var(--measure-content); }
+.measure-wide   { max-width: var(--measure-wide); }
+
+/* Apply automatically to long-form text containers */
+.prose {
+    max-width: var(--measure-prose);
+    line-height: var(--leading-relaxed);
+    color: var(--color-fg-muted);
+}
+.prose p + p { margin-top: var(--space-4); }
+.prose strong { color: var(--color-fg); }
+
+/* ==========================================================================
+   MOTION REDUCED
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

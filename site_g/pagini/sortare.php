@@ -1,24 +1,124 @@
-<section>
-    <span class="hero-pill">Metode de sortare</span>
-    <h2 class="hero-title">Alege metoda de sortare</h2>
-    <p class="hero-subtitle">
-        Fiecare metoda are pagina separata cu informatii, cod si vizualizator dedicat.
-    </p>
-</section>
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
 
-<section class="card-grid">
-    <a href="index.php?page=sort_bubble" class="card-link"><article class="card"><h3>Bubble Sort</h3><p>Comparatii adiacente + interschimbari repetate.</p></article></a>
-    <a href="index.php?page=sort_selection" class="card-link"><article class="card"><h3>Selection Sort</h3><p>Selecteaza minimul si il aduce pe pozitia curenta.</p></article></a>
-    <a href="index.php?page=sort_insertion" class="card-link"><article class="card"><h3>Insertion Sort</h3><p>Construieste secventa sortata prin inserare.</p></article></a>
-    <a href="index.php?page=sort_quick" class="card-link"><article class="card"><h3>Quick Sort</h3><p>Divide et Impera bazat pe pivot si partitionare.</p></article></a>
-    <a href="index.php?page=sort_merge" class="card-link"><article class="card"><h3>Merge Sort</h3><p>Imparte vectorul si interclaseaza recursiv.</p></article></a>
-    <a href="index.php?page=sort_counting" class="card-link"><article class="card"><h3>Counting Sort</h3><p>Numarare frecvente, eficient pentru valori in interval mic.</p></article></a>
-</section>
+<div data-component="dashboard-modern">
+    <header class="dash__header">
+        <span class="dash__eyebrow">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M11 15h2a2 2 0 1 0 0-4h-2a2 2 0 1 1 0-4h2"/>
+                <path d="M12 17V7"/>
+            </svg>
+            Metode de sortare
+        </span>
+        <h1 class="dash__title">
+            Alege metoda de <span class="dash__title-accent">sortare</span>
+        </h1>
+        <p class="dash__lede">
+            Explorează algoritmii de organizare a datelor. Fiecare metodă include vizualizări interactive, explicații ale complexității și exerciții practice.
+        </p>
+    </header>
 
-<section>
-    <div class="hero-actions">
-        <a href="index.php?page=comparatii_sortare" class="btn btn-primary">Comparatii de performanta</a>
-        <a href="index.php?page=metode" class="btn btn-ghost">Vezi si lista din baza de date</a>
-        <a href="index.php?page=lista_exercitii" class="btn btn-primary">Mergi la exercitii</a>
+    <div class="bento" style="gap: var(--space-6);">
+        <!-- 6 SORTING METHOD CARDS -->
+        <article class="card bento__card--stat" style="border: 1px solid rgba(255, 107, 107, 0.3); background: linear-gradient(135deg, rgba(255, 107, 107, 0.05) 0%, rgba(255, 107, 107, 0.02) 100%);">
+            <h3 class="card__title-sm" style="color: #ff6b6b;">🫧 Bubble Sort</h3>
+            <p class="card__body">Comparații adiacente și interschimbări repetate până la sortare.</p>
+            <div style="font-size: var(--text-xs); color: var(--color-fg-muted); margin-bottom: var(--space-2);">
+                <span style="background: rgba(255, 107, 107, 0.15); color: #ff6b6b; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-right: 4px;">O(n²)</span>
+                <span style="background: var(--color-success-soft); color: var(--color-success); padding: 2px 6px; border-radius: 4px; display: inline-block;">Easy</span>
+            </div>
+            <div class="card__actions">
+                <a href="index.php?page=sort_bubble" class="btn btn--ghost btn--sm">Deschide</a>
+            </div>
+        </article>
+
+        <article class="card bento__card--stat" style="border: 1px solid rgba(59, 130, 246, 0.3); background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.02) 100%);">
+            <h3 class="card__title-sm" style="color: #3b82f6;">✋ Selection Sort</h3>
+            <p class="card__body">Selectează minimul din secvența nesortată și îl mută la început.</p>
+            <div style="font-size: var(--text-xs); color: var(--color-fg-muted); margin-bottom: var(--space-2);">
+                <span style="background: rgba(59, 130, 246, 0.15); color: #3b82f6; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-right: 4px;">O(n²)</span>
+                <span style="background: var(--color-success-soft); color: var(--color-success); padding: 2px 6px; border-radius: 4px; display: inline-block;">Easy</span>
+            </div>
+            <div class="card__actions">
+                <a href="index.php?page=sort_selection" class="btn btn--ghost btn--sm">Deschide</a>
+            </div>
+        </article>
+
+        <article class="card bento__card--stat" style="border: 1px solid rgba(34, 197, 94, 0.3); background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(34, 197, 94, 0.02) 100%);">
+            <h3 class="card__title-sm" style="color: #22c55e;">📌 Insertion Sort</h3>
+            <p class="card__body">Construiește secvența sortată inserând fiecare element la locul său.</p>
+            <div style="font-size: var(--text-xs); color: var(--color-fg-muted); margin-bottom: var(--space-2);">
+                <span style="background: rgba(34, 197, 94, 0.15); color: #22c55e; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-right: 4px;">O(n²)</span>
+                <span style="background: var(--color-success-soft); color: var(--color-success); padding: 2px 6px; border-radius: 4px; display: inline-block;">Easy</span>
+            </div>
+            <div class="card__actions">
+                <a href="index.php?page=sort_insertion" class="btn btn--ghost btn--sm">Deschide</a>
+            </div>
+        </article>
+
+        <article class="card bento__card--stat" style="border: 1px solid rgba(168, 85, 247, 0.3); background: linear-gradient(135deg, rgba(168, 85, 247, 0.05) 0%, rgba(168, 85, 247, 0.02) 100%);">
+            <h3 class="card__title-sm" style="color: #a855f7;">⚡ Quick Sort</h3>
+            <p class="card__body">Algoritm eficient bazat pe pivot și partiționarea vectorului.</p>
+            <div style="font-size: var(--text-xs); color: var(--color-fg-muted); margin-bottom: var(--space-2);">
+                <span style="background: rgba(168, 85, 247, 0.15); color: #a855f7; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-right: 4px;">O(n log n)</span>
+                <span style="background: var(--color-warning-soft); color: var(--color-warning); padding: 2px 6px; border-radius: 4px; display: inline-block;">Medium</span>
+            </div>
+            <div class="card__actions">
+                <a href="index.php?page=sort_quick" class="btn btn--ghost btn--sm">Deschide</a>
+            </div>
+        </article>
+
+        <article class="card bento__card--stat" style="border: 1px solid rgba(250, 204, 21, 0.3); background: linear-gradient(135deg, rgba(250, 204, 21, 0.05) 0%, rgba(250, 204, 21, 0.02) 100%);">
+            <h3 class="card__title-sm" style="color: #facc15;">🔀 Merge Sort</h3>
+            <p class="card__body">Divide vectorul în jumătăți și le interclasează recursiv.</p>
+            <div style="font-size: var(--text-xs); color: var(--color-fg-muted); margin-bottom: var(--space-2);">
+                <span style="background: rgba(250, 204, 21, 0.15); color: #facc15; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-right: 4px;">O(n log n)</span>
+                <span style="background: var(--color-success-soft); color: var(--color-success); padding: 2px 6px; border-radius: 4px; display: inline-block;">Medium</span>
+            </div>
+            <div class="card__actions">
+                <a href="index.php?page=sort_merge" class="btn btn--ghost btn--sm">Deschide</a>
+            </div>
+        </article>
+
+        <article class="card bento__card--stat" style="border: 1px solid rgba(72, 202, 228, 0.3); background: linear-gradient(135deg, rgba(72, 202, 228, 0.05) 0%, rgba(72, 202, 228, 0.02) 100%);">
+            <h3 class="card__title-sm" style="color: #48cae4;">🔢 Counting Sort</h3>
+            <p class="card__body">Eficient pentru valori într-un interval mic, folosind frecvențele.</p>
+            <div style="font-size: var(--text-xs); color: var(--color-fg-muted); margin-bottom: var(--space-2);">
+                <span style="background: rgba(72, 202, 228, 0.15); color: #48cae4; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-right: 4px;">O(n+k)</span>
+                <span style="background: var(--color-success-soft); color: var(--color-success); padding: 2px 6px; border-radius: 4px; display: inline-block;">Hard</span>
+            </div>
+            <div class="card__actions">
+                <a href="index.php?page=sort_counting" class="btn btn--ghost btn--sm">Deschide</a>
+            </div>
+        </article>
+
+        <!-- CTA CARD: Full-width -->
+        <article class="card bento__card--timeline" style="grid-column: 1 / -1; border: 1px solid var(--color-primary-soft); background: linear-gradient(135deg, rgba(110, 86, 207, 0.08) 0%, rgba(110, 86, 207, 0.02) 100%); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -30%; right: -20%; width: 300px; height: 300px; background: radial-gradient(circle, var(--color-primary-glow) 0%, transparent 70%); opacity: 0.1; z-index: 0;"></div>
+            <div class="card__head" style="position: relative; z-index: 1;">
+                <span class="card__eyebrow" style="color: var(--color-primary);">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                    </svg>
+                    Analiză și practică
+                </span>
+            </div>
+            <h3 style="font-size: var(--text-lg); margin-bottom: var(--space-2); position: relative; z-index: 1;">Compară și testează performanța</h3>
+            <p style="color: var(--color-fg-muted); margin-bottom: var(--space-4); position: relative; z-index: 1;">Vezi grafice comparative și execută teste de performanță pe diferite dimensiuni de date.</p>
+            <div class="card__actions" style="position: relative; z-index: 1;">
+                <a href="index.php?page=comparatii_sortare" class="btn btn--primary">
+                    <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>
+                    </svg>
+                    Comparații de performanță
+                </a>
+                <a href="index.php?page=lista_exercitii" class="btn btn--ghost">
+                    Mergi la exerciții
+                </a>
+            </div>
+        </article>
     </div>
-</section>
+</div>

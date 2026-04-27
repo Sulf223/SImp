@@ -1,36 +1,23 @@
-<section>
-    <span class="hero-pill">Algoritm fundamental</span>
-    <h2 class="hero-title">Greedy</h2>
-    <p class="hero-subtitle">
-        Strategia Greedy face la fiecare pas alegerea locala cea mai buna.
-        Este corecta doar pentru probleme care au proprietatea de alegere lacoma.
-    </p>
-    <div class="hero-actions">
-        <a href="index.php?page=algoritmi_avansati" class="btn btn-ghost">Inapoi la algoritmi fundamentali</a>
-    </div>
-</section>
-
-<section class="card-grid">
-    <article class="card">
-        <h3>Idee principala</h3>
-        <p>
-            Alegerea de acum trebuie sa para cea mai buna local, fara a reconsidera
-            toate alegerile anterioare.
+<div data-component="dashboard-modern">
+    <header class="dash__header">
+        <div class="dash__eyebrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><circle cx="12" cy="12" r="10"/><path d="M16 8l-4 4-4-4"/></svg>
+            Algoritm fundamental
+        </div>
+        <h2 class="dash__title">Metoda <span class="dash__title-accent">Greedy</span></h2>
+        <p class="dash__lede">
+            Strategia Greedy face la fiecare pas alegerea locală cea mai bună.
+            Este corectă doar pentru probleme care au proprietatea de alegere lacomă.
         </p>
-    </article>
+    </header>
 
-    <article class="card">
-        <h3>Exemple tipice</h3>
-        <p>
-            Schimb monetar (in sisteme canonice), interval scheduling, Huffman,
-            Dijkstra (pe muchii nenegative).
-        </p>
-    </article>
-</section>
-
-<section>
-    <h3>Exemplu: schimb monetar</h3>
-    <pre><code>int monede[] = {50, 10, 5, 1};
+    <div class="bento">
+        <div class="card bento__card--hero">
+            <div class="card__head">
+                <h3 class="card__title">Exemplu: Schimb monetar</h3>
+            </div>
+            <div class="card__body">
+                <pre style="background: var(--color-surface-2); padding: var(--space-4); border-radius: var(--radius-md); overflow-x: auto;"><code>int monede[] = {50, 10, 5, 1};
 
 void greedyChange(int suma) {
     for (int i = 0; i < 4; i++) {
@@ -40,13 +27,38 @@ void greedyChange(int suma) {
             suma -= cnt * monede[i];
         }
     }
-}
-</code></pre>
-</section>
+}</code></pre>
+            </div>
+        </div>
 
-<section>
-    <h3>Vizualizator greedy</h3>
-    <div id="fundamental-visualizer" class="visualizer-container" data-topic="greedy"></div>
-</section>
+        <div class="card bento__card--accent">
+            <div class="card__head">
+                <h3 class="card__title-sm">Idee principală</h3>
+            </div>
+            <div class="card__body">
+                <p>Alegerea de acum trebuie să pară cea mai bună local, fără a reconsidera toate alegerile anterioare.</p>
+                <p style="margin-top: 1rem;"><strong>Exemple tipice:</strong> Schimb monetar, Interval scheduling, Huffman, Dijkstra.</p>
+            </div>
+            <div class="card__actions">
+                <a href="index.php?page=algoritmi_avansati" class="btn btn--ghost">Înapoi</a>
+            </div>
+        </div>
+
+        <div class="card card--stat bento__card--stat">
+            <span class="stat__label">Complexitate</span>
+            <div class="stat__value">O(n log n)</div>
+            <p class="stat__sub">Deseori limitată de sortarea inițială.</p>
+        </div>
+
+        <div class="card bento__card--timeline">
+             <div class="card__head">
+                <h3 class="card__title">Vizualizator Interactiv</h3>
+            </div>
+            <div class="card__body">
+                <div id="fundamental-visualizer" class="visualizer-container" data-topic="greedy" style="min-height: 400px; background: var(--color-surface-2); border-radius: var(--radius-lg);"></div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="JS/fundamental_visualizer.js"></script>

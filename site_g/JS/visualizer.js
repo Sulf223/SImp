@@ -42,7 +42,32 @@ class SortingVisualizer {
         this.initControls();
         this.createInfoPanels();
         this.resetArray();
+        
+        // Pixel Perfect Hook: Hide skeleton and set global instance
+        window.visualizerInstance = this;
+        const skeleton = document.getElementById('skeleton-loader');
+        if (skeleton) {
+            setTimeout(() => {
+                skeleton.style.opacity = '0';
+                setTimeout(() => skeleton.style.display = 'none', 300);
+            }, 800);
+        }
+
         window.addEventListener("resize", () => this.onResize());
+    }
+
+    getFontFamily() {
+        const root = getComputedStyle(document.documentElement);
+        const sans = root.getPropertyValue('--font-sans').trim();
+        return sans || 'Inter, system-ui, sans-serif';
+    }
+
+    // Pixel Perfect Hook: Update external stats
+    updateStatsUI() {
+        const compEl = document.getElementById('comparisons');
+        const swapEl = document.getElementById('swaps');
+        if (compEl) compEl.innerText = this.comparisons;
+        if (swapEl) swapEl.innerText = this.swaps;
     }
 
     resolveAlgorithmName(name) {
@@ -354,6 +379,15 @@ class SortingVisualizer {
     }
 
     draw(highlightIndices = [], pivotIndex = -1, sortedTail = -1) {
+        const style = getComputedStyle(document.documentElement);
+        const colors = {
+            primary: style.getPropertyValue('--color-primary').trim() || "#667eea",
+            success: style.getPropertyValue('--color-success').trim() || "#10b981",
+            warning: style.getPropertyValue('--color-warning').trim() || "#f59e0b",
+            danger: style.getPropertyValue('--color-danger').trim() || "#ef4444",
+            fg: style.getPropertyValue('--color-fg').trim() || "#111827"
+        };
+
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         if (!this.array.length) return;
 
@@ -369,13 +403,13 @@ class SortingVisualizer {
             const barHeight = (normalized / range) * this.canvas.height;
 
             if (i >= sortedTail && sortedTail !== -1) {
-                this.ctx.fillStyle = "#10b981";
+                this.ctx.fillStyle = colors.success;
             } else if (pivotIndex === i) {
-                this.ctx.fillStyle = "#f59e0b";
+                this.ctx.fillStyle = colors.warning;
             } else if (highlightIndices.includes(i)) {
-                this.ctx.fillStyle = "#ef4444";
+                this.ctx.fillStyle = colors.danger;
             } else {
-                this.ctx.fillStyle = "#667eea";
+                this.ctx.fillStyle = colors.primary;
             }
 
             const x = i * barWidth;
@@ -384,8 +418,8 @@ class SortingVisualizer {
             this.ctx.fillRect(x, y, w, barHeight);
 
             if (this.valueLabels && this.valueLabels[i] && length <= 35) {
-                this.ctx.fillStyle = "#111827";
-                this.ctx.font = "11px Poppins, sans-serif";
+                this.ctx.fillStyle = colors.fg;
+                this.ctx.font = `11px ${this.getFontFamily()}`;
                 this.ctx.textAlign = "center";
                 this.ctx.fillText(this.valueLabels[i], x + w / 2, Math.max(12, y - 4));
             }
@@ -643,6 +677,12 @@ class AlgorithmLab {
         this.buildLayout();
         this.generateScenario();
         window.addEventListener("resize", () => this.onResize());
+    }
+
+    getFontFamily() {
+        const root = getComputedStyle(document.documentElement);
+        const sans = root.getPropertyValue('--font-sans').trim();
+        return sans || 'Inter, system-ui, sans-serif';
     }
 
     buildLayout() {
@@ -1081,6 +1121,13 @@ class AlgorithmLab {
     }
 
     renderSortingStep(step) {
+        const style = getComputedStyle(document.documentElement);
+        const colors = {
+            primary: style.getPropertyValue('--color-primary').trim() || "#667eea",
+            warning: style.getPropertyValue('--color-warning').trim() || "#f59e0b",
+            danger: style.getPropertyValue('--color-danger').trim() || "#ef4444"
+        };
+
         const arr = step.array || [];
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         if (!arr.length) return;
@@ -1090,9 +1137,9 @@ class AlgorithmLab {
 
         for (let i = 0; i < arr.length; i++) {
             const h = (arr[i] / Math.max(1, maxVal)) * (this.canvas.height - 20);
-            if ((step.highlight || []).includes(i)) this.ctx.fillStyle = "#ef4444";
-            else if (step.pivot === i) this.ctx.fillStyle = "#f59e0b";
-            else this.ctx.fillStyle = "#667eea";
+            if ((step.highlight || []).includes(i)) this.ctx.fillStyle = colors.danger;
+            else if (step.pivot === i) this.ctx.fillStyle = colors.warning;
+            else this.ctx.fillStyle = colors.primary;
             this.ctx.fillRect(i * barW, this.canvas.height - h, Math.max(1, barW - 2), h);
         }
 
@@ -1100,6 +1147,14 @@ class AlgorithmLab {
     }
 
     renderStackStep(step) {
+        const style = getComputedStyle(document.documentElement);
+        const colors = {
+            primary: style.getPropertyValue('--color-primary').trim() || "#667eea",
+            warning: style.getPropertyValue('--color-warning').trim() || "#f59e0b",
+            fg: style.getPropertyValue('--color-fg').trim() || "#1f2937",
+            fgOnPrimary: style.getPropertyValue('--color-fg-on-primary').trim() || "#ffffff"
+        };
+
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         const frames = step.stack || [];
         const boxW = Math.min(300, this.canvas.width - 40);
@@ -1107,15 +1162,15 @@ class AlgorithmLab {
         const startX = 20;
         let y = this.canvas.height - 24;
 
-        this.ctx.font = "14px Poppins, sans-serif";
-        this.ctx.fillStyle = "#1f2937";
+        this.ctx.font = `14px ${this.getFontFamily()}`;
+        this.ctx.fillStyle = colors.fg;
         this.ctx.fillText("STACK", 20, 20);
 
         for (let i = 0; i < frames.length; i++) {
             y -= boxH + 8;
-            this.ctx.fillStyle = i === frames.length - 1 ? "#f59e0b" : "#667eea";
+            this.ctx.fillStyle = i === frames.length - 1 ? colors.warning : colors.primary;
             this.ctx.fillRect(startX, y, boxW, boxH);
-            this.ctx.fillStyle = "#ffffff";
+            this.ctx.fillStyle = colors.fgOnPrimary;
             this.ctx.fillText(frames[i], startX + 10, y + 22);
         }
 
@@ -1128,23 +1183,31 @@ class AlgorithmLab {
     }
 
     renderBacktrackingStep(step) {
+        const style = getComputedStyle(document.documentElement);
+        const colors = {
+            primary: style.getPropertyValue('--color-primary').trim() || "#667eea",
+            success: style.getPropertyValue('--color-success').trim() || "#10b981",
+            fg: style.getPropertyValue('--color-fg').trim() || "#1f2937",
+            fgMuted: style.getPropertyValue('--color-fg-muted').trim() || "#111827"
+        };
+
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.font = "16px Poppins, sans-serif";
-        this.ctx.fillStyle = "#1f2937";
+        this.ctx.font = `16px ${this.getFontFamily()}`;
+        this.ctx.fillStyle = colors.fg;
         this.ctx.fillText("Solutie partiala", 20, 30);
-        this.ctx.font = "24px Poppins, sans-serif";
-        this.ctx.fillStyle = "#667eea";
+        this.ctx.font = `24px ${this.getFontFamily()}`;
+        this.ctx.fillStyle = colors.primary;
         this.ctx.fillText((step.current || []).join(" ") || "-", 20, 70);
 
         const solutions = step.solutions || [];
-        this.ctx.font = "14px Poppins, sans-serif";
-        this.ctx.fillStyle = "#111827";
+        this.ctx.font = `14px ${this.getFontFamily()}`;
+        this.ctx.fillStyle = colors.fgMuted;
         this.ctx.fillText(`Solutii gasite: ${solutions.length}`, 20, 100);
 
         const preview = solutions.slice(-6);
         let y = 130;
         for (let i = 0; i < preview.length; i++) {
-            this.ctx.fillStyle = "#10b981";
+            this.ctx.fillStyle = colors.success;
             this.ctx.fillText(preview[i].join(" "), 20, y);
             y += 24;
         }
@@ -1169,3 +1232,5 @@ document.addEventListener("DOMContentLoaded", () => {
         new AlgorithmLab(labContainer);
     }
 });
+
+window.visualizerInstance = null;

@@ -88,7 +88,12 @@ if (session_status() === PHP_SESSION_NONE) {
             </div>
 
             <p class="card__meta" style="margin-top: var(--space-4); position: relative; z-index: 1; font-size: var(--text-xs); color: var(--color-fg-muted);">
-                💡 Notă: Pentru algoritmii O(n²), valori foarte mari pot dura mai mult. Recomandări: <strong>Aleatoriu</strong> = caz mediu, <strong>Sortat</strong> = caz optim, <strong>Invers</strong> = caz pesim.
+                <span style="display: inline-flex; align-items: center; gap: var(--space-2);">
+                  <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 18h6" /><path d="M10 22h4" /><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14" />
+                  </svg>
+                  Notă: Pentru algoritmii O(n²), valori foarte mari pot dura mai mult. Recomandări: <strong>Aleatoriu</strong> = caz mediu, <strong>Sortat</strong> = caz optim, <strong>Invers</strong> = caz pesim.
+                </span>
             </p>
             <p id="benchmark-live-status" class="badge badge--soft" style="display:none; margin-top: var(--space-3); position: relative; z-index: 1;"></p>
 
@@ -100,10 +105,20 @@ if (session_status() === PHP_SESSION_NONE) {
                     Înapoi la metode
                 </a>
                 <button id="run-benchmark" class="btn btn--primary btn--sm" type="button">
-                    ▶ Rulează comparația
+                    <span style="display: inline-flex; align-items: center; gap: var(--space-2);">
+                        <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
+                        Rulează comparația
+                    </span>
                 </button>
                 <button id="run-live-benchmark" class="btn btn--quiet btn--sm" type="button">
-                    ⚡ Benchmark live
+                    <span style="display: inline-flex; align-items: center; gap: var(--space-2);">
+                      <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                      </svg>
+                      Benchmark live
+                    </span>
                 </button>
             </div>
         </article>
@@ -121,7 +136,12 @@ if (session_status() === PHP_SESSION_NONE) {
             <div class="benchmark-canvas-wrap" style="background: var(--color-surface-2); border-radius: var(--radius-lg); padding: var(--space-4); position: relative; min-height: 400px; display: flex; align-items: center; justify-content: center;">
                 <canvas id="benchmark-chart" width="980" height="340" style="max-width: 100%; height: auto; display: none;"></canvas>
                 <div id="benchmark-placeholder" style="text-align: center; color: var(--color-fg-subtle); font-size: var(--text-sm);">
-                    📊 Graficul va apărea după ce rulezi o comparație
+                    <span style="display: inline-flex; align-items: center; gap: var(--space-2);">
+                      <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
+                      </svg>
+                      Graficul va apărea după ce rulezi o comparație
+                    </span>
                 </div>
             </div>
             <div id="benchmark-legend" class="benchmark-legend" style="margin-top: var(--space-3); display: flex; flex-wrap: wrap; gap: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--color-border);"></div>

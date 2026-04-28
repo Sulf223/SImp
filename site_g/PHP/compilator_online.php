@@ -30,65 +30,85 @@ if (empty($cod_sursa)) {
 
 <div data-component="dashboard-modern">
     <header class="dash__header">
-        <div class="dash__eyebrow">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        <span class="dash__eyebrow">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
+            </svg>
             Instrumente
-        </div>
-        <h2 class="dash__title">Compilator <span class="dash__title-accent">Online</span></h2>
+        </span>
+        <h1 class="dash__title">Compilator <span class="dash__title-accent">Online</span></h1>
         <p class="dash__lede">
-            Editor C++ profesional cu execuție instant. Scrie cod, apasă <strong>Run</strong> și vezi rezultatul imediat!
+            Editor C++ profesional cu execuție instant. Scrie cod, apasă <strong>Run</strong> și vezi rezultatul imediat într-un mediu sigur.
         </p>
     </header>
 
-    <div class="bento">
-        <div class="card bento__card--hero" style="padding: 0; overflow: hidden; min-height: 600px;">
+    <div class="bento" style="gap: var(--space-6);">
+        <!-- COMPILER: Main hero card -->
+        <article class="card bento__card--hero" style="padding: 0; overflow: hidden; min-height: 650px; border: 1px solid var(--color-border);">
             <iframe 
                 src="https://onecompiler.com/embed/cpp?hideLanguageSelection=true&hideNew=true&hideNewFileOption=true&availableLanguages=true&hideTitle=true" 
                 width="100%" 
-                height="600" 
+                height="650" 
                 loading="lazy"
                 frameborder="0"
-                style="display: block; border: none;">
+                style="display: block; border: none; background: #1e1e1e;">
             </iframe>
-        </div>
+        </article>
 
-        <div class="card bento__card--accent">
+        <!-- SIDEBAR: Instructions -->
+        <article class="card bento__card--accent" style="border: 1px solid var(--color-accent-soft); background: linear-gradient(135deg, rgba(6, 182, 212, 0.05) 0%, rgba(6, 182, 212, 0.02) 100%);">
             <div class="card__head">
-                <h3 class="card__title-sm">Instrucțiuni</h3>
+                <span class="card__eyebrow" style="color: var(--color-accent);">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/>
+                    </svg>
+                    Instrucțiuni
+                </span>
             </div>
             <div class="card__body">
-                <ol style="padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.8rem; color: var(--color-fg-muted); font-size: var(--text-sm);">
-                    <li>Scrie sau lipește codul C++ în editor.</li>
-                    <li>Apasă butonul verde <strong>"Run"</strong>.</li>
-                    <li>Output-ul apare instant în panoul de jos.</li>
-                    <li>Pentru input (cin), folosește zona <strong>"stdin"</strong> înainte să apeși Run.</li>
+                <ol style="padding-left: 1.2rem; display: flex; flex-direction: column; gap: 1rem; color: var(--color-fg-muted); font-size: var(--text-sm);">
+                    <li>Scrie sau lipește codul C++ în editorul de mai sus.</li>
+                    <li>Apasă butonul verde <strong>"Run"</strong> pentru execuție.</li>
+                    <li>Output-ul apare instant în panoul inferior al editorului.</li>
+                    <li>Dacă ai citiri cu <code>cin</code>, folosește zona <strong>"stdin"</strong>.</li>
                 </ol>
             </div>
-        </div>
+        </article>
 
+        <!-- SOURCE CODE: Timeline/Full width if source exists -->
         <?php if (!empty($cod_sursa) && $run_id > 0): ?>
-        <div class="card bento__card--timeline">
+        <article class="card bento__card--timeline" style="grid-column: 1 / -1; border: 1px solid var(--color-border); background: var(--color-surface-1);">
             <div class="card__head">
-                <h3 class="card__title">Cod Sursă Metodă</h3>
-                <button onclick="copySourceCode()" class="btn btn--primary btn--sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span class="card__eyebrow">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>
+                    </svg>
+                    Cod Sursă Referință
+                </span>
+                <button onclick="copySourceCode()" id="copy-btn" class="btn btn--primary btn--sm">
+                    <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
                     Copiază Codul
                 </button>
             </div>
             <div class="card__body">
-                <pre style="background: var(--color-surface-2); padding: var(--space-4); border-radius: var(--radius-md); overflow-x: auto; font-family: monospace; font-size: 0.85rem;"><code><?php echo htmlspecialchars($cod_sursa); ?></code></pre>
+                <pre style="margin: 0; background: var(--color-surface-2); padding: var(--space-4); border-radius: var(--radius-md); overflow-x: auto; font-family: var(--font-mono); font-size: var(--text-sm); line-height: 1.6; color: var(--color-fg-muted);"><code><?php echo htmlspecialchars($cod_sursa); ?></code></pre>
             </div>
-        </div>
+        </article>
         
         <script>
         function copySourceCode() {
             const code = <?php echo json_encode($cod_sursa); ?>;
+            const btn = document.getElementById('copy-btn');
             navigator.clipboard.writeText(code).then(() => {
-                const btn = event.currentTarget;
-                const original = btn.innerHTML;
-                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><polyline points="20 6 9 17 4 12"/></svg> Copiat!';
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copiat!';
+                btn.style.background = 'var(--color-success)';
                 setTimeout(() => {
-                    btn.innerHTML = original;
+                    btn.innerHTML = originalHtml;
+                    btn.style.background = '';
                 }, 2000);
             });
         }

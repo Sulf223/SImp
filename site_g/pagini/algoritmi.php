@@ -73,19 +73,38 @@ if (session_status() === PHP_SESSION_NONE) {
 
         <!-- STAT CARDS: 3-column -->
         <div class="card card--stat bento__card--stat" style="border: 1px solid var(--color-success-soft);">
-            <span class="stat__label" style="color: var(--color-success);">⚡ Sorting 101</span>
+            <span class="stat__label" style="color: var(--color-success); display: inline-flex; align-items: center; gap: 6px;">
+                <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+                Sorting 101
+            </span>
             <div class="stat__value">6 metode</div>
             <p class="stat__sub">Bubble, Selection, Insertion, Quick, Merge, Counting</p>
         </div>
 
         <div class="card card--stat bento__card--stat" style="border: 1px solid var(--color-warning-soft);">
-            <span class="stat__label" style="color: var(--color-warning);">🧩 Fundamentali</span>
+            <span class="stat__label" style="color: var(--color-warning); display: inline-flex; align-items: center; gap: 6px;">
+                <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M11.75 5.5H5a2 2 0 0 0-2 2v11.5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V13"/>
+                    <path d="M21 7.5a2.5 2.5 0 1 0-5 0v1.5a2.5 2.5 0 1 0 5 0V7.5z"/>
+                </svg>
+                Fundamentali
+            </span>
             <div class="stat__value">5 lectii</div>
             <p class="stat__sub">Recursivitate, Backtracking, Greedy, Divide&Impera, Dinamica</p>
         </div>
 
         <div class="card card--stat bento__card--stat" style="border: 1px solid var(--color-danger-soft);">
-            <span class="stat__label" style="color: var(--color-danger);">🚀 Avansati</span>
+            <span class="stat__label" style="color: var(--color-danger); display: inline-flex; align-items: center; gap: 6px;">
+                <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+                    <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+                    <path d="M9 12H4s.5-1 1-4c2 0 3 0 3 0"/>
+                    <path d="M15 3v5s1 .5 4 1c0-2 0-3 0-3"/>
+                </svg>
+                Avansati
+            </span>
             <div class="stat__value">Bonus+</div>
             <p class="stat__sub">Algoritmi de competiție și optimizări avansate</p>
         </div>
@@ -94,7 +113,9 @@ if (session_status() === PHP_SESSION_NONE) {
         <div class="card bento__card--timeline" style="grid-column: 1 / -1; border: 1px solid var(--color-border); background: var(--color-surface-1);">
             <div class="card__head">
                 <h3 class="card__title" style="display: flex; align-items: center; gap: var(--space-2);">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M12 5v14M5 12h14"/></svg>
+                    <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
                     Lecții disponibile
                 </h3>
             </div>
@@ -129,10 +150,30 @@ if (session_status() === PHP_SESSION_NONE) {
                     <div style="border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3); background: var(--color-surface-2);">
                         <h4 style="font-size: var(--text-sm); font-weight: 600; margin: 0 0 var(--space-2) 0; color: var(--color-success);">Instrumente</h4>
                         <div style="display: flex; flex-direction: column; gap: var(--space-1);">
-                            <a href="index.php?page=compilator" class="link-arrow" style="font-size: var(--text-sm);">💻 Compilator Online</a>
-                            <a href="index.php?page=comparatii_sortare" class="link-arrow" style="font-size: var(--text-sm);">📊 Comparații Sortare</a>
-                            <a href="index.php?page=lista_exercitii" class="link-arrow" style="font-size: var(--text-sm);">📋 Exerciții</a>
-                            <a href="index.php?page=profesor_ai" class="link-arrow" style="font-size: var(--text-sm);">🤖 Profesor AI</a>
+                            <a href="index.php?page=compilator" class="link-arrow" style="font-size: var(--text-sm);">
+                                <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: inline; vertical-align: middle; margin-right: 4px;">
+                                    <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
+                                </svg>
+                                Compilator Online
+                            </a>
+                            <a href="index.php?page=comparatii_sortare" class="link-arrow" style="font-size: var(--text-sm);">
+                                <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: inline; vertical-align: middle; margin-right: 4px;">
+                                    <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+                                </svg>
+                                Comparații Sortare
+                            </a>
+                            <a href="index.php?page=lista_exercitii" class="link-arrow" style="font-size: var(--text-sm);">
+                                <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: inline; vertical-align: middle; margin-right: 4px;">
+                                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>
+                                </svg>
+                                Exerciții
+                            </a>
+                            <a href="index.php?page=profesor_ai" class="link-arrow" style="font-size: var(--text-sm);">
+                                <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: inline; vertical-align: middle; margin-right: 4px;">
+                                    <path d="M12 8V4H8"/><rect x="2" y="8" width="20" height="12" rx="2"/><path d="M7 13v2"/><path d="M17 13v2"/>
+                                </svg>
+                                Profesor AI
+                            </a>
                         </div>
                     </div>
                 </div>

@@ -69,10 +69,10 @@ $afiseaza_ai_widget = !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal C++ – Metode de sortare</title>
 
-    <!-- font Poppins de la Google -->
+    <!-- Font Inter de la Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="CSS/modern_vars.css">
     <link rel="stylesheet" href="stil.css">
     <link rel="stylesheet" href="CSS/dashboard_modern.css">
@@ -111,18 +111,18 @@ $afiseaza_ai_widget = !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
 </head>
 <body data-theme="dark" style="background: var(--color-bg); color: var(--color-fg); font-family: var(--font-sans); margin: 0; min-height: 100vh; display: flex; flex-direction: column;">
 
-<nav style="position: sticky; top: 0; z-index: var(--z-sticky); background: rgba(14, 14, 17, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--color-border); padding: var(--space-3) var(--space-6); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4);">
+<nav class="site-nav">
     <!-- LOGO -->
-    <div style="display: flex; align-items: center; gap: var(--space-3);">
+    <div class="site-nav__brand">
         <svg class="icon icon--lg" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
         <div style="display: flex; flex-direction: column; gap: 0;">
-            <span style="font-weight: 700; font-size: var(--text-lg); letter-spacing: var(--tracking-tight); color: var(--color-fg);">SImp <span style="color: var(--color-primary);">Portal</span></span>
+            <span style="font-weight: 700; font-size: var(--text-lg); letter-spacing: var(--tracking-tight); color: var(--color-fg);">SImp <span class="site-nav__brand-accent">Portal</span></span>
             <span style="font-size: var(--text-xs); color: var(--color-fg-muted); letter-spacing: var(--tracking-wide); text-transform: uppercase;">C++ Learning Hub</span>
         </div>
     </div>
     
     <!-- MENU + THEME TOGGLE -->
-    <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center;">
+    <ul class="site-nav__menu">
         <li><a href="index.php?page=bun_venit" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Bun venit</a></li>
         <li><a href="index.php?page=acasa" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Acasă</a></li>
         <li><a href="index.php?page=algoritmi" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Algoritmi</a></li>
@@ -171,8 +171,17 @@ $afiseaza_ai_widget = !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
     ?>
 </main>
 
-<footer style="text-align: center; padding: var(--space-6); color: var(--color-fg-muted); font-size: var(--text-sm); border-top: 1px solid var(--color-border); margin-top: auto;">
-    <p style="margin: 0;">&copy; <?php echo date('Y'); ?> SImp Portal C++ – Inovație în învățare</p>
+<footer class="site-footer">
+    <div style="max-width: var(--measure-prose); margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-4);">
+        <p style="margin: 0; color: var(--color-fg-muted);">&copy; <?php echo date('Y'); ?> <strong>SImp Portal</strong> &mdash; Mediul tău modern de învățare C++.</p>
+        <div style="display: flex; justify-content: center; gap: var(--space-4); color: var(--color-fg-subtle); font-size: 10px; text-transform: uppercase; letter-spacing: var(--tracking-widest);">
+            <span>Engineering Design</span>
+            <span style="color: var(--color-border-strong);">|</span>
+            <span>Performance Optimized</span>
+            <span style="color: var(--color-border-strong);">|</span>
+            <span>Interactive Labs</span>
+        </div>
+    </div>
 </footer>
 
 <?php if ($afiseaza_ai_widget): ?>

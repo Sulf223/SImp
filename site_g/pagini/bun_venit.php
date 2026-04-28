@@ -52,13 +52,23 @@
 
         <!-- STATS: 2-column grid -->
         <div class="card card--stat bento__card--stat" style="border: 1px solid var(--color-success-soft); background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, transparent 100%);">
-            <span class="stat__label" style="color: var(--color-success);">📚 Lecții Active</span>
+            <span class="stat__label" style="color: var(--color-success); display: inline-flex; align-items: center; gap: 6px;">
+                <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                </svg>
+                Lecții Active
+            </span>
             <div class="stat__value" style="color: var(--color-success);">12+</div>
             <p class="stat__sub">Algoritmi fundamentali și avansați, demonstrații live.</p>
         </div>
 
         <div class="card card--stat bento__card--stat" style="border: 1px solid var(--color-accent-soft); background: linear-gradient(135deg, rgba(6, 182, 212, 0.05) 0%, transparent 100%);">
-            <span class="stat__label" style="color: var(--color-accent);">⚙️ Tehnologii</span>
+            <span class="stat__label" style="color: var(--color-accent); display: inline-flex; align-items: center; gap: 6px;">
+                <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                Tehnologii
+            </span>
             <div class="stat__value" style="color: var(--color-accent); font-size: var(--text-xl);">Modern</div>
             <p class="stat__sub">C++17, Python, JavaScript, PHP, MySQL, Canvas APIs.</p>
         </div>
@@ -73,13 +83,31 @@
             </div>
             <div class="card__body">
                 <p style="font-size: var(--text-sm); color: var(--color-fg-muted); margin-bottom: var(--space-4);">Navighez direct la lecțiile tale preferate:</p>
-                <div class="fundamental-links" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3); margin-top: var(--space-3);">
-                    <a class="btn btn--ghost btn--sm" href="index.php?page=sort_bubble" style="justify-content: center;">🫧 Bubble Sort</a>
-                    <a class="btn btn--ghost btn--sm" href="index.php?page=sort_selection" style="justify-content: center;">✋ Selection Sort</a>
-                    <a class="btn btn--ghost btn--sm" href="index.php?page=sort_insertion" style="justify-content: center;">📌 Insertion Sort</a>
-                    <a class="btn btn--ghost btn--sm" href="index.php?page=sort_quick" style="justify-content: center;">⚡ Quick Sort</a>
-                    <a class="btn btn--ghost btn--sm" href="index.php?page=sort_merge" style="justify-content: center;">🔀 Merge Sort</a>
-                    <a class="btn btn--ghost btn--sm" href="index.php?page=sort_counting" style="justify-content: center;">🔢 Counting Sort</a>
+                <div class="fundamental-links" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-3); margin-top: var(--space-3);">
+                    <a class="btn btn--ghost btn--sm" href="index.php?page=sort_bubble" style="justify-content: flex-start;">
+                        <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+                        Bubble Sort
+                    </a>
+                    <a class="btn btn--ghost btn--sm" href="index.php?page=sort_selection" style="justify-content: flex-start;">
+                        <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Selection Sort
+                    </a>
+                    <a class="btn btn--ghost btn--sm" href="index.php?page=sort_insertion" style="justify-content: flex-start;">
+                        <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Insertion Sort
+                    </a>
+                    <a class="btn btn--ghost btn--sm" href="index.php?page=sort_quick" style="justify-content: flex-start;">
+                        <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        Quick Sort
+                    </a>
+                    <a class="btn btn--ghost btn--sm" href="index.php?page=sort_merge" style="justify-content: flex-start;">
+                        <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+                        Merge Sort
+                    </a>
+                    <a class="btn btn--ghost btn--sm" href="index.php?page=sort_counting" style="justify-content: flex-start;">
+                        <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+                        Counting Sort
+                    </a>
                 </div>
             </div>
         </div>

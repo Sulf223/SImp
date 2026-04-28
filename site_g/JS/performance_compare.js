@@ -162,7 +162,18 @@
         return palette[index % palette.length];
     }
 
+    function fontStack(px) {
+        var sans = getComputedStyle(document.documentElement).getPropertyValue('--font-sans').trim() || 'Inter, sans-serif';
+        return px + "px " + sans;
+    }
+
     function drawChart(canvas, data) {
+        var style = getComputedStyle(document.documentElement);
+        var colors = {
+            fg: style.getPropertyValue('--color-fg').trim() || "#111827",
+            border: style.getPropertyValue('--color-border').trim() || "#cbd5e1"
+        };
+
         var ctx = canvas.getContext("2d");
         var width = canvas.width;
         var height = canvas.height;
@@ -187,7 +198,7 @@
         var usableH = height - pad * 2;
         var barW = usableW / data.length;
 
-        ctx.strokeStyle = "#cbd5e1";
+        ctx.strokeStyle = colors.border;
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(pad, pad);
@@ -204,8 +215,8 @@
             ctx.fillStyle = data[j].color;
             ctx.fillRect(x, y, Math.max(10, barW - 16), barH);
 
-            ctx.fillStyle = "#111827";
-            ctx.font = "12px Poppins, sans-serif";
+            ctx.fillStyle = colors.fg;
+            ctx.font = fontStack(12);
             ctx.textAlign = "center";
             ctx.fillText(data[j].name, x + Math.max(10, barW - 16) / 2, height - pad + 16);
             ctx.fillText(data[j].time.toFixed(2) + " ms", x + Math.max(10, barW - 16) / 2, y - 6);

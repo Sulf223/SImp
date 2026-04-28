@@ -41,7 +41,7 @@ if (session_status() === PHP_SESSION_NONE) {
                     Implementare C++
                 </span>
             </div>
-            <pre style="margin:0; font-family:var(--font-mono); font-size:var(--text-xs); color:var(--color-fg-muted); overflow-x:auto; padding: var(--space-4); background: var(--color-surface-2); border-radius: var(--radius-md);"><code>for (int i = 0; i < n - 1; i++) {
+            <pre class="lesson-code"><code>for (int i = 0; i < n - 1; i++) {
     for (int j = 0; j < n - i - 1; j++) {
         if (v[j] > v[j + 1]) 
             swap(v[j], v[j + 1]);
@@ -81,10 +81,20 @@ if (session_status() === PHP_SESSION_NONE) {
                 </div>
                 <div style="display: flex; gap: var(--space-2); align-items: flex-end;">
                     <button id="generate-btn" class="btn btn--ghost btn--sm" style="flex: 1;">
-                        🔄 Regenerează
+                        <span style="display: inline-flex; align-items: center; gap: var(--space-2);">
+                            <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M3 21v-5h5" />
+                            </svg>
+                            Regenerează
+                        </span>
                     </button>
                     <button id="play-btn" class="btn btn--primary btn--sm" style="flex: 1;">
-                        ▶ Start
+                        <span style="display: inline-flex; align-items: center; gap: var(--space-2);">
+                            <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <polygon points="5 3 19 12 5 21 5 3" />
+                            </svg>
+                            Start
+                        </span>
                     </button>
                 </div>
             </div>
@@ -138,13 +148,28 @@ if (session_status() === PHP_SESSION_NONE) {
 
             <div class="card__actions">
                 <button onclick="verificaExercitiu()" class="btn btn--primary">
-                    ✓ Verifică răspunsul
+                    <span style="display: inline-flex; align-items: center; gap: var(--space-2);">
+                        <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        Verifică răspunsul
+                    </span>
                 </button>
                 <button onclick="afiseazaAjutor()" class="btn btn--ghost">
-                    💡 Indiciu
+                    <span style="display: inline-flex; align-items: center; gap: var(--space-2);">
+                        <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M9 18h6" /><path d="M10 22h4" /><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14" />
+                        </svg>
+                        Indiciu
+                    </span>
                 </button>
                 <button onclick="urmatorulExercitiu()" class="btn btn--quiet">
-                    → Următorul
+                    <span style="display: inline-flex; align-items: center; gap: var(--space-2);">
+                        Următorul
+                        <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                        </svg>
+                    </span>
                 </button>
             </div>
 
@@ -152,6 +177,47 @@ if (session_status() === PHP_SESSION_NONE) {
             <p id="hint" class="card__body" style="display:none; padding: var(--space-3); background: var(--color-accent-soft); color: var(--color-accent); border-radius: var(--radius-md); margin-top: var(--space-2); font-style: italic;"></p>
         </article>
     </div>
+
+<script>
+// Connect HTML buttons to visualizer instance
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        // Get reference to global visualizer instance
+        const visualizer = window.visualizerInstance;
+        if (!visualizer) {
+            console.warn('Visualizer instance not found');
+            return;
+        }
+        
+        // Connect Play button
+        const playBtn = document.getElementById('play-btn');
+        if (playBtn) playBtn.onclick = () => visualizer.runSort();
+        
+        // Connect Generate button
+        const generateBtn = document.getElementById('generate-btn');
+        if (generateBtn) generateBtn.onclick = () => visualizer.resetArray();
+        
+        // Connect array size selector
+        const arraySize = document.getElementById('array-size');
+        if (arraySize) {
+            arraySize.onchange = () => {
+                visualizer.size = parseInt(arraySize.value, 10);
+                visualizer.valueLabels = null;
+                visualizer.resetArray();
+            };
+        }
+        
+        // Connect speed selector
+        const sortSpeed = document.getElementById('sort-speed');
+        if (sortSpeed) {
+            sortSpeed.onchange = () => {
+                const speeds = { slow: 80, medium: 35, fast: 10 };
+                visualizer.delay = speeds[sortSpeed.value] || 35;
+            };
+        }
+    }, 100);
+});
+</script>
 
     <style>
     @keyframes shimmer {

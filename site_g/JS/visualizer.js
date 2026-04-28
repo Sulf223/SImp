@@ -6,10 +6,10 @@
 
 class SortingVisualizer {
     constructor(containerId) {
-        this.container = document.getElementById(containerId);
-        if (!this.container) return;
+        const el = document.getElementById(containerId);
+        if (!el) return;
 
-        this.algorithmName = (this.container.getAttribute("data-algorithm") || "bubble").toLowerCase();
+        this.algorithmName = (el.getAttribute("data-algorithm") || "bubble").toLowerCase();
         this.algorithmLabelMap = {
             bubble: "Bubble Sort",
             selection: "Selection Sort",
@@ -19,10 +19,15 @@ class SortingVisualizer {
             counting: "Counting Sort"
         };
 
-        this.canvas = document.createElement("canvas");
-        this.canvas.width = Math.max(this.container.clientWidth, 320);
-        this.canvas.height = 300;
-        this.container.appendChild(this.canvas);
+        if (el.tagName.toLowerCase() === "canvas") {
+            this.canvas = el;
+            this.container = el.parentElement;
+        } else {
+            this.container = el;
+            this.canvas = document.createElement("canvas");
+            this.container.appendChild(this.canvas);
+        }
+
         this.ctx = this.canvas.getContext("2d");
 
         this.array = [];
@@ -43,6 +48,11 @@ class SortingVisualizer {
         this.createInfoPanels();
         this.resetArray();
         
+        // Ensure initial sizing
+        if (this.canvas.width === 0 || (this.container && this.container.clientWidth === 0)) {
+            requestAnimationFrame(() => this.onResize());
+        }
+
         // Pixel Perfect Hook: Hide skeleton and set global instance
         window.visualizerInstance = this;
         const skeleton = document.getElementById('skeleton-loader');
@@ -87,7 +97,10 @@ class SortingVisualizer {
     }
 
     onResize() {
-        this.canvas.width = Math.max(this.container.clientWidth, 320);
+        if (!this.canvas || !this.container) return;
+        const rect = this.canvas.getBoundingClientRect();
+        this.canvas.width = rect.width || Math.max(this.container.clientWidth, 320);
+        this.canvas.height = rect.height || 300;
         this.draw();
     }
 
@@ -381,11 +394,11 @@ class SortingVisualizer {
     draw(highlightIndices = [], pivotIndex = -1, sortedTail = -1) {
         const style = getComputedStyle(document.documentElement);
         const colors = {
-            primary: style.getPropertyValue('--color-primary').trim() || "#667eea",
-            success: style.getPropertyValue('--color-success').trim() || "#10b981",
-            warning: style.getPropertyValue('--color-warning').trim() || "#f59e0b",
-            danger: style.getPropertyValue('--color-danger').trim() || "#ef4444",
-            fg: style.getPropertyValue('--color-fg').trim() || "#111827"
+            primary: (style.getPropertyValue('--color-primary').trim() || "#6E56CF"),
+            success: (style.getPropertyValue('--color-success').trim() || "#10B981"),
+            warning: (style.getPropertyValue('--color-warning').trim() || "#F59E0B"),
+            danger:  (style.getPropertyValue('--color-danger').trim()  || "#EF4444"),
+            fg:      (style.getPropertyValue('--color-fg').trim()      || "#F4F4F5")
         };
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -1123,9 +1136,9 @@ class AlgorithmLab {
     renderSortingStep(step) {
         const style = getComputedStyle(document.documentElement);
         const colors = {
-            primary: style.getPropertyValue('--color-primary').trim() || "#667eea",
-            warning: style.getPropertyValue('--color-warning').trim() || "#f59e0b",
-            danger: style.getPropertyValue('--color-danger').trim() || "#ef4444"
+            primary: (style.getPropertyValue('--color-primary').trim() || "#6E56CF"),
+            warning: (style.getPropertyValue('--color-warning').trim() || "#F59E0B"),
+            danger:  (style.getPropertyValue('--color-danger').trim()  || "#EF4444")
         };
 
         const arr = step.array || [];
@@ -1149,10 +1162,10 @@ class AlgorithmLab {
     renderStackStep(step) {
         const style = getComputedStyle(document.documentElement);
         const colors = {
-            primary: style.getPropertyValue('--color-primary').trim() || "#667eea",
-            warning: style.getPropertyValue('--color-warning').trim() || "#f59e0b",
-            fg: style.getPropertyValue('--color-fg').trim() || "#1f2937",
-            fgOnPrimary: style.getPropertyValue('--color-fg-on-primary').trim() || "#ffffff"
+            primary: (style.getPropertyValue('--color-primary').trim() || "#6E56CF"),
+            warning: (style.getPropertyValue('--color-warning').trim() || "#F59E0B"),
+            fg:      (style.getPropertyValue('--color-fg').trim()      || "#F4F4F5"),
+            fgOnPrimary: (style.getPropertyValue('--color-fg-on-primary').trim() || "#ffffff")
         };
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -1185,10 +1198,10 @@ class AlgorithmLab {
     renderBacktrackingStep(step) {
         const style = getComputedStyle(document.documentElement);
         const colors = {
-            primary: style.getPropertyValue('--color-primary').trim() || "#667eea",
-            success: style.getPropertyValue('--color-success').trim() || "#10b981",
-            fg: style.getPropertyValue('--color-fg').trim() || "#1f2937",
-            fgMuted: style.getPropertyValue('--color-fg-muted').trim() || "#111827"
+            primary: (style.getPropertyValue('--color-primary').trim() || "#6E56CF"),
+            success: (style.getPropertyValue('--color-success').trim() || "#10B981"),
+            fg:      (style.getPropertyValue('--color-fg').trim()      || "#F4F4F5"),
+            fgMuted: (style.getPropertyValue('--color-fg-muted').trim() || "#A1A1AA")
         };
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);

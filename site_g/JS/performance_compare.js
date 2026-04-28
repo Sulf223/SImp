@@ -170,8 +170,8 @@
     function drawChart(canvas, data) {
         var style = getComputedStyle(document.documentElement);
         var colors = {
-            fg: style.getPropertyValue('--color-fg').trim() || "#111827",
-            border: style.getPropertyValue('--color-border').trim() || "#cbd5e1"
+            fg: (style.getPropertyValue('--color-fg').trim() || "#F4F4F5"),
+            border: (style.getPropertyValue('--color-border').trim() || "#27272A")
         };
 
         var ctx = canvas.getContext("2d");

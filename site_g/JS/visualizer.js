@@ -682,6 +682,9 @@ class SortingVisualizer {
 class AlgorithmLab {
     constructor(container) {
         this.container = container;
+        // Clear container to prevent duplicate UI (fix "canvas dublat" risk)
+        this.container.innerHTML = "";
+        
         this.steps = [];
         this.stepIndex = 0;
         this.timer = null;
@@ -689,13 +692,16 @@ class AlgorithmLab {
 
         this.buildLayout();
         this.generateScenario();
+        
+        // Initial resize
+        setTimeout(() => this.onResize(), 50);
         window.addEventListener("resize", () => this.onResize());
     }
 
     getFontFamily() {
         const root = getComputedStyle(document.documentElement);
-        const sans = root.getPropertyValue('--font-sans').trim();
-        return sans || 'Inter, system-ui, sans-serif';
+        const sans = (root.getPropertyValue('--font-sans') || 'Inter').trim();
+        return sans + ', system-ui, sans-serif';
     }
 
     buildLayout() {
@@ -722,19 +728,20 @@ class AlgorithmLab {
         this.inputN.max = "9";
         this.inputN.value = "6";
         this.inputN.className = "viz-input";
+        this.inputN.style.width = "60px";
 
         this.btnGenerate = document.createElement("button");
-        this.btnGenerate.className = "btn btn-ghost";
+        this.btnGenerate.className = "btn btn--ghost btn--sm";
         this.btnGenerate.textContent = "Genereaza scenariu";
         this.btnGenerate.onclick = () => this.generateScenario();
 
         this.btnStep = document.createElement("button");
-        this.btnStep.className = "btn";
+        this.btnStep.className = "btn btn--sm";
         this.btnStep.textContent = "Pas urmator";
         this.btnStep.onclick = () => this.stepForward();
 
         this.btnPlay = document.createElement("button");
-        this.btnPlay.className = "btn btn-primary";
+        this.btnPlay.className = "btn btn--primary btn--sm";
         this.btnPlay.textContent = "Ruleaza";
         this.btnPlay.onclick = () => this.togglePlay();
 
@@ -749,12 +756,12 @@ class AlgorithmLab {
         this.controls.appendChild(this.btnPlay);
         this.controls.appendChild(this.speedSelect);
 
+        this.meta = document.createElement("div");
+        this.meta.className = "viz-meta";
+
         this.canvas = document.createElement("canvas");
         this.canvas.height = 320;
         this.ctx = this.canvas.getContext("2d");
-
-        this.meta = document.createElement("div");
-        this.meta.className = "viz-meta";
 
         this.panel = document.createElement("div");
         this.panel.className = "viz-panel";
@@ -768,7 +775,9 @@ class AlgorithmLab {
     }
 
     onResize() {
-        this.canvas.width = Math.max(this.container.clientWidth - 40, 320);
+        if (!this.canvas || !this.container) return;
+        const rect = this.container.getBoundingClientRect();
+        this.canvas.width = Math.max(rect.width - 40, 320);
         this.render();
     }
 

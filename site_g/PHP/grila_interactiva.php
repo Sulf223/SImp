@@ -278,6 +278,15 @@ if ($id_grila > 0) {
                 </div>
             </article>
         </div>
+    <?php else: ?>
+        <article class="card bento__card--hero" style="border: 1px solid var(--color-danger-soft); background: var(--color-surface-1); text-align: center; padding: var(--space-10);">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--color-danger)" stroke-width="1.5" style="width: 48px; height: 48px; margin: 0 auto var(--space-4);"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <h2 class="dash__title-sm">Întrebarea nu a fost găsită</h2>
+            <p class="dash__lede" style="margin-top: var(--space-2);">ID-ul întrebării este invalid sau întrebarea a fost ștearsă.</p>
+            <div class="card__actions" style="justify-content: center; margin-top: var(--space-6);">
+                <a href="index.php?page=grile" class="btn btn--primary">Înapoi la bancă</a>
+            </div>
+        </article>
     <?php endif; ?>
 </div>
 

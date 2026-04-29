@@ -26,7 +26,7 @@ function is_admin(): bool {
  */
 function require_role(string $role = 'user'): void {
     if (!is_logged_in()) {
-        header("Location: ../index.php?page=login&required_auth=true");
+        header("Location: index.php?page=login&required_auth=true");
         exit;
     }
 

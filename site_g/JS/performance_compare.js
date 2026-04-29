@@ -294,6 +294,11 @@
                 }
 
                 results.sort(function (a, b) { return a.time - b.time; });
+                
+                var placeholder = document.getElementById("benchmark-placeholder");
+                if (placeholder) placeholder.style.display = "none";
+                canvas.style.display = "block";
+
                 renderTable(results, tableBody);
                 renderLegend(results, legend);
                 drawChart(canvas, results);

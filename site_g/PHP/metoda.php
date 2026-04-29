@@ -3,7 +3,11 @@ include "conexiune.php";
 include "auth.php";
 
 $id_metoda = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-if ($id_metoda <= 0) { die("ID metodă invalid."); }
+if ($id_metoda <= 0) { 
+    set_flash("ID metodă invalid.", "danger");
+    header("Location: index.php?page=algoritmi");
+    exit; 
+}
 
 $metoda = null;
 $sql_metoda = "SELECT nume, categorie, complexitate, descriere, fisier_cpp FROM metode WHERE id_metoda = ?";
@@ -15,7 +19,11 @@ if ($stmt_metoda = $con->prepare($sql_metoda)) {
     $stmt_metoda->close();
 }
 
-if ($metoda === null) { die("Metoda nu a fost găsită."); }
+if ($metoda === null) { 
+    set_flash("Metoda nu a fost găsită.", "danger");
+    header("Location: index.php?page=algoritmi");
+    exit; 
+}
 
 $cod_cpp = "";
 if (!empty($metoda['fisier_cpp'])) {

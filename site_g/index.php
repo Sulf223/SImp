@@ -48,7 +48,8 @@ $pagini_permise = [
     'grile' => 'PHP/grile.php',
     'grila_interactiva' => 'PHP/grila_interactiva.php',
     'register' => 'PHP/register.php',
-    'lista_exercitii' => 'PHP/lista_exercitii.php'
+    'lista_exercitii' => 'PHP/lista_exercitii.php',
+    'changelog' => 'pagini/changelog.php'
 ];
 
 // Ce pagină încărcăm implicit?
@@ -166,7 +167,26 @@ $afiseaza_ai_widget = !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
     if (file_exists($fisier_de_incarcat)) {
         include $fisier_de_incarcat;
     } else {
-        echo "<div data-component='dashboard-modern'><div class='dash__guard'><h3>Eroare 404</h3><p>Pagina cerută nu a fost găsită.</p></div></div>";
+        echo '
+        <div data-component="dashboard-modern">
+            <div class="dash__guard" style="max-width: 560px; padding: var(--space-12);">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 64px; height: 64px; color: var(--color-fg-subtle); margin: 0 auto var(--space-5);">
+                    <path d="M9 10a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+                    <path d="M15 10a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+                    <path d="M9 17c-1.5-2.5 1.5-2.5 3-2.5s4.5 0 3 2.5"/>
+                    <circle cx="12" cy="12" r="10"/>
+                </svg>
+                <h2 style="font-size: var(--text-3xl); margin-bottom: var(--space-3);">Pagina nu a fost găsită</h2>
+                <p style="color: var(--color-fg-muted); margin-bottom: var(--space-6);">URL-ul cerut nu există în portal. Verifică linkul sau revino acasă.</p>
+                <div style="display: flex; gap: var(--space-3); justify-content: center;">
+                    <a href="index.php" class="btn btn--primary">
+                        <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                        Acasă
+                    </a>
+                    <a href="javascript:history.back()" class="btn btn--ghost">Înapoi</a>
+                </div>
+            </div>
+        </div>';
     }
     ?>
 </main>
@@ -181,16 +201,20 @@ $afiseaza_ai_widget = !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
             <span style="color: var(--color-border-strong);">|</span>
             <span>Interactive Labs</span>
         </div>
+        <div style="text-align: center; margin-top: var(--space-2);">
+            <a href="index.php?page=changelog" class="link-arrow" style="font-size: var(--text-xs); color: var(--color-primary); text-decoration: none;">Changelog →</a>
+        </div>
     </div>
 </footer>
 
 <?php if ($afiseaza_ai_widget): ?>
 <div id="ai-widget" class="ai-widget">
-    <button id="ai-widget-toggle" class="ai-widget-toggle" type="button" aria-label="Deschide chat Profesor AI" aria-expanded="false">
+    <button id="ai-widget-toggle" class="ai-widget-toggle" type="button" aria-label="Deschide chat Profesor AI" aria-expanded="false" style="position: relative;">
         <svg class="ai-widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
             <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
         </svg>
+        <span id="ai-widget-status-dot" style="position: absolute; bottom: 4px; right: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--color-fg-disabled); border: 2px solid var(--color-surface-1); transition: background 0.3s;"></span>
         <span id="ai-widget-badge" class="ai-widget-badge" hidden>0</span>
     </button>
 

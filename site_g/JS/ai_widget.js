@@ -196,4 +196,18 @@
     loadHistory();
     renderHistory();
     updateUnreadBadge();
+
+    async function checkAIStatus() {
+        try {
+            const res = await fetch('PHP/ai_status.php');
+            const data = await res.json();
+            const dot = document.getElementById('ai-widget-status-dot');
+            if (!dot) return;
+            const colors = { fast: 'var(--color-success)', slow: 'var(--color-warning)', degraded: 'var(--color-danger)', offline: 'var(--color-fg-disabled)', unknown: 'var(--color-fg-disabled)' };
+            dot.style.background = colors[data.state] || colors.unknown;
+            dot.title = `AI: ${data.state}${data.latency_ms ? ' (' + data.latency_ms + 'ms)' : ''}`;
+        } catch (e) {}
+    }
+    checkAIStatus();
+    setInterval(checkAIStatus, 60000); // refresh la 1 minut
 })();

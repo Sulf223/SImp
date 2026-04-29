@@ -35,8 +35,9 @@ function require_role(string $role = 'user'): void {
     // Dacă rolul necesar este 'admin', doar adminii au voie.
     if ($role === 'admin' && $user_role !== 'admin') {
         http_response_code(403);
-        // Poți crea o pagină dedicată pentru erori de acces
-        die("Acces interzis. Doar administratorii pot accesa această pagină.");
+        set_flash("Acces interzis. Doar administratorii pot accesa această pagină.", "danger");
+        header("Location: index.php");
+        exit;
     }
     
     // Dacă rolul necesar este 'user', oricine logat (user sau admin) are voie.

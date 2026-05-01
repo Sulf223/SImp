@@ -5,6 +5,15 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+require_once 'helpers.php';
+
+// Verificăm CSRF pentru cereri AJAX (P1)
+if (!verify_csrf_ajax()) {
+    http_response_code(403);
+    echo json_encode(['ok' => false, 'error' => 'Eroare CSRF: Cerere neautorizată.']);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['ok' => false, 'error' => 'Metoda nepermisa']);

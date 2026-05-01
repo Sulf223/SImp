@@ -44,8 +44,14 @@ class SortingVisualizer {
         this.quizCurrentAlgorithm = null;
         this.lastRunAlgorithm = this.resolveAlgorithmName(this.algorithmName);
 
-        this.initControls();
-        this.createInfoPanels();
+        const hasCustomControls = !!document.querySelector('[data-visualizer-controls="custom"]');
+        if (!hasCustomControls) {
+            this.initControls();
+            this.createInfoPanels();
+        } else {
+            this.bindCustomControls();
+        }
+        
         this.resetArray();
         
         // Ensure initial sizing
@@ -70,6 +76,23 @@ class SortingVisualizer {
         const root = getComputedStyle(document.documentElement);
         const sans = root.getPropertyValue('--font-sans').trim();
         return sans || 'Inter, system-ui, sans-serif';
+    }
+
+    highlightCodeLine(lineNumber) {
+        const codeBlock = document.querySelector('[data-lesson-code]');
+        if (!codeBlock) return;
+        codeBlock.querySelectorAll('.code-line').forEach(el => el.classList.remove('is-active'));
+        const line = codeBlock.querySelector(`[data-line="${lineNumber}"]`);
+        if (line) line.classList.add('is-active');
+    }
+    
+    updateVarInspector(vars) {
+        const inspector = document.querySelector('[data-var-inspector]');
+        if (!inspector) return;
+        Object.entries(vars).forEach(([key, value]) => {
+            const slot = inspector.querySelector(`[data-watch="${key}"]`);
+            if (slot) slot.textContent = String(value);
+        });
     }
 
     // Pixel Perfect Hook: Update external stats
@@ -102,6 +125,34 @@ class SortingVisualizer {
         this.canvas.width = rect.width || Math.max(this.container.clientWidth, 320);
         this.canvas.height = rect.height || 300;
         this.draw();
+    }
+
+    bindCustomControls() {
+        document.querySelectorAll('[data-action="start"]').forEach(btn => {
+            btn.addEventListener('click', () => this.runSort());
+        });
+        document.querySelectorAll('[data-action="regenerate"]').forEach(btn => {
+            btn.addEventListener('click', () => this.resetArray());
+        });
+        document.querySelectorAll('[data-control="size"]').forEach(input => {
+            input.addEventListener('change', e => {
+                this.size = parseInt(e.target.value, 10);
+                this.valueLabels = null;
+                this.resetArray();
+            });
+        });
+        document.querySelectorAll('[data-control="speed"]').forEach(input => {
+            input.addEventListener('change', e => {
+                const val = e.target.value;
+                this.delay = val === 'slow' ? 80 : val === 'fast' ? 10 : 35;
+            });
+        });
+
+        // Also create info panels if they don't exist but we are in custom mode
+        // Usually custom mode pages have their own stats display but visualizer might need its meta
+        if (!this.statsEl) {
+            this.createInfoPanels();
+        }
     }
 
     initControls() {
@@ -534,58 +585,88 @@ class SortingVisualizer {
     async bubbleSort() {
         const len = this.array.length;
         for (let i = 0; i < len; i++) {
+            this.highlightCodeLine(1);
+            this.updateVarInspector({ i, j: '—', comparisons: this.comparisons, swaps: this.swaps });
             for (let j = 0; j < len - i - 1; j++) {
+                this.highlightCodeLine(2);
+                this.updateVarInspector({ i, j, comparisons: this.comparisons, swaps: this.swaps });
                 this.registerComparison(this.array[j], this.array[j + 1]);
                 this.draw([j, j + 1], -1, len - i);
                 await this.sleep();
                 if (this.array[j] > this.array[j + 1]) {
+                    this.highlightCodeLine(3);
                     this.registerSwap(this.array[j], this.array[j + 1]);
                     [this.array[j], this.array[j + 1]] = [this.array[j + 1], this.array[j]];
+                    this.highlightCodeLine(4);
+                    this.updateVarInspector({ i, j, comparisons: this.comparisons, swaps: this.swaps });
+                    this.draw([j, j + 1], -1, len - i);
+                    await this.sleep();
                 }
             }
         }
+        this.highlightCodeLine(0);
     }
 
     async selectionSort() {
         const len = this.array.length;
         for (let i = 0; i < len; i++) {
+            this.highlightCodeLine(1);
             let min = i;
+            this.highlightCodeLine(2);
+            this.updateVarInspector({ i, j: '—', minIdx: min, comparisons: this.comparisons, swaps: this.swaps });
             for (let j = i + 1; j < len; j++) {
+                this.highlightCodeLine(3);
+                this.updateVarInspector({ i, j, minIdx: min, comparisons: this.comparisons, swaps: this.swaps });
                 this.registerComparison(this.array[j], this.array[min]);
                 this.draw([i, j], min);
                 await this.sleep();
-                if (this.array[j] < this.array[min]) min = j;
+                if (this.array[j] < this.array[min]) {
+                    min = j;
+                    this.highlightCodeLine(4);
+                    this.updateVarInspector({ i, j, minIdx: min, comparisons: this.comparisons, swaps: this.swaps });
+                }
             }
             if (min !== i) {
+                this.highlightCodeLine(5);
                 this.registerSwap(this.array[i], this.array[min]);
                 [this.array[i], this.array[min]] = [this.array[min], this.array[i]];
                 this.draw([i, min], min);
                 await this.sleep();
             }
         }
+        this.highlightCodeLine(0);
     }
 
     async insertionSort() {
         const len = this.array.length;
         for (let i = 1; i < len; i++) {
+            this.highlightCodeLine(1);
             const key = this.array[i];
+            this.highlightCodeLine(2);
             let j = i - 1;
+            this.highlightCodeLine(3);
+            this.updateVarInspector({ i, j, key, comparisons: this.comparisons, swaps: this.swaps });
             while (j >= 0) {
+                this.highlightCodeLine(4);
                 this.registerComparison(this.array[j], key);
                 this.draw([j, j + 1]);
                 await this.sleep();
                 if (this.array[j] > key) {
+                    this.highlightCodeLine(5);
                     this.registerSwap(this.array[j], key);
                     this.array[j + 1] = this.array[j];
                     j--;
+                    this.updateVarInspector({ i, j, key, comparisons: this.comparisons, swaps: this.swaps });
                 } else {
                     break;
                 }
             }
+            this.highlightCodeLine(6);
             this.array[j + 1] = key;
             this.draw([j + 1]);
             await this.sleep();
         }
+        this.highlightCodeLine(0);
     }
 
     async quickSort(start, end) {
@@ -593,25 +674,35 @@ class SortingVisualizer {
         const index = await this.partition(start, end);
         await this.quickSort(start, index - 1);
         await this.quickSort(index + 1, end);
+        this.highlightCodeLine(0);
     }
 
     async partition(start, end) {
+        this.highlightCodeLine(1);
         const pivotValue = this.array[end];
+        this.highlightCodeLine(2);
         let pivotIndex = start;
+        this.updateVarInspector({ low: start, high: end, pivot: pivotValue, i: '—', comparisons: this.comparisons, swaps: this.swaps });
         for (let i = start; i < end; i++) {
+            this.highlightCodeLine(3);
+            this.updateVarInspector({ low: start, high: end, pivot: pivotValue, i, comparisons: this.comparisons, swaps: this.swaps });
             this.registerComparison(this.array[i], pivotValue);
             this.draw([i, end], pivotIndex);
             await this.sleep();
             if (this.array[i] < pivotValue) {
+                this.highlightCodeLine(4);
                 this.registerSwap(this.array[i], this.array[pivotIndex]);
                 [this.array[i], this.array[pivotIndex]] = [this.array[pivotIndex], this.array[i]];
                 pivotIndex++;
+                this.updateVarInspector({ low: start, high: end, pivot: pivotValue, i, comparisons: this.comparisons, swaps: this.swaps });
             }
         }
+        this.highlightCodeLine(5);
         this.registerSwap(this.array[pivotIndex], this.array[end]);
         [this.array[pivotIndex], this.array[end]] = [this.array[end], this.array[pivotIndex]];
         this.draw([pivotIndex, end], pivotIndex);
         await this.sleep();
+        this.highlightCodeLine(6);
         return pivotIndex;
     }
 
@@ -621,24 +712,33 @@ class SortingVisualizer {
         await this.mergeSort(start, mid);
         await this.mergeSort(mid + 1, end);
         await this.merge(start, mid, end);
+        this.highlightCodeLine(0);
     }
 
     async merge(start, mid, end) {
+        this.highlightCodeLine(1);
         const left = this.array.slice(start, mid + 1);
         const right = this.array.slice(mid + 1, end + 1);
+        this.highlightCodeLine(2);
         let i = 0;
         let j = 0;
         let k = start;
+        this.updateVarInspector({ lo: start, mid, hi: end, i, j, k, comparisons: this.comparisons, swaps: this.swaps });
 
         while (i < left.length && j < right.length) {
+            this.highlightCodeLine(3);
+            this.updateVarInspector({ lo: start, mid, hi: end, i, j, k, comparisons: this.comparisons, swaps: this.swaps });
             this.registerComparison(left[i], right[j]);
             this.draw([k]);
             await this.sleep();
             if (left[i] <= right[j]) {
+                this.highlightCodeLine(4);
                 this.array[k++] = left[i++];
             } else {
+                this.highlightCodeLine(5);
                 this.array[k++] = right[j++];
             }
+            this.updateVarInspector({ lo: start, mid, hi: end, i, j, k, comparisons: this.comparisons, swaps: this.swaps });
         }
 
         while (i < left.length) {
@@ -661,21 +761,29 @@ class SortingVisualizer {
         const count = new Array(max + offset + 1).fill(0);
 
         for (let i = 0; i < this.array.length; i++) {
+            this.highlightCodeLine(1);
+            this.updateVarInspector({ i, value: '—', idx: '—', comparisons: this.comparisons, swaps: this.swaps });
             count[this.array[i] + offset]++;
             this.draw([i]);
             await this.sleep();
         }
 
+        this.highlightCodeLine(2);
         let idx = 0;
         for (let v = 0; v < count.length; v++) {
+            this.highlightCodeLine(3);
+            this.updateVarInspector({ i: '—', value: v - offset, idx, comparisons: this.comparisons, swaps: this.swaps });
             while (count[v] > 0) {
+                this.highlightCodeLine(4);
                 this.array[idx] = v - offset;
                 this.draw([idx]);
                 await this.sleep();
                 idx++;
                 count[v]--;
+                this.updateVarInspector({ i: '—', value: v - offset, idx, comparisons: this.comparisons, swaps: this.swaps });
             }
         }
+        this.highlightCodeLine(0);
     }
 }
 

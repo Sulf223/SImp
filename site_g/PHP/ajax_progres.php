@@ -24,9 +24,15 @@ if (!verify_csrf_ajax()) {
     exit;
 }
 
-// Preluăm datele trimise (ne așteptăm la JSON)
-$data = json_decode(file_get_contents('php://input'), true);
-$id_grila = $data['id_grila'] ?? 0;
+// Preluăm datele trimise (JSON sau POST clasic)
+$inputJSON = file_get_contents('php://input');
+$data = json_decode($inputJSON, true);
+
+if ($data && isset($data['id_grila'])) {
+    $id_grila = (int)$data['id_grila'];
+} else {
+    $id_grila = (int)($_POST['id_grila'] ?? 0);
+}
 
 if ($id_grila > 0) {
     $id_utilizator = $_SESSION['user_id'];

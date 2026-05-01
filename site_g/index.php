@@ -16,6 +16,15 @@ if (session_status() === PHP_SESSION_NONE) {
 // CSP compatibil cu scripturile inline existente din proiect.
 header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; frame-src https://onecompiler.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;");
 
+header("X-Content-Type-Options: nosniff");
+header("X-Frame-Options: SAMEORIGIN");
+header("Referrer-Policy: strict-origin-when-cross-origin");
+header("Permissions-Policy: camera=(), microphone=(), geolocation=()");
+
+if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+    header("Strict-Transport-Security: max-age=31536000; includeSubDomains");
+}
+
 // Includem helper-ele (Flash messages, CSRF)
 require_once 'PHP/helpers.php';
 
@@ -49,19 +58,32 @@ $pagini_permise = [
     'grila_interactiva' => 'PHP/grila_interactiva.php',
     'register' => 'PHP/register.php',
     'lista_exercitii' => 'PHP/lista_exercitii.php',
-    'changelog' => 'pagini/changelog.php'
+    'changelog' => 'pagini/changelog.php',
+    'profil' => 'pagini/profil.php',
+    'invatare' => 'pagini/invatare.php'
 ];
 
 // Ce pagină încărcăm implicit?
 // - utilizator neautentificat: bun_venit
 // - utilizator autentificat: acasa (dashboard)
 $pagina_implicita = !empty($_SESSION['user_id']) ? 'acasa' : 'bun_venit';
-$pagina_curenta = isset($_GET['page']) && isset($pagini_permise[$_GET['page']]) ? $_GET['page'] : $pagina_implicita;
-$fisier_de_incarcat = $pagini_permise[$pagina_curenta];
+
+$pagina_curenta = $pagina_implicita;
+$is_404 = false;
+
+if (isset($_GET['page'])) {
+    if (isset($pagini_permise[$_GET['page']])) {
+        $pagina_curenta = $_GET['page'];
+    } else {
+        $is_404 = true;
+    }
+}
+
+$fisier_de_incarcat = $is_404 ? null : $pagini_permise[$pagina_curenta];
 
 // Paginile pe care nu afișăm widget-ul flotant AI
 $pagini_fara_ai_widget = ['bun_venit', 'login', 'register', 'logout'];
-$afiseaza_ai_widget = !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
+$afiseaza_ai_widget = !$is_404 && !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
 ?>
 <!DOCTYPE html>
 <html lang="ro">
@@ -77,40 +99,56 @@ $afiseaza_ai_widget = !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
     <link rel="stylesheet" href="CSS/modern_vars.css">
     <link rel="stylesheet" href="stil.css">
     <link rel="stylesheet" href="CSS/dashboard_modern.css">
+    <meta name="csrf-token" content="<?php echo get_csrf_token(); ?>">
     <?php if ($pagina_curenta === 'bun_venit'): ?>
         <link rel="stylesheet" href="CSS/bun_venit.css">
     <?php endif; ?>
     <style>
-        /* Fix: Anulează pointer-events din stil.css pentru a face butoanele clickabile */
+        /* Anulează pointer-events din stil.css pentru a face butoanele clickabile */
         nav, 
         nav * {
             pointer-events: auto !important;
         }
-        nav a, 
-        nav button,
-        .btn,
-        button {
+        
+        /* Asigură-te că zona principală de conținut este mereu deasupra fundalului ambient */
+        main {
+            position: relative;
+            z-index: 10;
+            pointer-events: auto !important;
+        }
+
+        /* Reactivează pointer-events pentru elemente interactive */
+        a, button, .btn, .grila-option, input, textarea {
             pointer-events: auto !important;
             cursor: pointer !important;
         }
-        /* Asigură-te că linkurile sunt clickabile */
-        a[href] {
-            pointer-events: auto !important;
-        }
-        /* Dezactiveaza pointer-events: none universal */
-        *:not(.ai-widget-panel):not(.ai-widget) {
-            pointer-events: auto !important;
-        }
-        /* Reactivează pointer-events: none doar pentru ai-widget când e închis */
+
+        /* Widget AI: Când este închis, panelul nu trebuie să ocupe spațiu sau să blocheze click-urile */
         .ai-widget-panel {
-            pointer-events: none;
+            pointer-events: none !important;
+            visibility: hidden !important;
+            display: none !important; /* Elimină complet din layout când e închis */
         }
         .ai-widget.open .ai-widget-panel {
-            pointer-events: auto;
+            pointer-events: auto !important;
+            visibility: visible !important;
+            display: flex !important; /* Reactivează layout-ul când e deschis */
+        }
+        
+        /* Prevenim ca fundalul decorativ să blocheze interacțiunea */
+        [data-component="dashboard-modern"]::before {
+            pointer-events: none !important;
+            z-index: -1 !important;
+        }
+        
+        /* Bento Grid și link-urile trebuie să fie deasupra oricărui background */
+        .bento, .card, .table-wrapper {
+            position: relative;
+            z-index: 5;
         }
     </style>
 </head>
-<body data-theme="dark" style="background: var(--color-bg); color: var(--color-fg); font-family: var(--font-sans); margin: 0; min-height: 100vh; display: flex; flex-direction: column;">
+<body data-theme="dark" style="background: var(--color-bg); color: var(--color-fg); font-family: var(--font-sans); margin: 0; min-height: 100vh; display: flex; flex-direction: column; isolation: isolate;">
 
 <nav class="site-nav">
     <!-- LOGO -->
@@ -127,11 +165,13 @@ $afiseaza_ai_widget = !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
         <li><a href="index.php?page=bun_venit" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Bun venit</a></li>
         <li><a href="index.php?page=acasa" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Acasă</a></li>
         <li><a href="index.php?page=algoritmi" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Algoritmi</a></li>
+        <li><a href="index.php?page=invatare" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm); color: var(--color-accent); font-weight: 600;">Drumuri de Învățare</a></li>
         <li><a href="index.php?page=comparatii_sortare" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Comparații</a></li>
         <li><a href="index.php?page=profesor_ai" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Profesor AI</a></li>
         <li><a href="index.php?page=lista_exercitii" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Exerciții</a></li>
         <li><a href="index.php?page=compilator" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Compilator</a></li>
         <li><a href="index.php?page=grile" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Grile</a></li>
+        <li><a href="index.php?page=profil" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Profil</a></li>
         
         <!-- THEME TOGGLE -->
         <li style="margin-left: var(--space-2); border-left: 1px solid var(--color-border); padding-left: var(--space-2);">
@@ -164,8 +204,8 @@ $afiseaza_ai_widget = !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
         echo '<div class="alert alert--success" style="margin-bottom: var(--space-4); padding: var(--space-3); border-radius: var(--radius-md); background: var(--color-success-soft); color: var(--color-success); border: 1px solid var(--color-success);">Ați fost delogat cu succes!</div>';
     }
 
-    if (file_exists($fisier_de_incarcat)) {
-        include $fisier_de_incarcat;
+    if ($fisier_de_incarcat && file_exists(__DIR__ . '/' . $fisier_de_incarcat)) {
+        include __DIR__ . '/' . $fisier_de_incarcat;
     } else {
         echo '
         <div data-component="dashboard-modern">

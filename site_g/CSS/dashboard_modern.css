@@ -1794,6 +1794,31 @@ input[type="submit"]:active { transform: scale(0.98); }
 }
 .btn-logout:hover { color: var(--color-danger); background: var(--color-danger-soft); }
 
+.lesson-code .code-line {
+    display: block;
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-sm);
+    transition: background var(--duration-fast), color var(--duration-fast), border-color var(--duration-fast);
+    border-left: 2px solid transparent;
+}
+.lesson-code .code-line.is-active {
+    background: var(--color-primary-soft);
+    border-left-color: var(--color-primary);
+    color: var(--color-fg);
+    font-weight: var(--font-medium);
+}
+
+[data-var-inspector] {
+    position: sticky;
+    top: var(--space-6);
+}
+[data-watch] {
+    font-variant-numeric: tabular-nums;
+    transition: color var(--duration-fast);
+    display: inline-block;
+    min-width: 30px;
+}
+
 /* ==========================================================================
    END OF GLOBAL LEGACY OVERRIDES
    ========================================================================== */

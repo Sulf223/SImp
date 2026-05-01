@@ -96,6 +96,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 </span>
             </p>
             <p id="benchmark-live-status" class="badge badge--soft" style="display:none; margin-top: var(--space-3); position: relative; z-index: 1;"></p>
+            <div id="iteration-info" style="margin-top: var(--space-2); font-size: var(--text-xs); color: var(--color-primary); font-weight: 500;"></div>
 
             <div style="display: flex; gap: var(--space-3); margin-top: var(--space-4); position: relative; z-index: 1; flex-wrap: wrap;">
                 <a href="index.php?page=sortare" class="btn btn--ghost btn--sm">

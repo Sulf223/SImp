@@ -51,6 +51,7 @@ if (empty($cod_sursa)) {
                 height="650" 
                 loading="lazy"
                 frameborder="0"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
                 style="display: block; border: none; background: #1e1e1e;">
             </iframe>
         </article>

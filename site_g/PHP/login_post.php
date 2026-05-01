@@ -19,8 +19,9 @@ if ($username === '' || $password === '') {
     exit;
 }
 
-// Verificăm rate limiting
-if (!check_rate_limit($username)) {
+// Verificăm rate limiting (P1 - Mutat în DB și bazat pe IP)
+$user_ip = $_SERVER['REMOTE_ADDR'] ?: 'unknown';
+if (!check_rate_limit($con, 'login', $user_ip, 5, 900)) {
     set_flash('error', 'Prea multe încercări eșuate. Te rog așteaptă 15 minute.');
     header('Location: ../index.php?page=login');
     exit;
@@ -47,7 +48,7 @@ if ($stmt) {
         $_SESSION['rol'] = $user['rol'] ?? 'user';
         
         // Resetăm rate limiting la login cu succes
-        reset_rate_limit($username);
+        reset_rate_limit($con, 'login', $user_ip);
 
         set_flash('success', 'Te-ai autentificat cu succes!');
         header('Location: ../index.php?page=metode');

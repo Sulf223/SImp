@@ -151,10 +151,14 @@
         return arr;
     }
 
-    function benchmark(fn, data) {
-        var start = performance.now();
-        fn(data);
-        return performance.now() - start;
+    function benchmark(fn, data, iterations = 1) {
+        var totalTime = 0;
+        for (var i = 0; i < iterations; i++) {
+            var start = performance.now();
+            fn(data);
+            totalTime += performance.now() - start;
+        }
+        return totalTime / iterations;
     }
 
     function colorByIndex(index) {
@@ -219,7 +223,7 @@
             ctx.font = fontStack(12);
             ctx.textAlign = "center";
             ctx.fillText(data[j].name, x + Math.max(10, barW - 16) / 2, height - pad + 16);
-            ctx.fillText(data[j].time.toFixed(2) + " ms", x + Math.max(10, barW - 16) / 2, y - 6);
+            ctx.fillText(data[j].time.toFixed(3) + " ms", x + Math.max(10, barW - 16) / 2, y - 6);
         }
     }
 
@@ -235,7 +239,7 @@
             html += "<tr>" +
                 "<td>" + results[i].name + "</td>" +
                 "<td>" + results[i].complexity + "</td>" +
-                "<td>" + results[i].time.toFixed(3) + "</td>" +
+                "<td>" + results[i].time.toFixed(3) + " ms</td>" +
                 "</tr>";
         }
 
@@ -258,6 +262,7 @@
         var canvas = document.getElementById("benchmark-chart");
         var legend = document.getElementById("benchmark-legend");
         var tableBody = document.querySelector("#benchmark-table tbody");
+        var iterationInfo = document.getElementById("iteration-info");
 
         if (!button || !datasetType || !datasetSize || !datasetMax || !canvas || !legend || !tableBody) {
             return;
@@ -276,15 +281,19 @@
             var size = Math.max(20, Math.min(3000, parseInt(datasetSize.value, 10) || 300));
             var maxValue = Math.max(50, Math.min(100000, parseInt(datasetMax.value, 10) || 1000));
             var data = createDataset(datasetType.value, size, maxValue);
+            var iterations = (size <= 500) ? 50 : (size <= 1500 ? 10 : 1);
 
             button.disabled = true;
             button.textContent = "Ruleaza...";
+            if (iterationInfo) {
+                iterationInfo.textContent = "Se calculeaza media a " + iterations + " rulari...";
+            }
 
             setTimeout(function () {
                 var results = [];
 
                 for (var i = 0; i < definitions.length; i++) {
-                    var elapsed = benchmark(definitions[i].fn, data);
+                    var elapsed = benchmark(definitions[i].fn, data, iterations);
                     results.push({
                         name: definitions[i].name,
                         complexity: definitions[i].complexity,
@@ -302,6 +311,10 @@
                 renderTable(results, tableBody);
                 renderLegend(results, legend);
                 drawChart(canvas, results);
+                
+                if (iterationInfo) {
+                    iterationInfo.textContent = "Media a " + iterations + " rulari.";
+                }
 
                 button.disabled = false;
                 button.textContent = "Ruleaza comparatia";

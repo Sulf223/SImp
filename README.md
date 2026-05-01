@@ -106,7 +106,17 @@ docker compose down
 docker compose up -d --build
 ```
 
-## 7. Structura proiect (pe scurt)
+## 7. Securitate și Hardening
+
+Proiectul include măsuri de securitate P0 și P1:
+1. **Configurație securizată:** Fișierul `.env` este mutat în rădăcina proiectului, în afara webroot-ului, și protejat prin `.htaccess`.
+2. **Protecție CSRF:** Toate endpoint-urile critice (AI Chat, Progres Learning) verifică token-ul CSRF.
+3. **Rate Limiting:** Implementat în baza de date (tabela `rate_limit_attempts`) pentru a preveni brute-force-ul, chiar și la ștergerea cookie-urilor.
+4. **Validare riguroasă:** Parolele la înregistrare necesită minim 8 caractere (litere + cifre).
+5. **Headere de securitate:** CSP, X-Content-Type-Options, X-Frame-Options și Referrer-Policy sunt configurate în `index.php`.
+6. **Sandbox Iframe:** Editorul OneCompiler rulează într-un mediu sandbox controlat.
+
+## 8. Structura proiect (pe scurt)
 
 1. [site_g/index.php](site_g/index.php) - intrare principala
 2. [site_g/pagini](site_g/pagini) - pagini de continut

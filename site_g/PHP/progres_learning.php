@@ -73,6 +73,8 @@ function track_lesson_visit(mysqli $con, int $userId, string $lessonSlug, string
         mysqli_stmt_execute($stmt);
         mysqli_stmt_close($stmt);
     }
+
+    update_streak($con, $userId);
 }
 
 function track_exercise_completion(mysqli $con, int $userId, string $lessonSlug, string $exerciseKey): int {
@@ -89,7 +91,9 @@ function track_exercise_completion(mysqli $con, int $userId, string $lessonSlug,
         mysqli_stmt_close($stmt);
     }
 
-    return recompute_progress_for_lesson($con, $userId, $lessonSlug);
+    $progress = recompute_progress_for_lesson($con, $userId, $lessonSlug);
+    update_streak($con, $userId);
+    return $progress;
 }
 
 function recompute_progress_for_lesson(mysqli $con, int $userId, string $lessonSlug): int {
@@ -218,4 +222,104 @@ function get_exercise_stats(mysqli $con, int $userId, string $lessonSlug): array
     }
 
     return ['done' => $done, 'total' => $total];
+}
+
+function ensure_streak_tables(mysqli $con): void {
+    // Verificăm dacă tabelul principal există deja
+    $check = mysqli_query($con, "SHOW TABLES LIKE 'user_streak'");
+    if (mysqli_num_rows($check) === 0) {
+        $sqlPath = __DIR__ . '/../database/upgrade_profile_streak.sql';
+        if (file_exists($sqlPath)) {
+            $sql = file_get_contents($sqlPath);
+            if ($sql) {
+                // Executăm scriptul SQL. Notă: mysqli_multi_query poate fi periculos 
+                // dacă scriptul are erori (ex: coloană existentă).
+                // Folosim un bloc de ignorare a erorilor pentru ALTER TABLE dacă e nevoie.
+                if (mysqli_multi_query($con, $sql)) {
+                    do {
+                        // Consumăm rezultatele pentru a elibera conexiunea
+                        if ($result = mysqli_store_result($con)) {
+                            mysqli_free_result($result);
+                        }
+                    } while (mysqli_more_results($con) && mysqli_next_result($con));
+                }
+            }
+        }
+    }
+}
+
+function update_streak(mysqli $con, int $userId): array {
+    if ($userId <= 0) return ['current' => 0, 'longest' => 0];
+    ensure_streak_tables($con);
+    
+    $today = date('Y-m-d');
+    $yesterday = date('Y-m-d', strtotime('-1 day'));
+    
+    // Citește streak existent
+    $stmt = mysqli_prepare($con, "SELECT current_streak, longest_streak, last_activity_date FROM user_streak WHERE user_id = ?");
+    mysqli_stmt_bind_param($stmt, 'i', $userId);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_assoc($res) ?: null;
+    mysqli_stmt_close($stmt);
+    
+    $current = $row['current_streak'] ?? 0;
+    $longest = $row['longest_streak'] ?? 0;
+    $lastDate = $row['last_activity_date'] ?? null;
+    
+    if ($lastDate === $today) {
+        // deja contat azi
+    } elseif ($lastDate === $yesterday) {
+        // continuat ieri → +1
+        $current++;
+    } else {
+        // întrerupt → reset la 1
+        $current = 1;
+    }
+    
+    if ($current > $longest) $longest = $current;
+    
+    $upsert = "INSERT INTO user_streak (user_id, current_streak, longest_streak, last_activity_date) 
+               VALUES (?, ?, ?, ?) 
+               ON DUPLICATE KEY UPDATE current_streak = VALUES(current_streak), longest_streak = VALUES(longest_streak), last_activity_date = VALUES(last_activity_date)";
+    $stmt = mysqli_prepare($con, $upsert);
+    mysqli_stmt_bind_param($stmt, 'iiis', $userId, $current, $longest, $today);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+    
+    // Incrementează activity_day
+    $activity = "INSERT INTO activity_day (user_id, activity_date, activity_count) VALUES (?, ?, 1) 
+                 ON DUPLICATE KEY UPDATE activity_count = activity_count + 1";
+    $stmt = mysqli_prepare($con, $activity);
+    mysqli_stmt_bind_param($stmt, 'is', $userId, $today);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+    
+    return ['current' => $current, 'longest' => $longest, 'last_date' => $today];
+}
+
+function get_streak(mysqli $con, int $userId): array {
+    ensure_streak_tables($con);
+    $stmt = mysqli_prepare($con, "SELECT current_streak, longest_streak FROM user_streak WHERE user_id = ?");
+    mysqli_stmt_bind_param($stmt, 'i', $userId);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_assoc($res) ?: ['current_streak' => 0, 'longest_streak' => 0];
+    mysqli_stmt_close($stmt);
+    return ['current' => (int)$row['current_streak'], 'longest' => (int)$row['longest_streak']];
+}
+
+function get_activity_heatmap(mysqli $con, int $userId, int $weeks = 26): array {
+    ensure_streak_tables($con);
+    $startDate = date('Y-m-d', strtotime("-{$weeks} weeks"));
+    $stmt = mysqli_prepare($con, "SELECT activity_date, activity_count FROM activity_day WHERE user_id = ? AND activity_date >= ?");
+    mysqli_stmt_bind_param($stmt, 'is', $userId, $startDate);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $map = [];
+    while ($row = mysqli_fetch_assoc($res)) {
+        $map[$row['activity_date']] = (int)$row['activity_count'];
+    }
+    mysqli_stmt_close($stmt);
+    return $map; // {'2026-04-29': 5, ...}
 }

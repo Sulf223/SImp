@@ -136,17 +136,28 @@ if ($is_logged_in) {
                                 <td style="padding: var(--space-4); color: var(--color-fg); font-size: var(--text-sm); max-width: 400px;"><?php echo htmlspecialchars($grila['intrebare']); ?></td>
                                 <td style="padding: var(--space-4);"><span class="badge badge--soft"><?php echo htmlspecialchars($grila['nume_metoda']); ?></span></td>
                                 <td style="padding: var(--space-4);">
-                                    <span class="badge" style="font-size: 10px; background: <?php echo $grila['dificultate'] == 'Ușor' ? 'var(--color-success-soft)' : ($grila['dificultate'] == 'Mediu' ? 'var(--color-warning-soft)' : 'var(--color-danger-soft)'); ?>; color: <?php echo $grila['dificultate'] == 'Ușor' ? 'var(--color-success)' : ($grila['dificultate'] == 'Mediu' ? 'var(--color-warning)' : 'var(--color-danger)'); ?>;">
-                                        <?php echo htmlspecialchars($grila['dificultate']); ?>
+                                    <?php 
+                                        $dif = $grila['dificultate'] ?? 'Usor';
+                                        $dif_label = $dif;
+                                        if ($dif === 'Usor') {
+                                            $dif_style = 'background: var(--color-success-soft); color: var(--color-success);';
+                                        } elseif ($dif === 'Mediu') {
+                                            $dif_style = 'background: var(--color-warning-soft); color: var(--color-warning);';
+                                        } else {
+                                            $dif_style = 'background: var(--color-danger-soft); color: var(--color-danger);';
+                                        }
+                                    ?>
+                                    <span class="badge" style="font-size: 10px; <?php echo $dif_style; ?>">
+                                        <?php echo htmlspecialchars($dif_label); ?>
                                     </span>
                                 </td>
                                 <td style="padding: var(--space-4); text-align: right;">
                                     <?php if ($is_logged_in): ?>
-                                        <a href="index.php?page=grila_interactiva&id=<?php echo $grila['id']; ?>" class="btn btn--quiet btn--sm" style="color: var(--color-primary);">
+                                        <a href="index.php?page=grila_interactiva&id=<?php echo (int)$grila['id']; ?>" class="btn btn--quiet btn--sm" style="color: var(--color-primary); pointer-events: auto !important;">
                                             <?php echo $is_completat ? 'Reia' : 'Rezolvă'; ?>
                                         </a>
                                     <?php else: ?>
-                                        <a href="index.php?page=login" class="btn btn--ghost btn--sm">Login</a>
+                                        <a href="index.php?page=login" class="btn btn--ghost btn--sm" style="pointer-events: auto !important;">Login</a>
                                     <?php endif; ?>
                                 </td>
                             </tr>

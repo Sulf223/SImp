@@ -1,260 +1,245 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// pagini/profesor_ai.php - Extins cu funcționalitate de Quiz AI
+require_once 'PHP/auth.php';
+$is_logged_in = is_logged_in();
 ?>
 
 <div data-component="dashboard-modern">
     <header class="dash__header">
         <span class="dash__eyebrow">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M12 8V4H8"/><rect x="2" y="8" width="20" height="12" rx="2"/><path d="M7 13v2"/><path d="M17 13v2"/>
+                <path d="M12 8V4H8"/><rect width="16" height="16" x="4" y="4" rx="2"/><path d="M12 12v4"/><path d="M16 12v4"/>
             </svg>
-            Asistent educațional
+            SImp Lab
         </span>
-        <h1 class="dash__title">
-            Profesor <span class="dash__title-accent">AI Tutor</span>
-        </h1>
+        <h1 class="dash__title">Profesor <span class="dash__title-accent">AI & Quiz</span></h1>
         <p class="dash__lede">
-            Pune întrebări despre C++ și primești explicații pas cu pas, indicii și exemple scurte. AI-ul este programat să te ghideze spre soluție, nu să ți-o ofere direct.
+            Folosește inteligența artificială pentru a genera teste personalizate de 10 întrebări sau discută direct cu profesorul tău virtual.
         </p>
     </header>
 
     <div class="bento" style="gap: var(--space-6);">
-        <!-- MAIN CHAT: Hero area -->
-        <article class="card bento__card--hero" style="border: 1px solid var(--color-border); background: var(--color-surface-1); min-height: 600px; display: flex; flex-direction: column; overflow: visible;">
-             <div class="card__head">
-                <span class="card__eyebrow">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                    </svg>
-                    Conversație Live
-                </span>
-                <div style="display: flex; gap: var(--space-2);">
-                    <div id="ai-status" style="display: flex; align-items: center; gap: 6px; font-size: var(--text-xs); color: var(--color-success);">
-                        <span style="width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor;"></span>
-                        Online
+        <!-- AI QUIZ GENERATOR -->
+        <article class="card bento__card--hero" id="ai-quiz-container" style="border: 1px solid var(--color-primary-soft); background: var(--color-surface-1); min-height: 450px;">
+            <div id="quiz-init">
+                <div class="card__head">
+                    <span class="card__eyebrow" style="color: var(--color-primary);">Generator Teste AI</span>
+                </div>
+                <div style="text-align: center; padding: var(--space-10) 0;">
+                    <div style="width: 64px; height: 64px; background: var(--color-primary-soft); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4);">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" style="width: 32px; height: 32px;"><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
                     </div>
+                    <h3 style="font-size: var(--text-xl); font-weight: 600; margin-bottom: var(--space-2);">Ești gata pentru o provocare?</h3>
+                    <p style="color: var(--color-fg-muted); margin-bottom: var(--space-6); max-width: 400px; margin-left: auto; margin-right: auto;">
+                        Voi genera un set de 10 întrebări unice despre algoritmi C++, adaptate nivelului tău.
+                    </p>
+                    <button id="start-ai-quiz" class="btn btn--primary" style="padding: var(--space-3) var(--space-8);">
+                        Generează Test (10 Întrebări)
+                    </button>
                 </div>
             </div>
 
-            <!-- Chat Box Container -->
-            <div id="ai-chat-box">
-                <!-- Messages will appear here -->
+            <div id="quiz-loading" style="display: none; text-align: center; padding: var(--space-20) 0;">
+                <div class="ai-typing-dots" style="margin-bottom: var(--space-4);"><span></span><span></span><span></span></div>
+                <p style="color: var(--color-fg-muted);">Gândesc întrebările potrivite pentru tine...</p>
             </div>
-            
-            <form id="ai-chat-form">
-                <textarea
-                    id="ai-message"
-                    rows="1"
-                    maxlength="1500"
-                    placeholder="Cum funcționează quick sort?"
-                    required
-                ></textarea>
-                <div style="display: flex; gap: var(--space-2); padding-bottom: 4px; padding-right: 4px;">
-                    <button type="button" id="ai-clear" class="btn btn--ghost btn--sm" title="Șterge conversația">
-                        <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H5c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                    </button>
-                    <button type="submit" class="btn btn--primary btn--sm">
-                        <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                    </button>
-                </div>
-            </form>
+
+            <div id="quiz-active" style="display: none; height: 100%; flex-direction: column;">
+                <!-- Quiz content dynamically injected here -->
+            </div>
+
+            <div id="quiz-results" style="display: none; text-align: center; padding: var(--space-10) 0;">
+                <!-- Results content -->
+            </div>
         </article>
 
-        <!-- SIDE PANEL: Tips -->
-        <article class="card bento__card--accent" style="border: 1px solid var(--color-accent-soft); background: linear-gradient(135deg, rgba(6, 182, 212, 0.05) 0%, rgba(6, 182, 212, 0.02) 100%);">
+        <!-- CHAT SIDEBAR / INFO -->
+        <article class="card bento__card--accent" style="border: 1px solid var(--color-border); background: var(--color-surface-2);">
             <div class="card__head">
-                <span class="card__eyebrow" style="color: var(--color-accent);">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/>
-                    </svg>
-                    Ghid de Utilizare
-                </span>
+                <span class="card__eyebrow">Despre Profesorul AI</span>
             </div>
-            <div class="prose" style="font-size: var(--text-xs);">
-                <p>Profesorul AI este optimizat pentru contextul platformei SImp. Încearcă să:</p>
-                <ul style="margin-left: var(--space-4); margin-top: var(--space-3); display: flex; flex-direction: column; gap: var(--space-3);">
-                    <li><strong>Fii specific:</strong> În loc de „nu merge codul”, trimite fragmentul care dă eroare.</li>
-                    <li><strong>Cere indicii:</strong> Dacă te-ai blocat la un exercițiu, întreabă „ce condiție îmi lipsește la pasul k?”.</li>
-                    <li><strong>Explică-mi:</strong> Solicită analogii dacă un concept (ex: pointeri) ți se pare prea abstract.</li>
+            <div class="prose" style="font-size: var(--text-sm);">
+                <p>Modeulul nostru AI (Llama 3.3) este antrenat special pe programa de informatică de liceu.</p>
+                <ul style="padding-left: var(--space-4); margin-top: var(--space-2); display: flex; flex-direction: column; gap: var(--space-2);">
+                    <li><strong>Generare dinamică:</strong> Nu există două teste la fel.</li>
+                    <li><strong>Explicații:</strong> Primești feedback detaliat pentru fiecare răspuns.</li>
+                    <li><strong>Corectare instantă:</strong> AI-ul îți analizează performanța la final.</li>
                 </ul>
             </div>
-            <div style="margin-top: auto; padding-top: var(--space-6);">
-                <div style="padding: var(--space-3); background: var(--color-surface-2); border-radius: var(--radius-md); border: 1px solid var(--color-border);">
-                    <span style="font-size: 10px; text-transform: uppercase; color: var(--color-fg-subtle); display: block; margin-bottom: 4px;">Model utilizat</span>
-                    <div style="font-size: var(--text-xs); font-family: var(--font-mono); color: var(--color-fg);">llama-3.3-70b-versatile</div>
-                </div>
+            <div style="margin-top: auto; padding-top: var(--space-4);">
+                <button onclick="document.getElementById('ai-widget-toggle').click()" class="btn btn--ghost btn--sm" style="width: 100%;">Deschide Chat Direct</button>
             </div>
         </article>
     </div>
 </div>
 
-<style>
-/* Chat Message Styling */
-.ai-msg {
-    max-width: 85%;
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    line-height: var(--leading-relaxed);
-    animation: slideUp 0.3s var(--ease-out);
-}
-
-.ai-msg.user {
-    align-self: flex-end;
-    background: var(--color-primary);
-    color: var(--color-fg-on-primary);
-    border-bottom-right-radius: var(--radius-xs);
-    box-shadow: var(--shadow-md), var(--shadow-glow-primary);
-}
-
-.ai-msg.assistant {
-    align-self: flex-start;
-    background: var(--color-surface-3);
-    color: var(--color-fg);
-    border-bottom-left-radius: var(--radius-xs);
-    border: 1px solid var(--color-border);
-    box-shadow: var(--shadow-sm);
-}
-
-.ai-msg strong {
-    display: block;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 4px;
-    opacity: 0.8;
-}
-
-.ai-msg code {
-    background: rgba(0,0,0,0.2);
-    padding: 2px 4px;
-    border-radius: 4px;
-    font-family: var(--font-mono);
-    font-size: 12px;
-}
-
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Auto-resize textarea */
-#ai-message::-webkit-scrollbar { width: 0; }
-</style>
-
 <script>
-(() => {
-    const chatBox = document.getElementById('ai-chat-box');
-    const form = document.getElementById('ai-chat-form');
-    const input = document.getElementById('ai-message');
-    const clearBtn = document.getElementById('ai-clear');
+document.addEventListener('DOMContentLoaded', () => {
+    const startBtn = document.getElementById('start-ai-quiz');
+    const initView = document.getElementById('quiz-init');
+    const loadingView = document.getElementById('quiz-loading');
+    const activeView = document.getElementById('quiz-active');
+    const resultsView = document.getElementById('quiz-results');
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const pathSlug = urlParams.get('path_exam') || 'general';
+    
+    let quizData = [];
+    let currentIdx = 0;
+    let userSelections = []; // { qIndex: 0, selected: 0, isCorrect: bool }
 
-    const history = [];
-
-    // Auto-resize textarea
-    input.addEventListener('input', () => {
-        input.style.height = 'auto';
-        input.style.height = (input.scrollHeight) + 'px';
-        if (input.scrollHeight > 200) {
-            input.style.overflowY = 'auto';
-            input.style.height = '200px';
-        } else {
-            input.style.overflowY = 'hidden';
-        }
-    });
-
-    function escapeHtml(text) {
-        return text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     }
 
-    function addMessage(role, text) {
-        const item = document.createElement('div');
-        item.className = `ai-msg ${role}`;
-
-        const title = role === 'user' ? 'Tu' : 'Profesor AI';
-        // Simple code block detection for better rendering
-        let formattedText = escapeHtml(text).replace(/\n/g, '<br>');
-        formattedText = formattedText.replace(/`(.*?)`/g, '<code>$1</code>');
-
-        item.innerHTML = `<strong>${title}</strong><div class="msg-content">${formattedText}</div>`;
-
-        chatBox.appendChild(item);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    function setLoading(isLoading) {
-        form.querySelector('button[type="submit"]').disabled = isLoading;
-        input.disabled = isLoading;
-        const status = document.getElementById('ai-status');
-        if (isLoading) {
-            status.style.color = 'var(--color-warning)';
-            status.innerHTML = '<span style="width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: pulse 1s infinite;"></span> Gândește...';
-        } else {
-            status.style.color = 'var(--color-success)';
-            status.innerHTML = '<span style="width: 8px; height: 8px; border-radius: 50%; background: currentColor;"></span> Online';
-        }
-    }
-
-    addMessage('assistant', 'Salut! Sunt profesorul tău AI de C++. Spune-mi ce concept sau algoritm vrei să explorăm astăzi.');
-
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const message = input.value.trim();
-        if (!message) return;
-
-        addMessage('user', message);
-        history.push({ role: 'user', content: message });
-        input.value = '';
-        input.style.height = 'auto';
-        setLoading(true);
+    startBtn.onclick = async () => {
+        initView.style.display = 'none';
+        loadingView.style.display = 'block';
 
         try {
-            const response = await fetch('PHP/profesor_ai_chat.php', {
+            const res = await fetch('PHP/ai_quiz_api.php', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    message,
-                    history: history.slice(-10)
-                })
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+                body: JSON.stringify({ action: 'generate_quiz', path_slug: pathSlug })
             });
-
-            const data = await response.json();
-            if (!response.ok || !data.ok) {
-                throw new Error(data.error || 'Nu am putut obține un răspuns.');
+            const data = await res.json();
+            
+            if (data && data.quiz) {
+                quizData = data.quiz;
+                currentIdx = 0;
+                userSelections = [];
+                loadingView.style.display = 'none';
+                activeView.style.display = 'flex';
+                renderQuestion();
+            } else {
+                throw new Error('Nu s-au putut genera întrebările.');
             }
-
-            addMessage('assistant', data.reply);
-            history.push({ role: 'assistant', content: data.reply });
-        } catch (error) {
-            addMessage('assistant', `Eroare: ${error.message}`);
-        } finally {
-            setLoading(false);
-            input.focus();
+        } catch (e) {
+            alert('Eroare: ' + e.message);
+            initView.style.display = 'block';
+            loadingView.style.display = 'none';
         }
-    });
+    };
 
-    clearBtn.addEventListener('click', () => {
-        history.length = 0;
-        chatBox.innerHTML = '';
-        addMessage('assistant', 'Conversația a fost resetată. Începem de la zero.');
-    });
-})();
+    function renderQuestion() {
+        const q = quizData[currentIdx];
+        activeView.innerHTML = `
+            <div class="card__head" style="margin-bottom: var(--space-4);">
+                <span class="card__eyebrow">Întrebarea ${currentIdx + 1} / ${quizData.length}</span>
+                <span class="badge badge--soft">${currentIdx + 1 > 5 ? 'Avansat' : 'Bazele'}</span>
+            </div>
+            <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-6);">${q.question}</h3>
+            
+            <div id="ai-options" style="display: flex; flex-direction: column; gap: var(--space-3); flex: 1;">
+                ${q.options.map((opt, i) => `
+                    <button class="grila-option ai-opt-btn" data-index="${i}" style="text-align: left; padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface-2); transition: all 0.2s;">
+                        ${opt}
+                    </button>
+                `).join('')}
+            </div>
+
+            <div id="ai-quiz-feedback" style="margin-top: var(--space-4); min-height: 60px; display: none;"></div>
+
+            <div class="card__actions" style="margin-top: var(--space-6);">
+                <button id="next-ai-q" class="btn btn--primary" style="display: none;">Următoarea Întrebare</button>
+            </div>
+        `;
+
+        const optButtons = document.querySelectorAll('.ai-opt-btn');
+        const feedback = document.getElementById('ai-quiz-feedback');
+        const nextBtn = document.getElementById('next-ai-q');
+
+        optButtons.forEach(btn => {
+            btn.onclick = () => {
+                const selected = parseInt(btn.dataset.index);
+                const isCorrect = selected === q.correct;
+                
+                userSelections.push({ question: q.question, user: selected, correct: q.correct, isCorrect });
+
+                // Disable all
+                optButtons.forEach(b => {
+                    b.disabled = true;
+                    const idx = parseInt(b.dataset.index);
+                    if (idx === q.correct) {
+                        b.style.borderColor = 'var(--color-success)';
+                        b.style.background = 'var(--color-success-soft)';
+                    } else if (idx === selected) {
+                        b.style.borderColor = 'var(--color-danger)';
+                        b.style.background = 'var(--color-danger-soft)';
+                    }
+                });
+
+                feedback.style.display = 'block';
+                feedback.innerHTML = `
+                    <div class="alert alert--${isCorrect ? 'success' : 'danger'}" style="margin: 0;">
+                        <strong>${isCorrect ? 'Excelent!' : 'Greșit.'}</strong> ${q.explanation}
+                    </div>
+                `;
+
+                nextBtn.style.display = 'block';
+                if (currentIdx === quizData.length - 1) {
+                    nextBtn.innerText = 'Vezi Scorul Final';
+                }
+            };
+        });
+
+        nextBtn.onclick = () => {
+            if (currentIdx < quizData.length - 1) {
+                currentIdx++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        };
+    }
+
+    async function showResults() {
+        activeView.style.display = 'none';
+        resultsView.style.display = 'block';
+        resultsView.innerHTML = `
+            <div class="ai-typing-dots"><span></span><span></span><span></span></div>
+            <p>Calculăm scorul și pregătim feedback-ul...</p>
+        `;
+
+        const score = userSelections.filter(s => s.isCorrect).length;
+        const percent = (score / quizData.length) * 100;
+
+        try {
+            const res = await fetch('PHP/ai_quiz_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+                body: JSON.stringify({ action: 'grade_quiz', answers: userSelections })
+            });
+            const data = await res.json();
+            
+            resultsView.innerHTML = `
+                <div class="card__head" style="justify-content: center; margin-bottom: var(--space-6);">
+                    <div style="text-align: center;">
+                        <h2 style="font-size: var(--text-5xl); font-weight: 700; color: ${percent >= 50 ? 'var(--color-success)' : 'var(--color-danger)'};">${score} / ${quizData.length}</h2>
+                        <p class="stat__sub">Scor Final</p>
+                    </div>
+                </div>
+                
+                <div style="max-width: 650px; margin: 0 auto;">
+                    <div style="padding: var(--space-6); background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-xl); text-align: left; margin-bottom: var(--space-8);">
+                        <div style="display: flex; gap: var(--space-3); align-items: flex-start;">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; font-size: 12px;">AI</div>
+                            <div style="flex: 1;">
+                                <h4 style="font-size: var(--text-md); font-weight: 600; margin-bottom: var(--space-3); color: var(--color-primary);">Raport de Evaluare:</h4>
+                                <div style="font-size: var(--text-sm); color: var(--color-fg-muted); line-height: 1.6; white-space: pre-wrap;">${data.feedback ? data.feedback.replace(/\*\*/g, '') : 'Analiză indisponibilă.'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card__actions" style="justify-content: center;">
+                        <button onclick="location.reload()" class="btn btn--primary">Încearcă din nou</button>
+                        <a href="index.php?page=grile" class="btn btn--ghost">Grile Clasice</a>
+                    </div>
+                </div>
+            `;
+        } catch (e) {
+            resultsView.innerHTML = `<h3>Scor: ${score} / ${quizData.length}</h3><button onclick="location.reload()" class="btn btn--primary">Reia</button>`;
+        }
+    }
+});
 </script>
-
-<style>
-@keyframes pulse {
-    0% { opacity: 0.4; }
-    50% { opacity: 1; }
-    100% { opacity: 0.4; }
-}
-</style>

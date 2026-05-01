@@ -39,6 +39,8 @@ services:
     volumes:
       # Application code (read-only for production)
       - ./site_g:/var/www/html:ro
+      # Relocated .env (mapping to legacy location inside container for ease, or root)
+      - ./.env:/var/www/.env:ro
       # Writable directories
       - ./site_g/uploads:/var/www/html/uploads:rw
       - ./site_g/logs:/var/www/html/logs:rw
@@ -96,6 +98,9 @@ services:
       # SQL initialization scripts
       - ./site_g/dbsortari.sql:/docker-entrypoint-initdb.d/01_dbsortari.sql:ro
       - ./site_g/database/upgrade_dashboard_progress.sql:/docker-entrypoint-initdb.d/02_upgrade_dashboard_progress.sql:ro
+      - ./site_g/database/upgrade_recursivitate_backtracking.sql:/docker-entrypoint-initdb.d/03_upgrade_recursivitate.sql:ro
+      - ./site_g/database/upgrade_profile_streak.sql:/docker-entrypoint-initdb.d/04_upgrade_profile_streak.sql:ro
+      - ./site_g/database/upgrade_rate_limit.sql:/docker-entrypoint-initdb.d/05_upgrade_rate_limit.sql:ro
     
     networks:
       - simp_network

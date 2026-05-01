@@ -42,6 +42,7 @@ $lectie_curenta_slug   = (string)($continueData['lesson_slug'] ?? 'sort_bubble')
 
 $stats        = get_exercise_stats($con, $userId, $lectie_curenta_slug);
 $recentItems  = get_recent_activity($con, $userId, 3);
+$streakInfo   = get_streak($con, $userId);
 
 $algoritm_zilei_titlu = 'Merge Sort (Interclasare)';
 $algoritm_zilei_desc  = 'Azi aprofundăm o tehnică eficientă (Divide et Impera) cu complexitate O(n log n).';
@@ -66,6 +67,11 @@ $nrRecent = is_array($recentItems) ? count($recentItems) : 0;
         </span>
         <h1 class="dash__title">
             Salutare, <span class="dash__title-accent"><?php echo $username; ?></span>
+            <?php if ($streakInfo['current'] > 0): ?>
+                <span class="badge badge--soft" style="vertical-align: middle; margin-left: var(--space-3); color: var(--color-warning); border-color: var(--color-warning-soft);">
+                    🔥 <?php echo $streakInfo['current']; ?> zile streak
+                </span>
+            <?php endif; ?>
         </h1>
         <p class="dash__lede">
             Continuă de unde ai rămas sau explorează un algoritm nou. Progresul tău este salvat automat.

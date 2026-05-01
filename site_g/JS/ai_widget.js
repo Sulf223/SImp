@@ -27,6 +27,10 @@
             .replace(/'/g, '&#039;');
     }
 
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    }
+
     function saveHistory() {
         try {
             sessionStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-20)));
@@ -154,7 +158,8 @@
             const response = await fetch('PHP/profesor_ai_chat.php', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': getCsrfToken()
                 },
                 body: JSON.stringify({
                     message: text,
@@ -211,3 +216,54 @@
     checkAIStatus();
     setInterval(checkAIStatus, 60000); // refresh la 1 minut
 })();
+
+/**
+ * Global API for contextual AI questions
+ */
+window.SImpAskAI = function(context) {
+    const widget = document.getElementById('ai-widget');
+    const input = document.getElementById('ai-widget-input');
+    const toggleBtn = document.getElementById('ai-widget-toggle');
+    if (!widget || !input) return;
+    
+    // Open widget if closed
+    if (!widget.classList.contains('open')) {
+        if (toggleBtn) toggleBtn.click();
+    }
+    
+    // Build prompt based on context type
+    let prompt = '';
+    if (context.type === 'quiz') {
+        prompt = `Am răspuns greșit la următoarea întrebare:\n\n"${context.intrebare}"\n\nAm ales: "${context.aleasa}"\nRăspunsul corect: "${context.corecta}"\n\nExplică-mi de ce răspunsul corect este cel bun, fără să-mi spui direct soluția. Ajută-mă să înțeleg conceptul.`;
+    } else if (context.type === 'exercise') {
+        prompt = `Sunt blocat la acest exercițiu de cod:\n\n${context.cod}\n\nAm încercat să completez cu: "${context.raspuns_user}"\n\nDă-mi un indiciu pas-cu-pas fără să-mi dai direct răspunsul.`;
+    } else if (context.type === 'concept') {
+        prompt = context.intrebare || 'Poți să-mi explici acest concept?';
+    } else {
+        prompt = context.intrebare || '';
+    }
+    
+    input.value = prompt;
+    input.focus();
+    
+    // Auto-scroll input to see the text if it's long
+    input.scrollTop = input.scrollHeight;
+};
+
+// Event delegation for all [data-ask-ai] buttons
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-ask-ai]');
+    if (!btn) return;
+    
+    e.preventDefault();
+    try {
+        const type = btn.getAttribute('data-ask-ai') || 'concept';
+        const contextStr = btn.getAttribute('data-context') || '{}';
+        const context = JSON.parse(contextStr);
+        context.type = type;
+        
+        window.SImpAskAI(context);
+    } catch (err) {
+        console.error('Ask AI: invalid context', err);
+    }
+});

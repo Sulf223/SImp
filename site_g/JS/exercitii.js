@@ -224,11 +224,12 @@
         return currentSet[indexCurent] || null;
     }
 
-    function setFeedback(text, isOk) {
+    function setFeedback(html, isOk) {
         const fb = document.getElementById('feedback');
         if (!fb) return;
-        fb.innerText = text;
+        fb.innerHTML = html;
         fb.style.color = isOk ? '#15803d' : '#b91c1c';
+        fb.style.display = html ? 'block' : 'none';
     }
 
     function setHint(text) {
@@ -256,7 +257,7 @@
         for (let i = 0; i < ex.cod.length; i++) {
             const line = ex.cod[i];
             if (line.indexOf('____') !== -1) {
-                html += line.replace('____', "<input type='text' id='raspuns" + i + "' size='30'>") + '\n';
+                html += line.replace('____', "<input type='text' id='raspuns" + i + "' class='exercise-input' size='30'>") + '\n';
             } else {
                 html += line + '\n';
             }
@@ -273,12 +274,17 @@
         }
     }
 
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    }
+
     function reportExerciseCompletion(ex) {
         if (!ex || !ex.lesson) return;
         fetch('PHP/progres_api.php', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': getCsrfToken()
             },
             body: JSON.stringify({
                 action: 'mark_exercise_complete',
@@ -305,12 +311,15 @@
         if (!ex) return;
 
         let corect = true;
+        let lastUserInput = '';
 
         for (let i = 0; i < ex.cod.length; i++) {
             if (ex.cod[i].indexOf('____') !== -1) {
                 const inputEl = document.getElementById('raspuns' + i);
-                const userInput = normalize((inputEl && inputEl.value) || '');
-                const isCorrect = (ex.raspunsuri || []).map(normalize).some((r) => r === userInput);
+                const userInput = (inputEl && inputEl.value) || '';
+                lastUserInput = userInput;
+                const normalizedUser = normalize(userInput);
+                const isCorrect = (ex.raspunsuri || []).map(normalize).some((r) => r === normalizedUser);
                 if (!isCorrect) {
                     corect = false;
                 }
@@ -324,7 +333,23 @@
                 reportExerciseCompletion(ex);
             }
         } else {
-            setFeedback('Raspuns gresit. Incearca din nou sau apasa Ajutor.', false);
+            const context = {
+                cod: ex.cod.join('\n'),
+                raspuns_user: lastUserInput
+            };
+            
+            const html = `
+                <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+                    <span>Răspuns greșit. Încearcă din nou sau apasă Ajutor.</span>
+                    <button class="btn btn--quiet btn--xs" style="background: rgba(239, 68, 68, 0.1); color: var(--color-danger); align-self: flex-start; border: 1px solid var(--color-danger-soft);" 
+                        data-ask-ai="exercise" 
+                        data-context='${JSON.stringify(context).replace(/'/g, "&#39;")}'>
+                        <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                        Întreabă AI-ul
+                    </button>
+                </div>
+            `;
+            setFeedback(html, false);
         }
     };
 

@@ -28,10 +28,15 @@ if ($metoda === null) {
 $cod_cpp = "";
 if (!empty($metoda['fisier_cpp'])) {
     $fisier_cpp_path = '../CPP/' . $metoda['fisier_cpp'];
-    if (file_exists($fisier_cpp_path)) {
+    
+    // Securitate: Symbolic link check + Path Traversal (P1)
+    $realPath = realpath($fisier_cpp_path);
+    $cppDir = realpath(__DIR__ . '/../CPP');
+    
+    if ($realPath && strpos($realPath, $cppDir) === 0 && file_exists($fisier_cpp_path)) {
         $cod_cpp = file_get_contents($fisier_cpp_path);
     } else {
-        $cod_cpp = "// Fișierul C++ sursă '" . htmlspecialchars($metoda['fisier_cpp']) . "' nu a fost găsit.";
+        $cod_cpp = "// Fișierul C++ sursă '" . htmlspecialchars($metoda['fisier_cpp']) . "' este invalid sau nu a fost găsit.";
     }
 }
 ?>

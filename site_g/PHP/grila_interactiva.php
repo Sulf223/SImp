@@ -108,25 +108,54 @@ if ($mode === 'w3') {
 
                 feedback.style.display = 'block';
                 feedback.innerHTML = `
-                    <div class="alert alert--${isCorrect ? 'success' : 'danger'}" style="margin: 0; padding: var(--space-3); border-radius: var(--radius-md); border: 1px solid currentColor;">
-                        <strong>${isCorrect ? 'Corect!' : 'Greșit!'}</strong><br>
-                        <p style="font-size: var(--text-xs); margin-top: 4px;">${q.explicatie}</p>
+                    <div class="alert alert--${isCorrect ? 'success' : 'danger'}" style="margin: 0; padding: var(--space-3); border-radius: var(--radius-md); border: 1px solid currentColor; display: flex; flex-direction: column; gap: var(--space-2);">
+                        <div>
+                            <strong>${isCorrect ? 'Corect!' : 'Greșit!'}</strong><br>
+                            <p style="font-size: var(--text-xs); margin-top: 4px;">${q.explicatie}</p>
+                        </div>
+                        ${!isCorrect ? `
+                            <div style="display: flex; gap: var(--space-2); margin-top: var(--space-2);">
+                                <button id="btn-retry" class="btn btn--quiet btn--xs" style="background: rgba(239, 68, 68, 0.1); color: var(--color-danger); border: 1px solid var(--color-danger-soft);">
+                                    Mai încearcă o dată
+                                </button>
+                                <button class="btn btn--quiet btn--xs" data-ask-ai="quiz" data-context='${JSON.stringify({
+                                    intrebare: q.intrebare,
+                                    aleasa: q.optiuni[parseInt(selected.value)],
+                                    corecta: q.optiuni[q.corect]
+                                }).replace(/'/g, "&#39;")}'>
+                                    <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                                    Întreabă AI-ul
+                                </button>
+                            </div>
+                        ` : ''}
                     </div>
                 `;
 
-                inputs.forEach(input => {
-                    input.disabled = true;
-                    if (parseInt(input.value) === q.corect) {
-                        input.parentElement.style.borderColor = 'var(--color-success)';
-                        input.parentElement.style.background = 'var(--color-success-soft)';
-                    } else if (parseInt(input.value) === parseInt(selected.value)) {
-                        input.parentElement.style.borderColor = 'var(--color-danger)';
-                        input.parentElement.style.background = 'var(--color-danger-soft)';
+                if (isCorrect) {
+                    inputs.forEach(input => {
+                        input.disabled = true;
+                        if (parseInt(input.value) === q.corect) {
+                            input.parentElement.style.borderColor = 'var(--color-success)';
+                            input.parentElement.style.background = 'var(--color-success-soft)';
+                        } else if (parseInt(input.value) === parseInt(selected.value)) {
+                            input.parentElement.style.borderColor = 'var(--color-danger)';
+                            input.parentElement.style.background = 'var(--color-danger-soft)';
+                        }
+                    });
+                    btnCheck.disabled = true;
+                    btnNext.disabled = false;
+                } else {
+                    // Logic for wrong answer
+                    const btnRetry = document.getElementById('btn-retry');
+                    if (btnRetry) {
+                        btnRetry.onclick = () => {
+                            feedback.style.display = 'none';
+                            selected.checked = false;
+                        };
                     }
-                });
-
-                btnCheck.disabled = true;
-                btnNext.disabled = false;
+                    // Button "Next" remains disabled or we can enable it to allow skipping
+                    btnNext.disabled = false; 
+                }
             };
 
             btnNext.onclick = () => {
@@ -312,6 +341,65 @@ document.addEventListener('DOMContentLoaded', () => {
     let raspunsCorect = <?php echo (int)($grila['raspuns_corect'] ?? 0); ?>;
     let explicatie = <?php echo json_encode($grila['explicatie'] ?? ''); ?>;
 
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    }
+
+    function processAnswer(answerId, answerText) {
+        // Update Drop Zone UI
+        dropZone.innerHTML = `<div style="font-weight: 600; color: var(--color-fg);">${answerText}</div>`;
+        
+        const isCorrect = (parseInt(answerId) === raspunsCorect);
+        
+        // Feedback Panel
+        feedbackPanel.style.display = 'block';
+        if (isCorrect) {
+            dropZone.style.borderColor = 'var(--color-success)';
+            dropZone.style.background = 'rgba(16, 185, 129, 0.05)';
+            document.getElementById('feedback-icon').innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" style="width:14px; height:14px;"><polyline points="20 6 9 17 4 12"/></svg>';
+            document.getElementById('feedback-icon').style.background = 'var(--color-success)';
+            document.getElementById('feedback-title').innerText = 'Corect!';
+            document.getElementById('feedback-title').style.color = 'var(--color-success)';
+            document.getElementById('feedback-text').innerText = explicatie;
+            
+            // Save progress via AJAX
+            fetch('PHP/ajax_progres.php', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': getCsrfToken()
+                },
+                body: JSON.stringify({ id_grila: currentGrilaId })
+            });
+        } else {
+            dropZone.style.borderColor = 'var(--color-danger)';
+            dropZone.style.background = 'rgba(239, 68, 68, 0.05)';
+            document.getElementById('feedback-icon').innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" style="width:14px; height:14px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+            document.getElementById('feedback-icon').style.background = 'var(--color-danger)';
+            document.getElementById('feedback-title').innerText = 'Mai încearcă';
+            document.getElementById('feedback-title').style.color = 'var(--color-danger)';
+            
+            const askAIContext = JSON.stringify({
+                intrebare: <?php echo json_encode($grila['intrebare'] ?? ''); ?>,
+                aleasa: answerText,
+                corecta: <?php 
+                    $corect_text = '';
+                    foreach($raspunsuri as $r) { if($r['id'] === ($grila['raspuns_corect'] ?? 0)) $corect_text = $r['text']; }
+                    echo json_encode($corect_text);
+                ?>
+            }).replace(/'/g, "&#39;");
+
+            document.getElementById('feedback-text').innerHTML = `
+                Răspunsul ales nu este corect. Analizează codul și încearcă o altă variantă.<br>
+                <button class="btn btn--quiet btn--xs" style="margin-top: 8px;" data-ask-ai="quiz" data-context='${askAIContext}'>
+                    <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                    Întreabă AI-ul
+                </button>
+            `;
+        }
+    }
+
+    // Drag & Drop Logic
     draggables.forEach(draggable => {
         draggable.addEventListener('dragstart', () => {
             draggable.classList.add('dragging');
@@ -321,6 +409,13 @@ document.addEventListener('DOMContentLoaded', () => {
         draggable.addEventListener('dragend', () => {
             draggable.classList.remove('dragging');
             draggable.style.opacity = '1';
+        });
+
+        // Alternative: Click-to-select
+        draggable.addEventListener('click', () => {
+            const id = draggable.getAttribute('data-id');
+            const text = draggable.innerText;
+            processAnswer(id, text);
         });
     });
 
@@ -339,40 +434,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const dragging = document.querySelector('.dragging');
         if (!dragging) return;
 
-        const answerId = parseInt(dragging.getAttribute('data-id'));
+        const answerId = dragging.getAttribute('data-id');
         const answerText = dragging.innerText;
-
-        // Update Drop Zone UI
-        dropZone.innerHTML = `<div style="font-weight: 600; color: var(--color-fg);">${answerText}</div>`;
-        
-        const isCorrect = (answerId === raspunsCorect);
-        
-        // Feedback Panel
-        feedbackPanel.style.display = 'block';
-        if (isCorrect) {
-            dropZone.style.borderColor = 'var(--color-success)';
-            dropZone.style.background = 'rgba(16, 185, 129, 0.05)';
-            document.getElementById('feedback-icon').innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" style="width:14px; height:14px;"><polyline points="20 6 9 17 4 12"/></svg>';
-            document.getElementById('feedback-icon').style.background = 'var(--color-success)';
-            document.getElementById('feedback-title').innerText = 'Corect!';
-            document.getElementById('feedback-title').style.color = 'var(--color-success)';
-            document.getElementById('feedback-text').innerText = explicatie;
-            
-            // Save progress via AJAX
-            fetch('PHP/ajax_progres.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `id_grila=${currentGrilaId}`
-            });
-        } else {
-            dropZone.style.borderColor = 'var(--color-danger)';
-            dropZone.style.background = 'rgba(239, 68, 68, 0.05)';
-            document.getElementById('feedback-icon').innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" style="width:14px; height:14px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-            document.getElementById('feedback-icon').style.background = 'var(--color-danger)';
-            document.getElementById('feedback-title').innerText = 'Mai încearcă';
-            document.getElementById('feedback-title').style.color = 'var(--color-danger)';
-            document.getElementById('feedback-text').innerText = 'Răspunsul ales nu este corect. Analizează codul și încearcă o altă variantă.';
-        }
+        processAnswer(answerId, answerText);
     });
 });
 </script>

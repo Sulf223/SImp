@@ -35,6 +35,13 @@ if ($password !== $password_confirm) {
     exit;
 }
 
+// 1.1 Validare complexitate parolă (P0)
+if (strlen($password) < 8 || !preg_match('/[A-Za-z]/', $password) || !preg_match('/[0-9]/', $password)) {
+    set_flash('error', 'Parola trebuie să aibă minim 8 caractere și să conțină atât litere cât și cifre.');
+    header('Location: ../index.php?page=register');
+    exit;
+}
+
 // 2. Verificăm dacă utilizatorul există deja în baza de date
 $sql_check = "SELECT id FROM utilizatori WHERE username = ?";
 $stmt_check = mysqli_prepare($con, $sql_check);
@@ -43,8 +50,8 @@ mysqli_stmt_execute($stmt_check);
 mysqli_stmt_store_result($stmt_check);
 
 if (mysqli_stmt_num_rows($stmt_check) > 0) {
-    // Utilizatorul există deja
-    set_flash('error', 'Numele de utilizator ' . htmlspecialchars($username) . ' este deja folosit.');
+    // Utilizatorul există deja - Mesaj generic anti-enumeration (P1)
+    set_flash('error', 'Înregistrarea a eșuat. Verifică datele și încearcă din nou.');
     header('Location: ../index.php?page=register');
     exit;
 }

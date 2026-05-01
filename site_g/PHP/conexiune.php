@@ -16,5 +16,6 @@ if (!$con) {
     die("Eroare internă a serverului. Te rugăm să revii mai târziu.");
 }
 
-mysqli_set_charset($con, "utf8");
+// Forțăm setul de caractere la utf8mb4 pentru a suporta corect diacriticele
+mysqli_set_charset($con, "utf8mb4");
 ?>

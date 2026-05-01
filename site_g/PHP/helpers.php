@@ -75,45 +75,91 @@ function regenerate_session() {
 }
 
 /**
- * Verifică rate limiting pentru login (previne brute-force).
- * @param string $username Username-ul pentru care verificăm
- * @return bool True dacă este permis, False dacă depășește limita
+ * Asigură existența tabelului pentru rate limiting.
  */
-function check_rate_limit($username) {
-    $max_attempts = 5;
-    $time_window = 900; // 15 minute în secunde
-    
-    $key = 'login_attempts_' . md5($username);
-    
-    if (!isset($_SESSION[$key])) {
-        $_SESSION[$key] = ['count' => 0, 'first_attempt' => time()];
-    }
-    
-    $attempts = $_SESSION[$key];
-    $current_time = time();
-    
-    // Resetăm dacă a trecut fereastra de timp
-    if ($current_time - $attempts['first_attempt'] > $time_window) {
-        $_SESSION[$key] = ['count' => 1, 'first_attempt' => $current_time];
-        return true;
-    }
-    
-    // Incrementăm numărul de încercări
-    $_SESSION[$key]['count']++;
-    
-    if ($_SESSION[$key]['count'] > $max_attempts) {
-        return false;
-    }
-    
-    return true;
+function ensure_rate_limit_table(mysqli $con) {
+    $sql = "CREATE TABLE IF NOT EXISTS rate_limit_attempts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        identifier VARCHAR(64) NOT NULL,
+        action VARCHAR(40) NOT NULL,
+        attempt_count INT DEFAULT 1,
+        window_start TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_ident_action (identifier, action)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+    mysqli_query($con, $sql);
 }
 
 /**
- * Resetează contorul de rate limiting după login cu succes.
+ * Verifică rate limiting pentru o acțiune.
+ * @param mysqli $con Conexiunea la DB
+ * @param string $action Numele acțiunii (ex: 'login', 'ai_chat')
+ * @param string $identifier Identificator unic (IP sau Username)
+ * @param int $max_attempts Maxim de încercări
+ * @param int $window_seconds Fereastra de timp în secunde
+ * @return bool True dacă este permis, False altfel
  */
-function reset_rate_limit($username) {
-    $key = 'login_attempts_' . md5($username);
-    unset($_SESSION[$key]);
+function check_rate_limit(mysqli $con, $action, $identifier, $max_attempts = 5, $window_seconds = 900) {
+    ensure_rate_limit_table($con);
+    
+    $today = date('Y-m-d H:i:s');
+    $identifier = md5($identifier); // Hash identifier for privacy if it's an IP
+    
+    // Curățăm înregistrările vechi (optional, pentru a menține tabela mică)
+    // mysqli_query($con, "DELETE FROM rate_limit_attempts WHERE window_start < NOW() - INTERVAL 1 DAY");
+
+    $sql = "SELECT id, attempt_count, window_start FROM rate_limit_attempts WHERE identifier = ? AND action = ?";
+    $stmt = mysqli_prepare($con, $sql);
+    mysqli_stmt_bind_param($stmt, 'ss', $identifier, $action);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_assoc($res);
+    mysqli_stmt_close($stmt);
+
+    if (!$row) {
+        // Prima încercare
+        $insert = "INSERT INTO rate_limit_attempts (identifier, action, attempt_count, window_start) VALUES (?, ?, 1, NOW())";
+        $stmt = mysqli_prepare($con, $insert);
+        mysqli_stmt_bind_param($stmt, 'ss', $identifier, $action);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        return true;
+    }
+
+    $id = $row['id'];
+    $count = (int)$row['attempt_count'];
+    $start = strtotime($row['window_start']);
+
+    if (time() - $start > $window_seconds) {
+        // Fereastra a expirat, resetăm
+        $update = "UPDATE rate_limit_attempts SET attempt_count = 1, window_start = NOW() WHERE id = ?";
+        $stmt = mysqli_prepare($con, $update);
+        mysqli_stmt_bind_param($stmt, 'i', $id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        return true;
+    }
+
+    // Incrementăm
+    $count++;
+    $update = "UPDATE rate_limit_attempts SET attempt_count = ? WHERE id = ?";
+    $stmt = mysqli_prepare($con, $update);
+    mysqli_stmt_bind_param($stmt, 'ii', $count, $id);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+
+    return $count <= $max_attempts;
+}
+
+/**
+ * Resetează contorul de rate limiting.
+ */
+function reset_rate_limit(mysqli $con, $action, $identifier) {
+    $identifier = md5($identifier);
+    $sql = "DELETE FROM rate_limit_attempts WHERE identifier = ? AND action = ?";
+    $stmt = mysqli_prepare($con, $sql);
+    mysqli_stmt_bind_param($stmt, 'ss', $identifier, $action);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
 }
 
 /**

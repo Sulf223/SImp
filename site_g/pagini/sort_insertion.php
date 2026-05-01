@@ -30,26 +30,46 @@ if (session_status() === PHP_SESSION_NONE) {
 
     <div class="bento" style="gap: var(--space-6);">
         <!-- CODE: C++ Implementation -->
-        <article class="card bento__card--accent" style="border: 1px solid rgba(34, 197, 94, 0.3); background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(34, 197, 94, 0.02) 100%); position: relative; overflow: hidden;">
-            <div style="position: absolute; top: -30%; right: -20%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(34, 197, 94, 0.3) 0%, transparent 70%); opacity: 0.05; z-index: 0;"></div>
+        <article class="card bento__card--accent" style="border: 1px solid rgba(16, 185, 129, 0.3); background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -30%; right: -20%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, transparent 70%); opacity: 0.05; z-index: 0;"></div>
             <div class="card__head" style="position: relative; z-index: 1;">
-                <span class="card__eyebrow" style="color: #22c55e;">
+                <span class="card__eyebrow" style="color: #10b981;">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>
                     </svg>
-                    Implementare C++
+                    Pseudo-cod (C++)
                 </span>
             </div>
-            <pre class="lesson-code"><code>for (int i = 1; i < n; i++) {
-    int key = v[i], j = i - 1;
-    while (j >= 0 && v[j] > key) {
-        v[j + 1] = v[j];
-        j--;
-    }
-    v[j + 1] = key;
-}</code></pre>
+            <pre class="lesson-code" data-lesson-code><code>
+        <span class="code-line" data-line="1">for (int i = 1; i < n; i++)</span>
+        <span class="code-line" data-line="2">  key = v[i]</span>
+        <span class="code-line" data-line="3">  j = i - 1</span>
+        <span class="code-line" data-line="4">  while (j >= 0 && v[j] > key)</span>
+        <span class="code-line" data-line="5">    v[j + 1] = v[j]; j--</span>
+        <span class="code-line" data-line="6">  v[j + 1] = key</span>
+            </code></pre>
         </article>
 
+        <!-- VARIABLE INSPECTOR -->
+        <article class="card bento__card--stat" data-var-inspector style="border: 1px solid var(--color-border); background: var(--color-surface-1);">
+            <div class="card__head">
+                <span class="card__eyebrow">
+                    <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 2v20M2 12h20"/></svg>
+                    Variable Inspector
+                </span>
+            </div>
+            <div style="display: grid; gap: var(--space-2); font-family: var(--font-mono); font-size: var(--text-sm); margin-top: var(--space-3);">
+                <div>i = <span data-watch="i" style="color: var(--color-primary); font-weight: bold;">—</span></div>
+                <div>j = <span data-watch="j" style="color: var(--color-primary); font-weight: bold;">—</span></div>
+                <div>key = <span data-watch="key" style="color: var(--color-success); font-weight: bold;">—</span></div>
+                <div>comparații = <span data-watch="comparisons" style="color: var(--color-accent);">0</span></div>
+                <div>swap-uri = <span data-watch="swaps" style="color: var(--color-warning);">0</span></div>
+            </div>
+            <button class="btn btn--quiet btn--sm" style="margin-top: var(--space-3); width: 100%;" data-ask-ai="concept" data-context='{"intrebare":"Ce face variabila key în Insertion Sort? De ce mutăm elementele la dreapta?"}'>
+                <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Ce sunt astea?
+            </button>
+        </article>
         <!-- VISUALIZER: Main interactive component -->
         <article class="card bento__card--hero" style="border: 1px solid var(--color-border); background: var(--color-surface-1); min-height: 550px; display: flex; flex-direction: column;">
             <div class="card__head">
@@ -62,10 +82,10 @@ if (session_status() === PHP_SESSION_NONE) {
             </div>
 
             <!-- Control Panel -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); padding: var(--space-4); background: var(--color-surface-2); border-radius: var(--radius-lg);">
+            <div data-visualizer-controls="custom" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); padding: var(--space-4); background: var(--color-surface-2); border-radius: var(--radius-lg);">
                 <div>
                     <label style="font-size: var(--text-xs); color: var(--color-fg-muted); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: var(--tracking-wide);">Dimensiune</label>
-                    <select id="array-size" style="width: 100%; padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-surface-1); color: var(--color-fg); font-size: var(--text-sm);">
+                    <select data-control="size" style="width: 100%; padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-surface-1); color: var(--color-fg); font-size: var(--text-sm);">
                         <option value="20">20 elemente</option>
                         <option value="50">50 elemente</option>
                         <option value="100" selected>100 elemente</option>
@@ -74,14 +94,14 @@ if (session_status() === PHP_SESSION_NONE) {
                 </div>
                 <div>
                     <label style="font-size: var(--text-xs); color: var(--color-fg-muted); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: var(--tracking-wide);">Viteza</label>
-                    <select id="sort-speed" style="width: 100%; padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-surface-1); color: var(--color-fg); font-size: var(--text-sm);">
+                    <select data-control="speed" style="width: 100%; padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-surface-1); color: var(--color-fg); font-size: var(--text-sm);">
                         <option value="slow">Lent</option>
                         <option value="medium" selected>Normal</option>
                         <option value="fast">Rapid</option>
                     </select>
                 </div>
                 <div style="display: flex; gap: var(--space-2); align-items: flex-end;">
-                    <button id="generate-btn" class="btn btn--ghost btn--sm" style="flex: 1;">
+                    <button data-action="regenerate" class="btn btn--ghost btn--sm" style="flex: 1;">
                         <span style="display: inline-flex; align-items: center; gap: var(--space-2);">
                             <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M3 21v-5h5" />
@@ -89,7 +109,7 @@ if (session_status() === PHP_SESSION_NONE) {
                             Regenerează
                         </span>
                     </button>
-                    <button id="play-btn" class="btn btn--primary btn--sm" style="flex: 1;">
+                    <button data-action="start" class="btn btn--primary btn--sm" style="flex: 1;">
                         <span style="display: inline-flex; align-items: center; gap: var(--space-2);">
                             <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <polygon points="5 3 19 12 5 21 5 3" />
@@ -176,38 +196,6 @@ if (session_status() === PHP_SESSION_NONE) {
             <p id="hint" class="card__body" style="display:none; padding: var(--space-3); background: var(--color-accent-soft); color: var(--color-accent); border-radius: var(--radius-md); margin-top: var(--space-2); font-style: italic;"></p>
         </article>
     </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        const visualizer = window.visualizerInstance;
-        if (!visualizer) return;
-        
-        const playBtn = document.getElementById('play-btn');
-        if (playBtn) playBtn.onclick = () => visualizer.runSort();
-        
-        const generateBtn = document.getElementById('generate-btn');
-        if (generateBtn) generateBtn.onclick = () => visualizer.resetArray();
-        
-        const arraySize = document.getElementById('array-size');
-        if (arraySize) {
-            arraySize.onchange = () => {
-                visualizer.size = parseInt(arraySize.value, 10);
-                visualizer.valueLabels = null;
-                visualizer.resetArray();
-            };
-        }
-        
-        const sortSpeed = document.getElementById('sort-speed');
-        if (sortSpeed) {
-            sortSpeed.onchange = () => {
-                const speeds = { slow: 80, medium: 35, fast: 10 };
-                visualizer.delay = speeds[sortSpeed.value] || 35;
-            };
-        }
-    }, 100);
-});
-</script>
 
     <style>
     @keyframes shimmer {

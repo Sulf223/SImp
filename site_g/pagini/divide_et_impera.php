@@ -105,6 +105,6 @@ if (session_status() === PHP_SESSION_NONE) {
     </div>
 </div>
 
-<script src="JS/fundamental_visualizer.js"></script>
+<script nonce="<?= $nonce ?>" src="JS/fundamental_visualizer.js"></script>
 <div data-lesson-slug="divide_et_impera" hidden></div>
-<script src="JS/lesson_tracker.js"></script>
+<script nonce="<?= $nonce ?>" src="JS/lesson_tracker.js"></script>

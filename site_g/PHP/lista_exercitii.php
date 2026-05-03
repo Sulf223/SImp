@@ -30,17 +30,39 @@ include __DIR__ . '/conexiune.php';
             </div>
             
             <?php
+            // POLISH [P5]: Pagination
+            $page = isset($_GET['p']) ? max(1, (int)$_GET['p']) : 1;
+            $limit = 25;
+            $offset = ($page - 1) * $limit;
+
+            $total_sql = "SELECT COUNT(*) as count FROM exercitii";
+            $total_res = $con->query($total_sql);
+            $total_row = $total_res->fetch_assoc();
+            $total_rows = $total_row['count'];
+            $total_pages = ceil($total_rows / $limit);
+
             $sql = "SELECT e.id_exercitiu, e.titlu, e.nivel, m.nume AS metoda
                     FROM exercitii e
                     JOIN metode m ON e.id_metoda = m.id_metoda
-                    ORDER BY e.id_exercitiu";
-            $rez = mysqli_query($con, $sql);
+                    ORDER BY e.id_exercitiu
+                    LIMIT $limit OFFSET $offset";
+            $rez = $con->query($sql);
 
-            if (!$rez): ?>
-                <div class="alert alert--danger">Eroare la interogare: <?php echo htmlspecialchars(mysqli_error($con)); ?></div>
+            if (!$rez): 
+                // FIX [M3]: Eliminare afișare eroare directă către utilizator (Error Disclosure)
+                error_log("Eroare DB în lista_exercitii.php: " . $con->error);
+            ?>
+                <div class="alert alert--danger">Eroare internă a serverului. Reîncercați mai târziu.</div>
+            <?php elseif ($rez->num_rows === 0): ?>
+                <!-- POLISH [P3]: Empty state -->
+                <div class="empty-state" style="text-align:center; padding: var(--space-12) var(--space-4);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-fg-muted)" stroke-width="2" width="48" height="48" style="margin-bottom: var(--space-4);"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    <h3 style="margin-top: var(--space-3); color: var(--color-fg-muted);">Nu există încă exerciții</h3>
+                    <p style="color: var(--color-fg-subtle); font-size: var(--text-sm);">Reveniți mai târziu sau adăugați exerciții din panoul de administrare.</p>
+                </div>
             <?php else: ?>
                 <div class="timeline" style="margin-top: var(--space-4);">
-                    <?php while ($row = mysqli_fetch_assoc($rez)): ?>
+                    <?php while ($row = $rez->fetch_assoc()): ?>
                         <div class="timeline__item">
                             <span class="timeline__icon">
                                 <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -55,6 +77,21 @@ include __DIR__ . '/conexiune.php';
                         </div>
                     <?php endwhile; ?>
                 </div>
+
+                <?php 
+                // POLISH [P5]: Pagination UI
+                if ($total_pages > 1): ?>
+                    <div style="display: flex; justify-content: center; align-items: center; gap: var(--space-4); margin-top: var(--space-6);">
+                        <?php if ($page > 1): ?>
+                            <a href="index.php?page=lista_exercitii&p=<?php echo ($page-1); ?>" class="btn btn--quiet btn--sm">← Anterior</a>
+                        <?php endif; ?>
+                        <span style="font-size: var(--text-xs); color: var(--color-fg-muted);">Pagina <strong><?php echo $page; ?></strong> din <?php echo $total_pages; ?></span>
+                        <?php if ($page < $total_pages): ?>
+                            <a href="index.php?page=lista_exercitii&p=<?php echo ($page+1); ?>" class="btn btn--quiet btn--sm">Următor →</a>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+
             <?php endif; ?>
         </article>
 
@@ -108,5 +145,5 @@ include __DIR__ . '/conexiune.php';
     </div>
 </div>
 
-<script src="JS/exercitii_avansate.js"></script>
-<script src="JS/visualizer.js"></script>
+<script src="JS/exercitii_avansate.js" nonce="<?= $nonce ?>"></script>
+<script src="JS/visualizer.js" nonce="<?= $nonce ?>"></script>

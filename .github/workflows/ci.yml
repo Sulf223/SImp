@@ -1,0 +1,32 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.1', '8.2', '8.3']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli, mbstring, pdo
+          coverage: none
+      - name: Validate composer.json
+        run: composer validate --strict
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+      - name: PHP lint
+        run: find site_g -name "*.php" -print0 | xargs -0 -n1 php -l
+      - name: Check no BOM in PHP files
+        run: |
+          for f in $(find site_g -name "*.php"); do
+            if head -c 3 "$f" | grep -q $'\xef\xbb\xbf'; then
+              echo "BOM in $f"; exit 1;
+            fi
+          done
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse site_g/PHP --level 4 --no-progress
+      - name: PHPUnit
+        run: vendor/bin/phpunit

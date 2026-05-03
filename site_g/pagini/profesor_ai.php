@@ -73,7 +73,8 @@ $is_logged_in = is_logged_in();
     </div>
 </div>
 
-<script>
+<script nonce="<?= $nonce ?>">
+// FIX [M2]: Adăugare nonce pentru CSP
 document.addEventListener('DOMContentLoaded', () => {
     const startBtn = document.getElementById('start-ai-quiz');
     const initView = document.getElementById('quiz-init');

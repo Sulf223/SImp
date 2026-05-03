@@ -162,7 +162,16 @@
     }
 
     function colorByIndex(index) {
-        var palette = ["#2563eb", "#16a34a", "#f59e0b", "#ef4444", "#7c3aed", "#0ea5e9"];
+        // FIX [A14]: Citim culorile din CSS variables pentru a respecta tema curentă
+        var style = getComputedStyle(document.documentElement);
+        var palette = [
+            style.getPropertyValue('--color-primary').trim() || "#2563eb",
+            style.getPropertyValue('--color-success').trim() || "#16a34a",
+            style.getPropertyValue('--color-warning').trim() || "#f59e0b",
+            style.getPropertyValue('--color-danger').trim() || "#ef4444",
+            style.getPropertyValue('--color-accent').trim() || "#7c3aed",
+            style.getPropertyValue('--color-fg-subtle').trim() || "#0ea5e9"
+        ];
         return palette[index % palette.length];
     }
 

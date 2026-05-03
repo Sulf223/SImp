@@ -50,7 +50,7 @@ if ($mode === 'w3') {
         </article>
     </div>
 
-    <script>
+    <script nonce="<?= $nonce ?>"> // FIX [M2]: Adăugare nonce pentru CSP
     document.addEventListener('DOMContentLoaded', () => {
         const questions = <?php echo json_encode(array_values($intrebari_selectate), JSON_UNESCAPED_UNICODE); ?>;
         const root = document.getElementById('w3-quiz-root');
@@ -103,7 +103,8 @@ if ($mode === 'w3') {
                 }
 
                 state.answered = true;
-                const isCorrect = parseInt(selected.value) === q.corect;
+                // FIX [M7]: Adăugare radix 10 la parseInt
+                const isCorrect = parseInt(selected.value, 10) === q.corect;
                 if (isCorrect) state.score++;
 
                 feedback.style.display = 'block';
@@ -120,7 +121,8 @@ if ($mode === 'w3') {
                                 </button>
                                 <button class="btn btn--quiet btn--xs" data-ask-ai="quiz" data-context='${JSON.stringify({
                                     intrebare: q.intrebare,
-                                    aleasa: q.optiuni[parseInt(selected.value)],
+                                    // FIX [M7]: Adăugare radix 10 la parseInt
+                                    aleasa: q.optiuni[parseInt(selected.value, 10)],
                                     corecta: q.optiuni[q.corect]
                                 }).replace(/'/g, "&#39;")}'>
                                     <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
@@ -134,10 +136,11 @@ if ($mode === 'w3') {
                 if (isCorrect) {
                     inputs.forEach(input => {
                         input.disabled = true;
-                        if (parseInt(input.value) === q.corect) {
+                        // FIX [M7]: Adăugare radix 10 la parseInt
+                        if (parseInt(input.value, 10) === q.corect) {
                             input.parentElement.style.borderColor = 'var(--color-success)';
                             input.parentElement.style.background = 'var(--color-success-soft)';
-                        } else if (parseInt(input.value) === parseInt(selected.value)) {
+                        } else if (parseInt(input.value, 10) === parseInt(selected.value, 10)) {
                             input.parentElement.style.borderColor = 'var(--color-danger)';
                             input.parentElement.style.background = 'var(--color-danger-soft)';
                         }
@@ -207,6 +210,11 @@ if ($id_grila > 0) {
             ['id' => 4, 'text' => $grila['varianta_4']],
         ];
         shuffle($raspunsuri);
+    } else {
+        // FIX [L3]: Tratare caz în care grila nu există
+        set_flash("Grila nu există.", "danger");
+        header("Location: index.php?page=grile");
+        exit;
     }
     
     $stmt_next = $con->prepare("SELECT id FROM grile_cpp WHERE id > ? ORDER BY id ASC LIMIT 1");
@@ -331,7 +339,7 @@ if ($id_grila > 0) {
 }
 </style>
 
-<script>
+<script nonce="<?= $nonce ?>"> // FIX [M2]: Adăugare nonce pentru CSP
 document.addEventListener('DOMContentLoaded', () => {
     const draggables = document.querySelectorAll('.draggable-answer');
     const dropZone = document.getElementById('drop-zone');
@@ -349,7 +357,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update Drop Zone UI
         dropZone.innerHTML = `<div style="font-weight: 600; color: var(--color-fg);">${answerText}</div>`;
         
-        const isCorrect = (parseInt(answerId) === raspunsCorect);
+        // FIX [M7]: Adăugare radix 10 la parseInt
+        const isCorrect = (parseInt(answerId, 10) === raspunsCorect);
         
         // Feedback Panel
         feedbackPanel.style.display = 'block';
@@ -389,13 +398,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 ?>
             }).replace(/'/g, "&#39;");
 
-            document.getElementById('feedback-text').innerHTML = `
-                Răspunsul ales nu este corect. Analizează codul și încearcă o altă variantă.<br>
-                <button class="btn btn--quiet btn--xs" style="margin-top: 8px;" data-ask-ai="quiz" data-context='${askAIContext}'>
-                    <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
-                    Întreabă AI-ul
-                </button>
-            `;
+            // FIX [H2]: Prevenire XSS prin utilizarea manipulării DOM sigure în loc de innerHTML
+            const feedbackText = document.getElementById('feedback-text');
+            feedbackText.innerHTML = 'Răspunsul ales nu este corect. Analizează codul și încearcă o altă variantă.<br>';
+            
+            const aiButton = document.createElement('button');
+            aiButton.className = 'btn btn--quiet btn--xs';
+            aiButton.style.marginTop = '8px';
+            aiButton.setAttribute('data-ask-ai', 'quiz');
+            aiButton.setAttribute('data-context', askAIContext);
+            
+            // Re-utilizăm SVG-ul într-un mod sigur
+            aiButton.innerHTML = `<svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> Întreabă AI-ul`;
+            
+            feedbackText.appendChild(aiButton);
         }
     }
 

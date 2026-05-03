@@ -13,8 +13,12 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// FIX [M2]: Generare nonce pentru CSP și eliminare 'unsafe-inline' pentru scripturi
+$nonce = base64_encode(random_bytes(16));
+
 // CSP compatibil cu scripturile inline existente din proiect.
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; frame-src https://onecompiler.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;");
+// FIX [M2]: Utilizare nonce în CSP. 'unsafe-inline' rămâne pentru style-src datorită stilurilor dinamice din pagini.
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-{$nonce}'; frame-src https://onecompiler.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;");
 
 header("X-Content-Type-Options: nosniff");
 header("X-Frame-Options: SAMEORIGIN");
@@ -60,7 +64,11 @@ $pagini_permise = [
     'lista_exercitii' => 'PHP/lista_exercitii.php',
     'changelog' => 'pagini/changelog.php',
     'profil' => 'pagini/profil.php',
-    'invatare' => 'pagini/invatare.php'
+    'invatare' => 'pagini/invatare.php',
+    'admin' => 'pagini/admin.php',
+    // FEATURE [F1]: Password Reset
+    'forgot_password' => 'pagini/forgot_password.php',
+    'reset_password' => 'pagini/reset_password.php'
 ];
 
 // Ce pagină încărcăm implicit?
@@ -76,21 +84,54 @@ if (isset($_GET['page'])) {
         $pagina_curenta = $_GET['page'];
     } else {
         $is_404 = true;
+        // POLISH [P2]: Set HTTP 404 status code
+        http_response_code(404);
     }
 }
 
-$fisier_de_incarcat = $is_404 ? null : $pagini_permise[$pagina_curenta];
+$fisier_de_incarcat = $is_404 ? 'pagini/404.php' : $pagini_permise[$pagina_curenta];
 
 // Paginile pe care nu afișăm widget-ul flotant AI
 $pagini_fara_ai_widget = ['bun_venit', 'login', 'register', 'logout'];
 $afiseaza_ai_widget = !$is_404 && !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
+
+// POLISH [P8]: Dynamic page titles
+$page_titles = [
+    'bun_venit' => 'Bun venit',
+    'acasa' => 'Tablou de bord',
+    'algoritmi' => 'Algoritmi de sortare',
+    'profesor_ai' => 'Profesor AI',
+    'sortare' => 'Laborator Sortare',
+    'metode' => 'Administrare Metode',
+    'compilator' => 'Compilator Online',
+    'metoda' => 'Detalii Algoritm',
+    'login' => 'Autentificare',
+    'register' => 'Cont Nou',
+    'grile' => 'Grile interactive',
+    'lista_exercitii' => 'Exerciții practice',
+    'profil' => 'Profilul meu',
+    'admin' => 'Administrare Sistem'
+];
+$display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_curenta] ?? 'Portal C++')) . ' – SImp Portal';
 ?>
 <!DOCTYPE html>
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal C++ – Metode de sortare</title>
+    <title><?php echo $display_title; ?></title>
+
+    <!-- POLISH [P8]: Favicon and Meta tags -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta name="description" content="SImp Portal – platformă educațională pentru învățarea algoritmilor de sortare cu vizualizări interactive în C++.">
+    <meta property="og:title" content="SImp Portal – C++ Learning Hub">
+    <meta property="og:description" content="Învață algoritmi de sortare cu vizualizări interactive, exerciții practice și asistent AI.">
+    <meta property="og:type" content="website">
+
+    <!-- FEATURE [F4]: PWA Manifest & Meta -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6E56CF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
 
     <!-- Font Inter de la Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -99,28 +140,23 @@ $afiseaza_ai_widget = !$is_404 && !in_array($pagina_curenta, $pagini_fara_ai_wid
     <link rel="stylesheet" href="CSS/modern_vars.css">
     <link rel="stylesheet" href="stil.css">
     <link rel="stylesheet" href="CSS/dashboard_modern.css">
+    <?php if ($pagina_curenta === 'admin'): ?>
+        <link rel="stylesheet" href="CSS/admin.css">
+    <?php endif; ?>
+    <?php if ($pagina_curenta === 'sortare'): ?>
+        <link rel="stylesheet" href="CSS/sortare.css">
+    <?php endif; ?>
     <meta name="csrf-token" content="<?php echo get_csrf_token(); ?>">
     <?php if ($pagina_curenta === 'bun_venit'): ?>
         <link rel="stylesheet" href="CSS/bun_venit.css">
     <?php endif; ?>
     <style>
-        /* Anulează pointer-events din stil.css pentru a face butoanele clickabile */
-        nav, 
-        nav * {
-            pointer-events: auto !important;
-        }
-        
+        /* FIX [UI4]: workaround pointer-events eliminat – body::before are z-index:-1 și nu blochează nimic */
+
         /* Asigură-te că zona principală de conținut este mereu deasupra fundalului ambient */
         main {
             position: relative;
             z-index: 10;
-            pointer-events: auto !important;
-        }
-
-        /* Reactivează pointer-events pentru elemente interactive */
-        a, button, .btn, .grila-option, input, textarea {
-            pointer-events: auto !important;
-            cursor: pointer !important;
         }
 
         /* Widget AI: Când este închis, panelul nu trebuie să ocupe spațiu sau să blocheze click-urile */
@@ -150,6 +186,9 @@ $afiseaza_ai_widget = !$is_404 && !in_array($pagina_curenta, $pagini_fara_ai_wid
 </head>
 <body data-theme="dark" style="background: var(--color-bg); color: var(--color-fg); font-family: var(--font-sans); margin: 0; min-height: 100vh; display: flex; flex-direction: column; isolation: isolate;">
 
+<!-- POLISH [P6]: Skip-to-content link for accessibility -->
+<a href="#main-content" class="skip-link">Sari la conținut</a>
+
 <nav class="site-nav">
     <!-- LOGO -->
     <div class="site-nav__brand">
@@ -159,9 +198,14 @@ $afiseaza_ai_widget = !$is_404 && !in_array($pagina_curenta, $pagini_fara_ai_wid
             <span style="font-size: var(--text-xs); color: var(--color-fg-muted); letter-spacing: var(--tracking-wide); text-transform: uppercase;">C++ Learning Hub</span>
         </div>
     </div>
+
+    <!-- POLISH [P1]: Hamburger menu button for mobile -->
+    <button id="nav-toggle" class="btn btn--ghost btn--sm site-nav__toggle" aria-label="Deschide meniul" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
     
     <!-- MENU + THEME TOGGLE -->
-    <ul class="site-nav__menu">
+    <ul class="site-nav__menu" id="nav-menu">
         <li><a href="index.php?page=bun_venit" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Bun venit</a></li>
         <li><a href="index.php?page=acasa" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Acasă</a></li>
         <li><a href="index.php?page=algoritmi" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Algoritmi</a></li>
@@ -172,11 +216,14 @@ $afiseaza_ai_widget = !$is_404 && !in_array($pagina_curenta, $pagini_fara_ai_wid
         <li><a href="index.php?page=compilator" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Compilator</a></li>
         <li><a href="index.php?page=grile" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Grile</a></li>
         <li><a href="index.php?page=profil" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Profil</a></li>
-        
+        <?php if (function_exists('is_admin') && is_admin()): ?>
+        <li><a href="index.php?page=admin" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm); color: var(--color-warning); font-weight: 600;">Admin</a></li>
+        <?php endif; ?>
+
         <!-- THEME TOGGLE -->
         <li style="margin-left: var(--space-2); border-left: 1px solid var(--color-border); padding-left: var(--space-2);">
-            <button id="theme-toggle" class="btn btn--ghost btn--sm" title="Toggle dark/light mode" style="display: flex; align-items: center; gap: var(--space-1);">
-                <svg id="theme-icon-sun" class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <button id="theme-toggle" class="btn btn--ghost btn--sm" aria-label="Comutare temă" title="Toggle dark/light mode" style="display: flex; align-items: center; gap: var(--space-1);">
+                <svg id="theme-icon-sun" class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y2="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
                 <svg id="theme-icon-moon" class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             </button>
         </li>
@@ -197,9 +244,28 @@ $afiseaza_ai_widget = !$is_404 && !in_array($pagina_curenta, $pagini_fara_ai_wid
     </ul>
 </nav>
 
-<main style="flex: 1; padding: var(--space-6); max-width: var(--measure-wide); margin: 0 auto; width: 100%;">
+<main id="main-content" style="flex: 1; padding: var(--space-6); max-width: var(--measure-wide); margin: 0 auto; width: 100%;">
     <?php
     display_flash();
+    
+    // FEATURE [F5]: Display newly unlocked achievements as toasts
+    if (!empty($_SESSION['new_achievements'])) {
+        echo '<div class="toast-container" id="toast-container-achievements" style="top: auto; bottom: var(--space-4);">';
+        foreach ($_SESSION['new_achievements'] as $ach) {
+            echo '<div class="toast toast--info" role="alert" style="border-left-color: var(--color-warning); animation: toastIn 0.5s ease; align-items: center;">';
+            echo '<div class="toast__icon" style="color: var(--color-warning);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></div>';
+            echo '<div class="toast__content" style="flex: 1;">';
+            echo '<strong style="display: block; font-size: var(--text-sm); color: var(--color-fg);">Achievement Deblocat!</strong>';
+            echo '<span style="font-size: var(--text-xs); color: var(--color-fg-muted);">' . htmlspecialchars($ach['title']) . '</span>';
+            echo '</div>';
+            echo '<button type="button" class="toast__close" aria-label="Închide" onclick="this.parentElement.remove()">&times;</button>';
+            echo '</div>';
+            echo '<script nonce="' . $nonce . '">setTimeout(() => { const t = document.getElementById("toast-container-achievements"); if(t) t.remove(); }, 6000);</script>';
+        }
+        echo '</div>';
+        unset($_SESSION['new_achievements']);
+    }
+
     if (isset($_GET['msg']) && $_GET['msg'] === 'logout_success') {
         echo '<div class="alert alert--success" style="margin-bottom: var(--space-4); padding: var(--space-3); border-radius: var(--radius-md); background: var(--color-success-soft); color: var(--color-success); border: 1px solid var(--color-success);">Ați fost delogat cu succes!</div>';
     }
@@ -247,6 +313,7 @@ $afiseaza_ai_widget = !$is_404 && !in_array($pagina_curenta, $pagini_fara_ai_wid
     </div>
 </footer>
 
+<script src="JS/toast.js" defer nonce="<?= $nonce ?>"></script>
 <?php if ($afiseaza_ai_widget): ?>
 <div id="ai-widget" class="ai-widget">
     <button id="ai-widget-toggle" class="ai-widget-toggle" type="button" aria-label="Deschide chat Profesor AI" aria-expanded="false" style="position: relative;">
@@ -286,11 +353,11 @@ $afiseaza_ai_widget = !$is_404 && !in_array($pagina_curenta, $pagini_fara_ai_wid
         </form>
     </section>
 </div>
-
-<script src="JS/ai_widget.js" defer></script>
+<script src="JS/ai_widget.js" defer nonce="<?= $nonce ?>"></script>
 <?php endif; ?>
+
 </body>
-<script>
+<script nonce="<?= $nonce ?>"> // FIX [M2]: Adăugare nonce pentru CSP
 // THEME TOGGLE
 (function() {
   const button = document.getElementById('theme-toggle');
@@ -328,6 +395,18 @@ $afiseaza_ai_widget = !$is_404 && !in_array($pagina_curenta, $pagini_fara_ai_wid
     const next = current === 'dark' ? 'light' : 'dark';
     setTheme(next);
   });
+})();
+
+// POLISH [P1]: Mobile menu toggle
+(function() {
+    const toggle = document.getElementById('nav-toggle');
+    const menu = document.getElementById('nav-menu');
+    if (toggle && menu) {
+        toggle.addEventListener('click', () => {
+            const isOpen = menu.classList.toggle('is-open');
+            toggle.setAttribute('aria-expanded', isOpen);
+        });
+    }
 })();
 </script>
 </html>

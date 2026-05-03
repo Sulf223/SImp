@@ -1,11 +1,16 @@
 <?php
 header('Content-Type: application/json; charset=UTF-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 require_once 'helpers.php';
+
+// FIX [A2]: Session timeout pentru AJAX
+enforce_session_timeout_ajax();
 
 // Verificăm CSRF pentru cereri AJAX (P1)
 if (!verify_csrf_ajax()) {

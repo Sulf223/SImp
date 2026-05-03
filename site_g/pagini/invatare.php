@@ -7,17 +7,25 @@ require_once 'PHP/progres_learning.php';
 $is_logged_in = is_logged_in();
 $id_utilizator = $_SESSION['user_id'] ?? 0;
 
-// Fetch learning paths
-$paths = [];
-$res = mysqli_query($con, "SELECT * FROM learning_paths ORDER BY id ASC");
-while ($row = mysqli_fetch_assoc($res)) {
-    $row['steps'] = [];
-    $path_id = $row['id'];
-    $steps_res = mysqli_query($con, "SELECT * FROM learning_path_steps WHERE path_id = $path_id ORDER BY step_order ASC");
-    while ($step = mysqli_fetch_assoc($steps_res)) {
-        $row['steps'][] = $step;
+// FIX [C1]: Optimizare interogări (eliminare N+1) și prevenire SQL Injection prin preluare bulk
+$paths = []; 
+$by_id = [];
+$rs = $con->query("SELECT * FROM learning_paths ORDER BY id ASC");
+if ($rs) {
+    while ($r = $rs->fetch_assoc()) {
+        $r['steps'] = [];
+        $by_id[(int)$r['id']] = count($paths);
+        $paths[] = $r;
     }
-    $paths[] = $row;
+}
+$rs = $con->query("SELECT * FROM learning_path_steps ORDER BY path_id, step_order");
+if ($rs) {
+    while ($s = $rs->fetch_assoc()) {
+        $pid = (int)$s['path_id'];
+        if (isset($by_id[$pid])) {
+            $paths[$by_id[$pid]]['steps'][] = $s;
+        }
+    }
 }
 ?>
 

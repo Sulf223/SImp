@@ -12,9 +12,12 @@ if ($run_id > 0) {
         if ($row = $result->fetch_assoc()) {
             $fisier_cpp = $row['fisier_cpp'];
             if (!empty($fisier_cpp)) {
-                $nume_fisier_sigur = basename($fisier_cpp);
-                $file_path = '../CPP/' . $nume_fisier_sigur;
-                if (file_exists($file_path)) {
+                // FIX [M5]: Protecție Path Traversal și validare cale fișier C++ (utilizând pattern din metoda.php)
+                $file_path = __DIR__ . '/../CPP/' . $fisier_cpp;
+                $realPath = realpath($file_path);
+                $cppDir = realpath(__DIR__ . '/../CPP');
+
+                if ($realPath && strpos($realPath, $cppDir) === 0 && file_exists($file_path)) {
                     $cod_sursa = file_get_contents($file_path);
                 }
             }
@@ -76,7 +79,32 @@ if (empty($cod_sursa)) {
             </div>
         </article>
 
+        <!-- FEATURE [F3]: AI Code Feedback UI -->
+        <article class="card bento__card--timeline" style="grid-column: 1 / -1; border: 1px solid var(--color-border); background: var(--color-surface-1);">
+            <div class="card__head">
+                <span class="card__eyebrow">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                    </svg>
+                    Feedback Profesor AI
+                </span>
+            </div>
+            <div class="card__body" style="display: flex; flex-direction: column; gap: var(--space-4);">
+                <p style="color: var(--color-fg-muted); font-size: var(--text-sm);">Lipește codul pe care tocmai l-ai rulat pentru o analiză rapidă a stilului, erorilor și complexității.</p>
+                <textarea id="ai-feedback-code" rows="6" placeholder="Lipește codul C++ aici..." style="width: 100%; padding: var(--space-3); border-radius: var(--radius-md); background: var(--color-surface-2); border: 1px solid var(--color-border); color: var(--color-fg); font-family: var(--font-mono); font-size: var(--text-sm); outline: none;"></textarea>
+                <div>
+                    <button id="btn-ask-feedback" class="btn btn--primary">
+                        <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h.01"/><path d="M12 2v14"/><path d="m15 13-3 3-3-3"/></svg>
+                        Cere feedback AI
+                    </button>
+                </div>
+                <div id="ai-feedback-response" style="margin-top: var(--space-2);"></div>
+            </div>
+        </article>
+        <script src="JS/ai_code_feedback.js" defer nonce="<?= $nonce ?>"></script>
+
         <!-- SOURCE CODE: Timeline/Full width if source exists -->
+
         <?php if (!empty($cod_sursa) && $run_id > 0): ?>
         <article class="card bento__card--timeline" style="grid-column: 1 / -1; border: 1px solid var(--color-border); background: var(--color-surface-1);">
             <div class="card__head">
@@ -99,7 +127,7 @@ if (empty($cod_sursa)) {
             </div>
         </article>
         
-        <script>
+        <script nonce="<?= $nonce ?>"> // FIX [M2]: Adăugare nonce pentru CSP
         function copySourceCode() {
             const code = <?php echo json_encode($cod_sursa); ?>;
             const btn = document.getElementById('copy-btn');

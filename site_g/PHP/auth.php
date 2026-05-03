@@ -3,6 +3,12 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// FIX [M4]: Implementare session timeout la 30 minute (1800 secunde) de inactivitate
+if (isset($_SESSION['user_id'])) {
+    require_once __DIR__ . '/helpers.php';
+    enforce_session_timeout(true);
+}
+
 /**
  * Verifică dacă utilizatorul este logat.
  * @return bool

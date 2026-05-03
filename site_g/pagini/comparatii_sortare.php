@@ -183,4 +183,4 @@ if (session_status() === PHP_SESSION_NONE) {
     </div>
 </div>
 
-<script src="JS/performance_compare.js"></script>
+<script nonce="<?= $nonce ?>" src="JS/performance_compare.js"></script>

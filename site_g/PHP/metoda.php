@@ -92,7 +92,7 @@ if (!empty($metoda['fisier_cpp'])) {
                     Cod Sursă C++
                 </span>
                 <?php if (!empty($cod_cpp)): ?>
-                <button onclick="copyCode()" id="copy-btn" class="btn btn--quiet btn--sm">
+                <button onclick="copyCode()" id="copy-btn" class="btn btn--quiet btn--sm" aria-label="Copiază codul C++">
                     <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
@@ -126,8 +126,8 @@ if (!empty($metoda['fisier_cpp'])) {
     </div>
 </div>
 
-<script src="JS/visualizer.js"></script>
-<script>
+<script src="JS/visualizer.js" nonce="<?= $nonce ?>"></script>
+<script nonce="<?= $nonce ?>"> // FIX [M2]: Adăugare nonce pentru CSP
 function copyCode() {
     const code = <?php echo json_encode($cod_cpp); ?>;
     const btn = document.getElementById('copy-btn');

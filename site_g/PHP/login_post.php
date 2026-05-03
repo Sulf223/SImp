@@ -29,14 +29,14 @@ if (!check_rate_limit($con, 'login', $user_ip, 5, 900)) {
 
 // Căutăm utilizatorul în tabelul `utilizatori` folosind prepared statements
 $sql = "SELECT id, username, parola_hash, rol FROM utilizatori WHERE username = ? LIMIT 1";
-$stmt = mysqli_prepare($con, $sql);
+$stmt = $con->prepare($sql);
 
 if ($stmt) {
-    mysqli_stmt_bind_param($stmt, "s", $username);
-    mysqli_stmt_execute($stmt);
-    $res  = mysqli_stmt_get_result($stmt);
-    $user = mysqli_fetch_assoc($res);
-    mysqli_stmt_close($stmt);
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $res  = $stmt->get_result();
+    $user = $res->fetch_assoc();
+    $stmt->close();
 
     // Verificăm parola (hash)
     if ($user && password_verify($password, $user['parola_hash'])) {
@@ -49,6 +49,48 @@ if ($stmt) {
         
         // Resetăm rate limiting la login cu succes
         reset_rate_limit($con, 'login', $user_ip);
+
+        // Streaks logic
+        $user_id = (int)$user['id'];
+        $stmt_streak = $con->prepare("SELECT id, current_streak, max_streak, last_activity_date FROM user_streak WHERE user_id = ?");
+        $stmt_streak->bind_param("i", $user_id);
+        $stmt_streak->execute();
+        $streak_res = $stmt_streak->get_result();
+        $today = date('Y-m-d');
+        if ($streak_res && $streak_row = $streak_res->fetch_assoc()) {
+            $last_date = $streak_row['last_activity_date'];
+            $diff = (strtotime($today) - strtotime($last_date)) / (60 * 60 * 24);
+            $new_current = (int)$streak_row['current_streak'];
+            $new_max = (int)$streak_row['max_streak'];
+            
+            if ($diff == 1) {
+                // Consecutive day
+                $new_current++;
+                if ($new_current > $new_max) $new_max = $new_current;
+            } elseif ($diff > 1) {
+                // Streak broken
+                $new_current = 1;
+            } // If diff == 0, same day, do nothing to counts
+            
+            $stmt_streak = $con->prepare("UPDATE user_streak SET current_streak=?, max_streak=?, last_activity_date=? WHERE id=?");
+            if ($stmt_streak) {
+                $stmt_streak->bind_param('iisi', $new_current, $new_max, $today, $streak_row['id']);
+                $stmt_streak->execute();
+            }
+        } else {
+            // First time tracking
+            $stmt_streak = $con->prepare("INSERT INTO user_streak (user_id, current_streak, max_streak, last_activity_date) VALUES (?, 1, 1, ?)");
+            if ($stmt_streak) {
+                $stmt_streak->bind_param('is', $user_id, $today);
+                $stmt_streak->execute();
+            }
+        }
+
+        // FEATURE [F5]: Check and award achievements on login
+        $newly_unlocked = check_and_award_achievements($con, $user_id);
+        if (!empty($newly_unlocked)) {
+            $_SESSION['new_achievements'] = $newly_unlocked;
+        }
 
         set_flash('success', 'Te-ai autentificat cu succes!');
         header('Location: ../index.php?page=metode');

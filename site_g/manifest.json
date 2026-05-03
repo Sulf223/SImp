@@ -1,0 +1,12 @@
+{
+    "name": "SImp Portal",
+    "short_name": "SImp",
+    "description": "Platformă educațională pentru algoritmi de sortare",
+    "start_url": "/site_g/index.php?page=acasa",
+    "display": "standalone",
+    "background_color": "#0A0A0A",
+    "theme_color": "#6E56CF",
+    "icons": [
+        { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    ]
+}

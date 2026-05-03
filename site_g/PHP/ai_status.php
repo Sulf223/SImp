@@ -1,5 +1,16 @@
 <?php
 header('Content-Type: application/json; charset=UTF-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once 'helpers.php';
+
+// FIX [A2]: Actualizăm activitatea (fără redirect) pentru a păstra sesiunea vie cât timp widget-ul e activ
+enforce_session_timeout_ajax();
+
 $cacheFile = sys_get_temp_dir() . '/simp_ai_status.json';
 $ttl = 60; // secunde
 

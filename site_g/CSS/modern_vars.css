@@ -225,6 +225,13 @@
     --color-primary-soft:  rgba(110, 86, 207, 0.08);
     --color-accent-soft:   rgba(6, 182, 212, 0.08);
 
+    /* FIX [UI2]: Missing soft tokens for light theme */
+    --color-success-soft:  rgba(16, 185, 129, 0.10);
+    --color-warning-soft:  rgba(245, 158, 11, 0.12);
+    --color-danger-soft:   rgba(239, 68, 68, 0.10);
+    --color-primary-glow:  rgba(110, 86, 207, 0.18);
+    --color-accent-glow:   rgba(6, 182, 212, 0.14);
+
     --gradient-aurora:
         radial-gradient(60% 60% at 20% 0%, rgba(110, 86, 207, 0.10) 0%, transparent 60%),
         radial-gradient(40% 60% at 100% 100%, rgba(6, 182, 212, 0.08) 0%, transparent 60%);

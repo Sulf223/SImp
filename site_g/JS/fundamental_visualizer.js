@@ -93,26 +93,25 @@
         var steps = buildSteps(topic);
         var index = 0;
 
-        function refresh() {
-            render(container, steps, index);
-            var prev = container.querySelector('[data-action="prev"]');
-            var next = container.querySelector('[data-action="next"]');
-            var reset = container.querySelector('[data-action="reset"]');
-
-            prev.addEventListener("click", function () {
+        // FIX [A4]: Atașăm listener-ul o singură dată pe container (event delegation)
+        container.addEventListener("click", function (e) {
+            var btn = e.target.closest('[data-action]');
+            if (!btn) return;
+            
+            var action = btn.getAttribute("data-action");
+            if (action === "prev") {
                 index = Math.max(0, index - 1);
-                refresh();
-            });
-            next.addEventListener("click", function () {
+                render(container, steps, index);
+            } else if (action === "next") {
                 index = Math.min(steps.length - 1, index + 1);
-                refresh();
-            });
-            reset.addEventListener("click", function () {
+                render(container, steps, index);
+            } else if (action === "reset") {
                 index = 0;
-                refresh();
-            });
-        }
+                render(container, steps, index);
+            }
+        });
 
-        refresh();
+        // Inițializare
+        render(container, steps, index);
     });
 })();

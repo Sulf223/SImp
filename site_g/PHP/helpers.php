@@ -6,11 +6,81 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 /**
+ * Verifică și aplică timeout-ul de sesiune (30 min inactivitate).
+ * Pentru endpoint-urile AJAX care trebuie să refuze cererea cu HTTP 401 dacă a expirat.
+ * Apelează imediat după session_start().
+ */
+function enforce_session_timeout_ajax(int $max_inactivity_seconds = 1800): void {
+    if (!isset($_SESSION['user_id'])) return; // anonim → nu enforce
+    if (isset($_SESSION['last_activity']) && time() - $_SESSION['last_activity'] > $max_inactivity_seconds) {
+        session_unset();
+        session_destroy();
+        http_response_code(401);
+        header('Content-Type: application/json; charset=UTF-8');
+        echo json_encode(['ok' => false, 'error' => 'Sesiune expirată', 'expired' => true]);
+        exit;
+    }
+    $_SESSION['last_activity'] = time();
+}
+
+/**
+ * Extrage token-ul CSRF din headere sau POST.
+ * FIX [A8]: Fallback pentru nginx unde getallheaders() poate lipsi.
+ */
+function get_csrf_token_from_request(): string {
+    $token = '';
+    if (function_exists('getallheaders')) {
+        $h = getallheaders();
+        if (is_array($h)) {
+            // Verificăm atât varianta Case-Sensitive cât și cea lowercase (pentru diverse servere/proxy-uri)
+            $token = $h['X-CSRF-Token'] ?? $h['x-csrf-token'] ?? '';
+        }
+    }
+    if (!$token && isset($_SERVER['HTTP_X_CSRF_TOKEN'])) {
+        $token = $_SERVER['HTTP_X_CSRF_TOKEN'];
+    }
+    if (!$token && isset($_POST['csrf_token'])) {
+        $token = $_POST['csrf_token'];
+    }
+    return is_string($token) ? $token : '';
+}
+
+/**
+ * Impune timeout de sesiune (30 minute) si actualizeaza last_activity.
+ * Pentru pagini UI care fac redirect.
+ */
+function enforce_session_timeout(bool $redirect_on_expire = true): void {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    if (!isset($_SESSION['user_id'])) {
+        return;
+    }
+
+    if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
+        session_unset();
+        session_destroy();
+        if ($redirect_on_expire) {
+            header("Location: index.php?page=login&expired=1");
+            exit;
+        }
+        return;
+    }
+
+    $_SESSION['last_activity'] = time();
+}
+
+/**
  * Setează un mesaj flash (care va fi afișat o singură dată).
  * @param string $type 'success', 'error', 'info'
  * @param string $message Mesajul de afișat
  */
 function set_flash($type, $message) {
+    if (!in_array($type, ['success', 'error', 'info'], true)) {
+        error_log("set_flash: tip invalid '$type', folosit 'info'");
+        $type = 'info';
+    }
     $_SESSION['flash_messages'][] = [
         'type' => $type,
         'message' => $message
@@ -19,17 +89,25 @@ function set_flash($type, $message) {
 
 /**
  * Afișează mesajele flash salvate în sesiune și le șterge.
+ * POLISH [P4]: Generates modern toast notifications instead of static alerts.
  */
 function display_flash() {
     if (!empty($_SESSION['flash_messages'])) {
+        echo '<div class="toast-container" id="toast-container">';
         foreach ($_SESSION['flash_messages'] as $msg) {
-            $class = 'alert';
-            if ($msg['type'] === 'error') $class .= ' alert-error';
-            elseif ($msg['type'] === 'success') $class .= ' alert-success';
-            else $class .= ' alert-info';
-            
-            echo '<div class="' . $class . '">' . htmlspecialchars($msg['message']) . '</div>';
+            $type = $msg['type']; // success, error, info
+            $icon = "";
+            if ($type === 'success') $icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="20 6 9 17 4 12"/></svg>';
+            elseif ($type === 'error') $icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+            else $icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+
+            echo '<div class="toast toast--' . $type . '" role="alert" aria-live="assertive" aria-atomic="true">';
+            echo '<div class="toast__icon">' . $icon . '</div>';
+            echo '<div class="toast__content">' . htmlspecialchars($msg['message']) . '</div>';
+            echo '<button type="button" class="toast__close" aria-label="Închide">&times;</button>';
+            echo '</div>';
         }
+        echo '</div>';
         // Ștergem mesajele după afișare
         unset($_SESSION['flash_messages']);
     }
@@ -86,7 +164,7 @@ function ensure_rate_limit_table(mysqli $con) {
         window_start TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         INDEX idx_ident_action (identifier, action)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
-    mysqli_query($con, $sql);
+    $con->query($sql);
 }
 
 /**
@@ -102,26 +180,27 @@ function check_rate_limit(mysqli $con, $action, $identifier, $max_attempts = 5, 
     ensure_rate_limit_table($con);
     
     $today = date('Y-m-d H:i:s');
-    $identifier = md5($identifier); // Hash identifier for privacy if it's an IP
+    // FIX [L4]: Utilizare SHA-256 în loc de MD5 pentru hashing identificator (privacy)
+    $identifier = hash('sha256', $identifier); 
     
     // Curățăm înregistrările vechi (optional, pentru a menține tabela mică)
     // mysqli_query($con, "DELETE FROM rate_limit_attempts WHERE window_start < NOW() - INTERVAL 1 DAY");
 
     $sql = "SELECT id, attempt_count, window_start FROM rate_limit_attempts WHERE identifier = ? AND action = ?";
-    $stmt = mysqli_prepare($con, $sql);
-    mysqli_stmt_bind_param($stmt, 'ss', $identifier, $action);
-    mysqli_stmt_execute($stmt);
-    $res = mysqli_stmt_get_result($stmt);
-    $row = mysqli_fetch_assoc($res);
-    mysqli_stmt_close($stmt);
+    $stmt = $con->prepare($sql);
+    $stmt->bind_param('ss', $identifier, $action);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $row = $res->fetch_assoc();
+    $stmt->close();
 
     if (!$row) {
         // Prima încercare
         $insert = "INSERT INTO rate_limit_attempts (identifier, action, attempt_count, window_start) VALUES (?, ?, 1, NOW())";
-        $stmt = mysqli_prepare($con, $insert);
-        mysqli_stmt_bind_param($stmt, 'ss', $identifier, $action);
-        mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
+        $stmt = $con->prepare($insert);
+        $stmt->bind_param('ss', $identifier, $action);
+        $stmt->execute();
+        $stmt->close();
         return true;
     }
 
@@ -132,20 +211,20 @@ function check_rate_limit(mysqli $con, $action, $identifier, $max_attempts = 5, 
     if (time() - $start > $window_seconds) {
         // Fereastra a expirat, resetăm
         $update = "UPDATE rate_limit_attempts SET attempt_count = 1, window_start = NOW() WHERE id = ?";
-        $stmt = mysqli_prepare($con, $update);
-        mysqli_stmt_bind_param($stmt, 'i', $id);
-        mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
+        $stmt = $con->prepare($update);
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $stmt->close();
         return true;
     }
 
     // Incrementăm
     $count++;
     $update = "UPDATE rate_limit_attempts SET attempt_count = ? WHERE id = ?";
-    $stmt = mysqli_prepare($con, $update);
-    mysqli_stmt_bind_param($stmt, 'ii', $count, $id);
-    mysqli_stmt_execute($stmt);
-    mysqli_stmt_close($stmt);
+    $stmt = $con->prepare($update);
+    $stmt->bind_param('ii', $count, $id);
+    $stmt->execute();
+    $stmt->close();
 
     return $count <= $max_attempts;
 }
@@ -154,12 +233,13 @@ function check_rate_limit(mysqli $con, $action, $identifier, $max_attempts = 5, 
  * Resetează contorul de rate limiting.
  */
 function reset_rate_limit(mysqli $con, $action, $identifier) {
-    $identifier = md5($identifier);
+    // FIX [L4]: Aliniere cu check_rate_limit (SHA-256)
+    $identifier = hash('sha256', $identifier);
     $sql = "DELETE FROM rate_limit_attempts WHERE identifier = ? AND action = ?";
-    $stmt = mysqli_prepare($con, $sql);
-    mysqli_stmt_bind_param($stmt, 'ss', $identifier, $action);
-    mysqli_stmt_execute($stmt);
-    mysqli_stmt_close($stmt);
+    $stmt = $con->prepare($sql);
+    $stmt->bind_param('ss', $identifier, $action);
+    $stmt->execute();
+    $stmt->close();
 }
 
 /**
@@ -168,8 +248,16 @@ function reset_rate_limit(mysqli $con, $action, $identifier) {
  */
 function verify_csrf_ajax() {
     // Verificăm dacă există token în header-ul X-CSRF-Token
-    $headers = getallheaders();
-    $token = $headers['X-CSRF-Token'] ?? $headers['x-csrf-token'] ?? '';
+    $token = '';
+    if (function_exists('getallheaders')) {
+        $headers = getallheaders();
+        if (is_array($headers)) {
+            $token = $headers['X-CSRF-Token'] ?? $headers['x-csrf-token'] ?? '';
+        }
+    }
+    if ($token === '') {
+        $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+    }
     
     if (empty($token) || !isset($_SESSION['csrf_token'])) {
         return false;
@@ -185,4 +273,138 @@ function verify_csrf_ajax() {
 function get_csrf_token() {
     return generate_csrf_token();
 }
+
+/**
+ * FEATURE [F2]: Extrage logica de validare parolă
+ * Verifică dacă parola are minim 8 caractere, și cel puțin o literă și o cifră.
+ * @param string $password
+ * @return bool True dacă e validă, False altfel
+ */
+function validate_password_complexity(string $password): bool {
+    if (strlen($password) < 8) return false;
+    if (!preg_match('/[A-Za-z]/', $password)) return false;
+    if (!preg_match('/[0-9]/', $password)) return false;
+    return true;
+}
+
+/**
+ * Înregistrează o acțiune administrativă în admin_audit_log.
+ * Apelat din admin_actions.php după fiecare change_role / reset_progress / delete_user.
+ *
+ * @param mysqli $con Conexiunea MySQLi
+ * @param string $action_type Tipul acțiunii ('change_role', 'reset_progress', 'delete_user')
+ * @param int|null $target_user_id ID-ul utilizatorului afectat
+ * @param string|null $target_username Username-ul utilizatorului afectat (snapshot)
+ * @param string|null $details JSON sau text liber cu detalii suplimentare (ex: rolul nou)
+ * @return bool true dacă logarea a reușit
+ */
+function log_admin_action(mysqli $con, $action_type, $target_user_id = null, $target_username = null, $details = null) {
+    if (empty($_SESSION['user_id'])) {
+        return false;
+    }
+    $admin_user_id = (int)$_SESSION['user_id'];
+    $admin_username = (string)($_SESSION['username'] ?? 'unknown');
+    $ip = $_SERVER['REMOTE_ADDR'] ?? null;
+    $ua = isset($_SERVER['HTTP_USER_AGENT']) ? mb_substr($_SERVER['HTTP_USER_AGENT'], 0, 255) : null;
+
+    $sql = "INSERT INTO admin_audit_log
+            (admin_user_id, admin_username, action_type, target_user_id, target_username, details, ip_address, user_agent)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    if ($stmt = $con->prepare($sql)) {
+        $stmt->bind_param(
+            "ississss",
+            $admin_user_id, $admin_username, $action_type,
+            $target_user_id, $target_username, $details, $ip, $ua
+        );
+        $ok = $stmt->execute();
+        $stmt->close();
+        return $ok;
+    }
+    return false;
+}
+/**
+ * Verifică dacă utilizatorul îndeplinește criteriile pentru achievements neacordate
+ * și le inserează în user_achievements. Returnează lista achievement-urilor deblocate acum.
+ * FEATURE [F5]: Achievements System
+ */
+function check_and_award_achievements(mysqli $con, int $user_id): array {
+    $locked = $con->begin_transaction();
+    if ($locked) {
+        if ($lockStmt = $con->prepare("SELECT achievement_id FROM user_achievements WHERE user_id = ? FOR UPDATE")) {
+            $lockStmt->bind_param('i', $user_id);
+            $lockStmt->execute();
+            $lockStmt->close();
+        }
+    }
+
+    // Obține achievements neacordate încă
+    $sql = "SELECT a.* FROM achievements a
+            WHERE a.id NOT IN (SELECT achievement_id FROM user_achievements WHERE user_id = ?)";
+    $unlocked = [];
+    if ($stmt = $con->prepare($sql)) {
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $rs = $stmt->get_result();
+        while ($a = $rs->fetch_assoc()) {
+            $met = false;
+            switch ($a['criteria_type']) {
+                case 'first_login': $met = true; break;
+                case 'grile_count':
+                    // FIX [F5-PATCH]: prepared statement (înainte era interpolare directă)
+                    if ($s = $con->prepare("SELECT COUNT(*) c FROM progres_grile WHERE id_utilizator = ?")) {
+                        $s->bind_param('i', $user_id);
+                        $s->execute();
+                        $row = $s->get_result()->fetch_assoc();
+                        $met = $row && (int)$row['c'] >= (int)$a['criteria_value'];
+                        $s->close();
+                    }
+                    break;
+                case 'exercise_count':
+                    if ($s = $con->prepare("SELECT COUNT(*) c FROM learning_exercise_progress WHERE user_id = ?")) {
+                        $s->bind_param('i', $user_id);
+                        $s->execute();
+                        $row = $s->get_result()->fetch_assoc();
+                        $met = $row && (int)$row['c'] >= (int)$a['criteria_value'];
+                        $s->close();
+                    }
+                    break;
+                case 'algorithm_completed':
+                    $meta = $a['criteria_meta'];
+                    if ($s2 = $con->prepare("SELECT COUNT(DISTINCT g.id) c FROM progres_grile p JOIN grile_cpp g ON g.id = p.id_grila WHERE p.id_utilizator = ? AND LOWER(g.nume_metoda) LIKE ?")) {
+                        $like = '%'.$meta.'%';
+                        $s2->bind_param('is', $user_id, $like);
+                        $s2->execute();
+                        $row = $s2->get_result()->fetch_assoc();
+                        $met = $row && (int)$row['c'] >= 1;
+                        $s2->close();
+                    }
+                    break;
+                case 'streak_days':
+                    if ($s = $con->prepare("SELECT current_streak FROM user_streak WHERE user_id = ?")) {
+                        $s->bind_param('i', $user_id);
+                        $s->execute();
+                        $row = $s->get_result()->fetch_assoc();
+                        if ($row) { $met = (int)$row['current_streak'] >= (int)$a['criteria_value']; }
+                        $s->close();
+                    }
+                    break;
+            }
+            if ($met) {
+                if ($s3 = $con->prepare("INSERT IGNORE INTO user_achievements (user_id, achievement_id) VALUES (?, ?)")) {
+                    $s3->bind_param('ii', $user_id, $a['id']);
+                    if ($s3->execute() && $s3->affected_rows > 0) {
+                        $unlocked[] = $a;
+                    }
+                    $s3->close();
+                }
+            }
+        }
+        $stmt->close();
+    }
+    if ($locked) {
+        $con->commit();
+    }
+    return $unlocked;
+}
+
 ?>

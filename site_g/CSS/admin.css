@@ -1,0 +1,47 @@
+/**
+ * POLISH [P9]: Admin dedicated styles
+ */
+
+.admin-table-wrapper {
+    overflow-x: auto;
+    margin-top: var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table thead {
+    background: var(--color-surface-2);
+    color: var(--color-fg-muted);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+}
+
+.admin-table th, .admin-table td {
+    padding: 0.75rem;
+}
+
+.admin-table tr {
+    border-bottom: 1px solid var(--color-border);
+}
+
+.admin-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+.admin-card-stat h2 {
+    font-size: var(--text-3xl);
+    margin: var(--space-2) 0;
+}
+
+.admin-card-stat p {
+    color: var(--color-fg-muted);
+    font-size: var(--text-sm);
+}

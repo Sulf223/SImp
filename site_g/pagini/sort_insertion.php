@@ -206,6 +206,6 @@ if (session_status() === PHP_SESSION_NONE) {
 </div>
 
 <div data-lesson-slug="sort_insertion" hidden></div>
-<script src="JS/visualizer.js"></script>
-<script src="JS/exercitii.js"></script>
-<script src="JS/lesson_tracker.js"></script>
+<script nonce="<?= $nonce ?>" src="JS/visualizer.js"></script>
+<script nonce="<?= $nonce ?>" src="JS/exercitii.js"></script>
+<script nonce="<?= $nonce ?>" src="JS/lesson_tracker.js"></script>

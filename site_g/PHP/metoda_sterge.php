@@ -22,25 +22,24 @@ if (isset($_POST['id']) && filter_var($_POST['id'], FILTER_VALIDATE_INT)) {
     // Acest lucru separă logica SQL de date, prevenind interpretarea datelor ca fiind cod SQL.
     $sql = "DELETE FROM metode WHERE id_metoda = ?";
 
-    if ($stmt = mysqli_prepare($con, $sql)) {
+    if ($stmt = $con->prepare($sql)) {
         // 2. Legăm variabila PHP ($id) la placeholder-ul din interogare.
         // "i" specifică faptul că variabila este de tip integer (întreg).
-        mysqli_stmt_bind_param($stmt, "i", $id);
+        $stmt->bind_param("i", $id);
 
         // 3. Executăm interogarea pregătită.
-        if (mysqli_stmt_execute($stmt)) {
+        if ($stmt->execute()) {
             // Ștergerea a avut succes.
         } else {
             // A apărut o eroare la execuție (de ex. probleme de permisiuni, etc.)
-            // Într-o aplicație reală, aici ai loga eroarea.
-            // echo "Eroare la ștergere: " . mysqli_stmt_error($stmt);
+            error_log("Eroare la ștergere metoda ID $id: " . $stmt->error);
         }
 
         // 4. Închidem statement-ul.
-        mysqli_stmt_close($stmt);
+        $stmt->close();
     } else {
         // A apărut o eroare la pregătirea interogării
-        // echo "Eroare: " . mysqli_error($con);
+        error_log("Eroare pregătire ștergere: " . $con->error);
     }
 }
 

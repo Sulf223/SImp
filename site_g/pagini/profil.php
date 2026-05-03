@@ -7,11 +7,14 @@ require_once __DIR__ . '/../PHP/progres_learning.php';
 $userId = (int)$_SESSION['user_id'];
 
 // Fetch user info
-$stmt = mysqli_prepare($con, "SELECT username, display_name, bio, avatar_seed, theme_pref, created_at FROM utilizatori WHERE id = ?");
-mysqli_stmt_bind_param($stmt, 'i', $userId);
-mysqli_stmt_execute($stmt);
-$user = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt)) ?: [];
-mysqli_stmt_close($stmt);
+$stmt = $con->prepare("SELECT username, display_name, bio, avatar_seed, theme_pref, created_at FROM utilizatori WHERE id = ?");
+if ($stmt) {
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $user = $res->fetch_assoc() ?: [];
+    $stmt->close();
+}
 
 $displayName = htmlspecialchars($user['display_name'] ?? $user['username'] ?? 'Student');
 $bio = htmlspecialchars($user['bio'] ?? '');
@@ -23,6 +26,22 @@ $heatmap = get_activity_heatmap($con, $userId, 26);
 
 $totalActivities = array_sum($heatmap);
 $activeDays = count($heatmap);
+
+// FEATURE [F5]: Achievements
+$sql_ach = "SELECT a.*, ua.unlocked_at IS NOT NULL AS unlocked
+            FROM achievements a
+            LEFT JOIN user_achievements ua ON ua.achievement_id = a.id AND ua.user_id = ?
+            ORDER BY ua.unlocked_at DESC, a.id ASC";
+$achievements = [];
+if ($stmt = $con->prepare($sql_ach)) {
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+        $achievements[] = $row;
+    }
+    $stmt->close();
+}
 ?>
 
 <div data-component="dashboard-modern">
@@ -69,10 +88,52 @@ $activeDays = count($heatmap);
         <!-- generat de JS -->
       </div>
     </article>
+
+    <!-- FEATURE [F5]: Achievements UI (col-span-12) -->
+    <article class="card bento__card--timeline">
+      <header class="card__head">
+        <span class="card__eyebrow">
+          <svg class="icon"><path d="M12 15l-2 5-9-5 9-5 2 5Z"/><path d="M12 15l2 5 9-5-9-5-2 5Z"/></svg>
+          Realizări (Achievements)
+        </span>
+      </header>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-4); margin-top: var(--space-4);">
+        <?php foreach ($achievements as $ach): 
+            $opacity = $ach['unlocked'] ? '1' : '0.4';
+            $filter = $ach['unlocked'] ? 'none' : 'grayscale(100%)';
+            $bg = $ach['unlocked'] ? 'linear-gradient(135deg, rgba(110, 86, 207, 0.1) 0%, rgba(110, 86, 207, 0.02) 100%)' : 'var(--color-surface-2)';
+            $border = $ach['unlocked'] ? '1px solid var(--color-primary-soft)' : '1px dashed var(--color-border)';
+        ?>
+        <div style="border: <?= $border ?>; background: <?= $bg ?>; padding: var(--space-4); border-radius: var(--radius-md); opacity: <?= $opacity ?>; filter: <?= $filter ?>; transition: all 0.2s; display: flex; flex-direction: column; gap: var(--space-2); text-align: center;">
+            <div style="font-size: 2rem; margin: 0 auto; color: var(--color-primary);">
+                <?php
+                $iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><circle cx="12" cy="12" r="10"/></svg>';
+                if ($ach['icon'] === 'star') $iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+                if ($ach['icon'] === 'sun') $iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y2="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+                if ($ach['icon'] === 'check-circle') $iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+                if ($ach['icon'] === 'award') $iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>';
+                if ($ach['icon'] === 'crown') $iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>';
+                if ($ach['icon'] === 'code') $iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>';
+                if ($ach['icon'] === 'zap') $iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>';
+                if ($ach['icon'] === 'layers') $iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>';
+                if ($ach['icon'] === 'flame') $iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>';
+                echo $iconSvg;
+                ?>
+            </div>
+            <strong style="font-size: var(--text-sm); color: var(--color-fg);"><?= htmlspecialchars($ach['title']) ?></strong>
+            <span style="font-size: var(--text-xs); color: var(--color-fg-muted); line-height: 1.4;"><?= htmlspecialchars($ach['description']) ?></span>
+            <?php if ($ach['unlocked']): ?>
+                <span style="font-size: 10px; color: var(--color-success); font-weight: 600; margin-top: auto; padding-top: var(--space-2);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="vertical-align: middle;"><polyline points="20 6 9 17 4 12"/></svg> Deblocat</span>
+            <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
+      </div>
+    </article>
   </div>
 </div>
 
-<script>
+<script nonce="<?= $nonce ?>">
+// FIX [M2]: Adăugare nonce pentru CSP
 (function() {
   const container = document.getElementById('heatmap-container');
   if (!container) return;

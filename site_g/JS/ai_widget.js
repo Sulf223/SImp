@@ -214,11 +214,15 @@
         } catch (e) {}
     }
     checkAIStatus();
-    setInterval(checkAIStatus, 60000); // refresh la 1 minut
+    // FIX [M8]: setInterval neclarezat - curățare pe beforeunload
+    const aiStatusInterval = setInterval(checkAIStatus, 60000); // refresh la 1 minut
+    window.addEventListener('beforeunload', () => clearInterval(aiStatusInterval));
 })();
 
 /**
- * Global API for contextual AI questions
+ * API Global pentru intrebari contextuale catre Profesor AI.
+ * Deschide widget-ul si pre-completeaza input-ul cu o intrebare relevanta.
+ * @param {Object} context - Obiect cu date despre context (tip, intrebare, cod, etc).
  */
 window.SImpAskAI = function(context) {
     const widget = document.getElementById('ai-widget');

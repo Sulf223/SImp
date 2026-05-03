@@ -1,3 +1,85 @@
-<Files ".env">
+# ==========================================================================
+# SImp Portal — .htaccess hardening
+# Protejează fișiere sensibile, dezactivează listing, adaugă headere securitate
+# ==========================================================================
+
+# --- 1. Dezactivează listing-ul de directoare ---
+Options -Indexes
+Options +FollowSymLinks -MultiViews
+
+# --- 2. Blochează acces direct la fișiere sensibile ---
+<FilesMatch "(?i)^\.env|^\.env\..*|^\.git.*|^\.htaccess$|^\.htpasswd$|^composer\.(json|lock)$|^package(-lock)?\.json$|^README\.md$|^Dockerfile.*|^docker-compose\.ya?ml$|^Makefile$|^\.gitignore$|^\.gitattributes$">
     Require all denied
-</Files>
+</FilesMatch>
+
+# --- 3. Blochează dumps SQL, fișiere temporare, backup-uri ---
+<FilesMatch "(?i)\.(sql|sqlite|bak|backup|swp|swo|tmp|log|env|example|orig|old|dist)$">
+    Require all denied
+</FilesMatch>
+
+# Blochează Word lock files (~$file.docx) și fișiere temporare Office
+<FilesMatch "(?i)^~\$|\.(lock|tmp|crdownload)$">
+    Require all denied
+</FilesMatch>
+
+# --- 4. Blochează acces la directoare interne (.git, vendor, node_modules) ---
+RedirectMatch 404 /\..*$
+RedirectMatch 404 /(vendor|node_modules)/
+
+# --- 5. Headere de securitate la nivel Apache (dublă protecție față de PHP) ---
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+    Header always set X-XSS-Protection "1; mode=block"
+    # HSTS doar pe HTTPS (1 an)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" "expr=%{HTTPS} == 'on'"
+    # Elimină antete care leak info despre server
+    Header unset X-Powered-By
+    Header unset Server
+</IfModule>
+
+# --- 6. PHP: ascunde versiunea, dezactivează expunerea de erori în producție ---
+<IfModule mod_php.c>
+    php_flag expose_php Off
+    php_flag display_errors Off
+    php_flag display_startup_errors Off
+    php_value session.cookie_httponly 1
+    php_value session.cookie_samesite "Strict"
+    php_value session.use_strict_mode 1
+</IfModule>
+
+# --- 7. Blochează metode HTTP neutilizate ---
+<LimitExcept GET POST HEAD>
+    Require all denied
+</LimitExcept>
+
+# --- 8. Limitează dimensiunea upload-ului (anti-DoS minimal) ---
+LimitRequestBody 5242880
+# 5 MB maxim pentru orice request
+
+# --- 9. Forțează UTF-8 pe răspunsuri text ---
+AddDefaultCharset UTF-8
+
+# --- 10. Cache pentru asset-uri statice (performance + reduce dependency pe headere PHP) ---
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 day"
+    ExpiresByType application/javascript "access plus 1 day"
+    ExpiresByType image/png "access plus 1 week"
+    ExpiresByType image/jpeg "access plus 1 week"
+    ExpiresByType image/svg+xml "access plus 1 week"
+    ExpiresByType image/webp "access plus 1 week"
+    ExpiresByType font/woff "access plus 1 month"
+    ExpiresByType font/woff2 "access plus 1 month"
+</IfModule>
+
+# --- 11. Comprimă răspunsurile text ---
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json text/xml application/xml
+</IfModule>
+
+# --- 12. Error pages personalizate (opțional) ---
+ErrorDocument 403 "Acces interzis"
+ErrorDocument 404 "Pagina nu a fost gasita"

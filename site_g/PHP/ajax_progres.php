@@ -3,12 +3,17 @@
 
 // Setăm header-ul pentru a indica un răspuns JSON
 header('Content-Type: application/json');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
 // Pornim sesiunea și includem fișierele necesare
-session_start();
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
 require_once 'conexiune.php';
 require_once 'auth.php';
 require_once 'helpers.php';
+
+// FIX [A2]: Session timeout pentru AJAX
+enforce_session_timeout_ajax();
 
 // Verificăm dacă utilizatorul este logat
 if (!is_logged_in()) {
@@ -37,6 +42,21 @@ if ($data && isset($data['id_grila'])) {
 if ($id_grila > 0) {
     $id_utilizator = $_SESSION['user_id'];
 
+    // FIX [M1]: Verificare existență grilă înainte de a marca progresul
+    $check_sql = "SELECT 1 FROM grile_cpp WHERE id = ?";
+    if ($check_stmt = $con->prepare($check_sql)) {
+        $check_stmt->bind_param("i", $id_grila);
+        $check_stmt->execute();
+        $check_res = $check_stmt->get_result();
+        if (!$check_res->fetch_assoc()) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'Grila nu există.']);
+            $check_stmt->close();
+            exit;
+        }
+        $check_stmt->close();
+    }
+
     // Inserăm progresul în baza de date, ignorând duplicatele
     $sql = "INSERT IGNORE INTO progres_grile (id_utilizator, id_grila) VALUES (?, ?)";
     
@@ -44,6 +64,15 @@ if ($id_grila > 0) {
         $stmt->bind_param("ii", $id_utilizator, $id_grila);
         
         if ($stmt->execute()) {
+            // FEATURE [F5]: Check achievements after quiz completion
+            $newly_unlocked = check_and_award_achievements($con, $id_utilizator);
+            if (!empty($newly_unlocked)) {
+                if (!isset($_SESSION['new_achievements'])) {
+                    $_SESSION['new_achievements'] = [];
+                }
+                $_SESSION['new_achievements'] = array_merge($_SESSION['new_achievements'], $newly_unlocked);
+            }
+
             echo json_encode(['success' => true, 'message' => 'Progres salvat.']);
         } else {
             http_response_code(500); // Internal Server Error

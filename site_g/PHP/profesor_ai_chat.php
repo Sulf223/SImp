@@ -1,11 +1,15 @@
 <?php
-header('Content-Type: application/json; charset=UTF-8');
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+header('Content-Type: application/json; charset=UTF-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
 require_once 'helpers.php';
+
+// FIX [A2]: Session timeout pentru AJAX
+enforce_session_timeout_ajax();
+
 require_once 'conexiune.php';
 
 // Verificăm CSRF pentru cereri AJAX
@@ -50,20 +54,14 @@ if ($message === '') {
     exit;
 }
 
-$apiKey = getenv('GROQ_API_KEY');
-if (!$apiKey && isset($_ENV['GROQ_API_KEY'])) {
-    $apiKey = $_ENV['GROQ_API_KEY'];
-}
+// FIX [L1]: Sursă unică pentru API Key (getenv). Eliminare fallback la $_ENV/$_SERVER.
+$apiKey = getenv('GROQ_API_KEY') ?: '';
 
-if (!$apiKey && isset($_SERVER['GROQ_API_KEY'])) {
-    $apiKey = $_SERVER['GROQ_API_KEY'];
-}
-
-if (!$apiKey) {
-    http_response_code(500);
+if ($apiKey === '') {
+    http_response_code(503);
     echo json_encode([
         'ok' => false,
-        'error' => 'Lipsește cheia API. Configurează variabila de mediu GROQ_API_KEY pe server.'
+        'error' => 'Serviciul AI este momentan indisponibil (API key lipsă).'
     ]);
     exit;
 }
@@ -124,28 +122,26 @@ curl_setopt_array($ch, [
 
 $response = curl_exec($ch);
 $curlErr = curl_error($ch);
+$curlErrno = curl_errno($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 if ($response === false) {
-    http_response_code(502);
-    echo json_encode(['ok' => false, 'error' => 'Eroare rețea către Groq: ' . $curlErr]);
+    // FIX [A10]: logging erori curl
+    error_log("profesor_ai_chat curl error #{$curlErrno}: {$curlErr}");
+    echo json_encode(['ok' => false, 'error' => 'Serviciul AI este indisponibil. Încearcă mai târziu.']);
+    exit;
+}
+if ($httpCode !== 200) {
+    error_log("profesor_ai_chat HTTP {$httpCode}: " . substr((string)$response, 0, 500));
+    echo json_encode(['ok' => false, 'error' => 'AI a răspuns cu eroare (HTTP ' . $httpCode . ').']);
     exit;
 }
 
 $data = json_decode($response, true);
-
-if ($httpCode >= 400) {
-    $err = trim((string)($data['error']['message'] ?? 'Răspuns invalid de la Groq.'));
-    http_response_code(502);
-    echo json_encode(['ok' => false, 'error' => $err]);
-    exit;
-}
-
 $reply = trim((string)($data['choices'][0]['message']['content'] ?? ''));
 if ($reply === '') {
-    http_response_code(502);
-    echo json_encode(['ok' => false, 'error' => 'Modelul nu a returnat text.']);
+    echo json_encode(['ok' => false, 'error' => 'Răspuns invalid de la AI.']);
     exit;
 }
 

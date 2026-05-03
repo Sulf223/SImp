@@ -109,6 +109,14 @@ if ($is_logged_in) {
             </div>
             
             <div class="table-wrapper" style="overflow-x: auto; margin-top: var(--space-4);">
+                <?php if (empty($grile)): ?>
+                    <!-- POLISH [P3]: Empty state -->
+                    <div class="empty-state" style="text-align:center; padding: var(--space-12) var(--space-4);">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-fg-muted)" stroke-width="2" width="48" height="48" style="margin-bottom: var(--space-4);"><path d="M12 20h.01"/><path d="M12 16h.01"/><path d="M12 12h.01"/><path d="M12 8h.01"/><path d="M12 4h.01"/><path d="M8 20h.01"/><path d="M8 16h.01"/><path d="M8 12h.01"/><path d="M8 8h.01"/><path d="M8 4h.01"/><path d="M16 20h.01"/><path d="M16 16h.01"/><path d="M16 12h.01"/><path d="M16 8h.01"/><path d="M16 4h.01"/></svg>
+                        <h3 style="margin-top: var(--space-3); color: var(--color-fg-muted);">Nu există încă grile în bază</h3>
+                        <p style="color: var(--color-fg-subtle); font-size: var(--text-sm);">Grilele vor apărea aici odată ce sunt adăugate de către administratori.</p>
+                    </div>
+                <?php else: ?>
                 <table style="width: 100%; border-collapse: collapse;">
                     <thead>
                         <tr style="border-bottom: 2px solid var(--color-border);">
@@ -164,6 +172,7 @@ if ($is_logged_in) {
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                <?php endif; ?>
             </div>
         </article>
     </div>

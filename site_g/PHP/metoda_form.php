@@ -8,18 +8,18 @@ $nume = $categorie = $complexitate = $descriere = $fisier_cpp = "";
 
 if ($id > 0) {
     $sql = "SELECT nume, categorie, complexitate, descriere, fisier_cpp FROM metode WHERE id_metoda = ?";
-    if ($stmt = mysqli_prepare($con, $sql)) {
-        mysqli_stmt_bind_param($stmt, "i", $id);
-        mysqli_stmt_execute($stmt);
-        $rezultat = mysqli_stmt_get_result($stmt);
-        if ($row = mysqli_fetch_assoc($rezultat)) {
+    if ($stmt = $con->prepare($sql)) {
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $rezultat = $stmt->get_result();
+        if ($row = $rezultat->fetch_assoc()) {
             $nume = $row['nume'];
             $categorie = $row['categorie'];
             $complexitate = $row['complexitate'];
             $descriere = $row['descriere'];
             $fisier_cpp = $row['fisier_cpp'];
         }
-        mysqli_stmt_close($stmt);
+        $stmt->close();
     }
 }
 ?>
@@ -92,4 +92,4 @@ if ($id > 0) {
         </div>
     </div>
 </div>
-<script src="js/validare.js"></script>
+<script src="js/validare.js" nonce="<?= $nonce ?>"></script>

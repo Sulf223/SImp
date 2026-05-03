@@ -4,7 +4,9 @@ if (!empty($_SESSION['user_id'])) {
     header('Location: index.php?page=acasa');
     exit;
 }
-$err = isset($_GET['err']) ? (string)$_GET['err'] : '';
+// FIX [SEC]: Eliminat $_GET['err'] — erorile sunt afișate via display_flash() (flash în sesiune),
+// nu prin parametri URL care pot fi exploatați de phishing.
+$expired = isset($_GET['expired']) && $_GET['expired'] === '1';
 ?>
 
 <div data-component="dashboard-modern">
@@ -30,14 +32,17 @@ $err = isset($_GET['err']) ? (string)$_GET['err'] : '';
                 </div>
 
                 <div class="form-group">
-                    <label style="display: block; font-size: 11px; font-weight: 600; color: var(--color-fg-subtle); margin-bottom: 6px; text-transform: uppercase; letter-spacing: var(--tracking-wider);">Parolă</label>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                        <label style="font-size: 11px; font-weight: 600; color: var(--color-fg-subtle); text-transform: uppercase; letter-spacing: var(--tracking-wider);">Parolă</label>
+                        <a href="index.php?page=forgot_password" style="font-size: 11px; color: var(--color-primary); text-decoration: none;">Ai uitat parola?</a>
+                    </div>
                     <input type="password" name="password" required style="width: 100%; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--color-surface-2); border: 1px solid var(--color-border); color: var(--color-fg); transition: all 0.2s ease; outline: none;" onfocus="this.style.borderColor='var(--color-primary)'; this.style.boxShadow='var(--shadow-focus)'" onblur="this.style.borderColor='var(--color-border)'; this.style.boxShadow='none'">
                 </div>
 
-                <?php if ($err): ?>
-                <div style="padding: var(--space-3); background: var(--color-danger-soft); border-radius: var(--radius-md); border: 1px solid var(--color-danger-soft); color: var(--color-danger); font-size: var(--text-xs); display: flex; align-items: center; gap: 8px;">
+                <?php if ($expired): ?>
+                <div style="padding: var(--space-3); background: var(--color-warning-soft); border-radius: var(--radius-md); border: 1px solid var(--color-warning-soft); color: var(--color-warning); font-size: var(--text-xs); display: flex; align-items: center; gap: 8px;">
                     <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    <?php echo htmlspecialchars($err); ?>
+                    Sesiunea a expirat. Te rugăm să te autentifici din nou.
                 </div>
                 <?php endif; ?>
 

@@ -19,12 +19,27 @@ verify_csrf();
 
 // Prelucrăm datele din formular
 $username = trim($_POST['username'] ?? '');
+$email = trim($_POST['email'] ?? '');
+// FIX [M9]: Validare lungime username (3-64 caractere)
+if (mb_strlen($username) > 64 || mb_strlen($username) < 3) {
+    set_flash("error", "Username-ul trebuie să aibă între 3 și 64 de caractere.");
+    header("Location: ../index.php?page=register");
+    exit;
+}
+
+// FEATURE [F1]: Validare email
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    set_flash('error', 'Adresă de email invalidă.');
+    header("Location: ../index.php?page=register");
+    exit;
+}
+
 $password = $_POST['password'] ?? '';
 $password_confirm = $_POST['password_confirm'] ?? '';
 
 // 1. Validare simplă pe server-side
-if (empty($username) || empty($password)) {
-    set_flash('error', 'Numele de utilizator și parola sunt obligatorii.');
+if (empty($username) || empty($email) || empty($password)) {
+    set_flash('error', 'Toate câmpurile sunt obligatorii.');
     header('Location: ../index.php?page=register');
     exit;
 }
@@ -42,37 +57,41 @@ if (strlen($password) < 8 || !preg_match('/[A-Za-z]/', $password) || !preg_match
     exit;
 }
 
-// 2. Verificăm dacă utilizatorul există deja în baza de date
-$sql_check = "SELECT id FROM utilizatori WHERE username = ?";
-$stmt_check = mysqli_prepare($con, $sql_check);
-mysqli_stmt_bind_param($stmt_check, 's', $username);
-mysqli_stmt_execute($stmt_check);
-mysqli_stmt_store_result($stmt_check);
+// 2. Verificăm dacă utilizatorul sau emailul există deja în baza de date
+$sql_check = "SELECT id FROM utilizatori WHERE username = ? OR email = ?";
+$stmt_check = $con->prepare($sql_check);
+if ($stmt_check) {
+    $stmt_check->bind_param('ss', $username, $email);
+    $stmt_check->execute();
+    $stmt_check->store_result();
 
-if (mysqli_stmt_num_rows($stmt_check) > 0) {
-    // Utilizatorul există deja - Mesaj generic anti-enumeration (P1)
-    set_flash('error', 'Înregistrarea a eșuat. Verifică datele și încearcă din nou.');
-    header('Location: ../index.php?page=register');
-    exit;
+    if ($stmt_check->num_rows > 0) {
+        // Utilizatorul există deja - Mesaj generic anti-enumeration (P1)
+        set_flash('error', 'Înregistrarea a eșuat. Numele de utilizator sau emailul pot fi deja utilizate.');
+        header('Location: ../index.php?page=register');
+        exit;
+    }
+    $stmt_check->close();
 }
-mysqli_stmt_close($stmt_check);
 
 
 // 3. Hash-uim parola
 $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
 // 4. Inserăm utilizatorul nou în baza de date cu rolul 'user'
-$sql_insert = "INSERT INTO utilizatori (username, parola_hash, rol) VALUES (?, ?, 'user')";
-$stmt_insert = mysqli_prepare($con, $sql_insert);
-mysqli_stmt_bind_param($stmt_insert, 'ss', $username, $password_hash);
+$sql_insert = "INSERT INTO utilizatori (username, email, parola_hash, rol) VALUES (?, ?, ?, 'user')";
+$stmt_insert = $con->prepare($sql_insert);
+if ($stmt_insert) {
+    $stmt_insert->bind_param('sss', $username, $email, $password_hash);
 
-if (mysqli_stmt_execute($stmt_insert)) {
-    set_flash('success', 'Contul a fost creat cu succes! Te rugăm să te autentifici.');
-    header('Location: ../index.php?page=login');
-} else {
-    set_flash('error', 'A apărut o eroare la crearea contului. Te rugăm să încerci din nou.');
-    header('Location: ../index.php?page=register');
+    if ($stmt_insert->execute()) {
+        set_flash('success', 'Contul a fost creat cu succes! Te rugăm să te autentifici.');
+        header('Location: ../index.php?page=login');
+    } else {
+        set_flash('error', 'A apărut o eroare la crearea contului. Te rugăm să încerci din nou.');
+        header('Location: ../index.php?page=register');
+    }
+    $stmt_insert->close();
 }
-mysqli_stmt_close($stmt_insert);
 exit;
 ?>

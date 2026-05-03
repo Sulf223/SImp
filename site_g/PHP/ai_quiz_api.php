@@ -1,12 +1,15 @@
 <?php
-header('Content-Type: application/json; charset=UTF-8');
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+header('Content-Type: application/json; charset=UTF-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
 require_once 'helpers.php';
 require_once 'conexiune.php';
+
+// FIX [A2]: Session timeout pentru AJAX
+enforce_session_timeout_ajax();
 
 // Verificăm CSRF
 if (!verify_csrf_ajax()) {
@@ -19,9 +22,12 @@ $input = json_decode(file_get_contents('php://input'), true);
 $action = $input['action'] ?? '';
 $pathSlug = $input['path_slug'] ?? 'general';
 
-$apiKey = getenv('GROQ_API_KEY') ?: ($_ENV['GROQ_API_KEY'] ?? '');
-if (!$apiKey) {
-    echo json_encode(['ok' => false, 'error' => 'API Key missing.']);
+// FIX [L1]: Sursă unică pentru API Key (getenv). Eliminare fallback la $_ENV/$_SERVER.
+$apiKey = getenv('GROQ_API_KEY') ?: '';
+
+if ($apiKey === '') {
+    http_response_code(503);
+    echo json_encode(['ok' => false, 'error' => 'Serviciul AI Quiz este momentan indisponibil (API key lipsă).']);
     exit;
 }
 
@@ -63,10 +69,26 @@ if ($action === 'generate_quiz') {
         CURLOPT_POST => true,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'Authorization: Bearer ' . $apiKey],
-        CURLOPT_POSTFIELDS => json_encode($payload)
+        CURLOPT_POSTFIELDS => json_encode($payload),
+        CURLOPT_TIMEOUT => 30
     ]);
     $res = curl_exec($ch);
+    $curlErr = curl_error($ch);
+    $curlErrno = curl_errno($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+
+    if ($res === false) {
+        // FIX [A10]: logging erori curl
+        error_log("ai_quiz_api generate curl error #{$curlErrno}: {$curlErr}");
+        echo json_encode(['ok' => false, 'error' => 'Serviciul AI este indisponibil. Încearcă mai târziu.']);
+        exit;
+    }
+    if ($httpCode !== 200) {
+        error_log("ai_quiz_api generate HTTP {$httpCode}: " . substr((string)$res, 0, 500));
+        echo json_encode(['ok' => false, 'error' => 'AI a răspuns cu eroare (HTTP ' . $httpCode . ').']);
+        exit;
+    }
 
     $data = json_decode($res, true);
     $quizRaw = $data['choices'][0]['message']['content'] ?? '';
@@ -102,10 +124,26 @@ if ($action === 'grade_quiz') {
         CURLOPT_POST => true,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'Authorization: Bearer ' . $apiKey],
-        CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE)
+        CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE),
+        CURLOPT_TIMEOUT => 30
     ]);
     $res = curl_exec($ch);
+    $curlErr = curl_error($ch);
+    $curlErrno = curl_errno($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+
+    if ($res === false) {
+        // FIX [A10]: logging erori curl
+        error_log("ai_quiz_api grade curl error #{$curlErrno}: {$curlErr}");
+        echo json_encode(['ok' => false, 'error' => 'Serviciul AI este indisponibil. Încearcă mai târziu.']);
+        exit;
+    }
+    if ($httpCode !== 200) {
+        error_log("ai_quiz_api grade HTTP {$httpCode}: " . substr((string)$res, 0, 500));
+        echo json_encode(['ok' => false, 'error' => 'AI a răspuns cu eroare (HTTP ' . $httpCode . ').']);
+        exit;
+    }
 
     $data = json_decode($res, true);
     echo json_encode(['ok' => true, 'feedback' => $data['choices'][0]['message']['content'] ?? 'Bravo!']);

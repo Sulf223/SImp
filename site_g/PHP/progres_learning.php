@@ -45,7 +45,7 @@ function ensure_learning_tables(mysqli $con): void {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
 
     foreach ($sql as $query) {
-        mysqli_query($con, $query);
+        $con->query($query);
     }
 }
 
@@ -57,10 +57,10 @@ function track_lesson_visit(mysqli $con, int $userId, string $lessonSlug, string
     ensure_learning_tables($con);
 
     $insertHistory = "INSERT INTO learning_activity_history (user_id, activity_type, title, link_access) VALUES (?, 'Lectie', ?, ?)";
-    if ($stmt = mysqli_prepare($con, $insertHistory)) {
-        mysqli_stmt_bind_param($stmt, 'iss', $userId, $lessonTitle, $link);
-        mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
+    if ($stmt = $con->prepare($insertHistory)) {
+        $stmt->bind_param('iss', $userId, $lessonTitle, $link);
+        $stmt->execute();
+        $stmt->close();
     }
 
     $upsert = "INSERT INTO learning_progress (user_id, lesson_slug, lesson_title, progress_percent)
@@ -68,10 +68,10 @@ function track_lesson_visit(mysqli $con, int $userId, string $lessonSlug, string
                ON DUPLICATE KEY UPDATE
                     lesson_title = VALUES(lesson_title),
                     progress_percent = GREATEST(progress_percent, 10)";
-    if ($stmt = mysqli_prepare($con, $upsert)) {
-        mysqli_stmt_bind_param($stmt, 'iss', $userId, $lessonSlug, $lessonTitle);
-        mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
+    if ($stmt = $con->prepare($upsert)) {
+        $stmt->bind_param('iss', $userId, $lessonSlug, $lessonTitle);
+        $stmt->execute();
+        $stmt->close();
     }
 
     update_streak($con, $userId);
@@ -85,14 +85,24 @@ function track_exercise_completion(mysqli $con, int $userId, string $lessonSlug,
     ensure_learning_tables($con);
 
     $insert = "INSERT IGNORE INTO learning_exercise_progress (user_id, lesson_slug, exercise_key) VALUES (?, ?, ?)";
-    if ($stmt = mysqli_prepare($con, $insert)) {
-        mysqli_stmt_bind_param($stmt, 'iss', $userId, $lessonSlug, $exerciseKey);
-        mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
+    if ($stmt = $con->prepare($insert)) {
+        $stmt->bind_param('iss', $userId, $lessonSlug, $exerciseKey);
+        $stmt->execute();
+        $stmt->close();
     }
 
     $progress = recompute_progress_for_lesson($con, $userId, $lessonSlug);
     update_streak($con, $userId);
+
+    // FEATURE [F5]: Check achievements after exercise completion
+    $newly_unlocked = check_and_award_achievements($con, $userId);
+    if (!empty($newly_unlocked)) {
+        if (!isset($_SESSION['new_achievements'])) {
+            $_SESSION['new_achievements'] = [];
+        }
+        $_SESSION['new_achievements'] = array_merge($_SESSION['new_achievements'], $newly_unlocked);
+    }
+
     return $progress;
 }
 
@@ -110,13 +120,13 @@ function recompute_progress_for_lesson(mysqli $con, int $userId, string $lessonS
     $done = 0;
 
     $countSql = "SELECT COUNT(*) AS total_done FROM learning_exercise_progress WHERE user_id = ? AND lesson_slug = ?";
-    if ($stmt = mysqli_prepare($con, $countSql)) {
-        mysqli_stmt_bind_param($stmt, 'is', $userId, $lessonSlug);
-        mysqli_stmt_execute($stmt);
-        $res = mysqli_stmt_get_result($stmt);
-        $row = mysqli_fetch_assoc($res);
+    if ($stmt = $con->prepare($countSql)) {
+        $stmt->bind_param('is', $userId, $lessonSlug);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $row = $res->fetch_assoc();
         $done = (int)($row['total_done'] ?? 0);
-        mysqli_stmt_close($stmt);
+        $stmt->close();
     }
 
     $exerciseWeight = min(100, (int)round(($done / max(1, $total)) * 90));
@@ -131,10 +141,10 @@ function recompute_progress_for_lesson(mysqli $con, int $userId, string $lessonS
                     lesson_title = VALUES(lesson_title),
                     progress_percent = VALUES(progress_percent)";
 
-    if ($stmt = mysqli_prepare($con, $upsert)) {
-        mysqli_stmt_bind_param($stmt, 'issi', $userId, $lessonSlug, $title, $progress);
-        mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
+    if ($stmt = $con->prepare($upsert)) {
+        $stmt->bind_param('issi', $userId, $lessonSlug, $title, $progress);
+        $stmt->execute();
+        $stmt->close();
     }
 
     return $progress;
@@ -149,12 +159,12 @@ function get_continue_learning(mysqli $con, int $userId): array {
             ORDER BY updated_at DESC
             LIMIT 1";
 
-    if ($stmt = mysqli_prepare($con, $sql)) {
-        mysqli_stmt_bind_param($stmt, 'i', $userId);
-        mysqli_stmt_execute($stmt);
-        $res = mysqli_stmt_get_result($stmt);
-        $row = mysqli_fetch_assoc($res) ?: [];
-        mysqli_stmt_close($stmt);
+    if ($stmt = $con->prepare($sql)) {
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $row = $res->fetch_assoc() ?: [];
+        $stmt->close();
 
         if (!empty($row)) {
             $lessons = get_fundamental_lessons();
@@ -183,14 +193,14 @@ function get_recent_activity(mysqli $con, int $userId, int $limit = 3): array {
             LIMIT ?";
 
     $items = [];
-    if ($stmt = mysqli_prepare($con, $sql)) {
-        mysqli_stmt_bind_param($stmt, 'ii', $userId, $limit);
-        mysqli_stmt_execute($stmt);
-        $res = mysqli_stmt_get_result($stmt);
-        while ($row = mysqli_fetch_assoc($res)) {
+    if ($stmt = $con->prepare($sql)) {
+        $stmt->bind_param('ii', $userId, $limit);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        while ($row = $res->fetch_assoc()) {
             $items[] = $row;
         }
-        mysqli_stmt_close($stmt);
+        $stmt->close();
     }
 
     return $items;
@@ -212,13 +222,13 @@ function get_exercise_stats(mysqli $con, int $userId, string $lessonSlug): array
     $done = 0;
 
     $sql = "SELECT COUNT(*) AS total_done FROM learning_exercise_progress WHERE user_id = ? AND lesson_slug = ?";
-    if ($stmt = mysqli_prepare($con, $sql)) {
-        mysqli_stmt_bind_param($stmt, 'is', $userId, $lessonSlug);
-        mysqli_stmt_execute($stmt);
-        $res = mysqli_stmt_get_result($stmt);
-        $row = mysqli_fetch_assoc($res);
+    if ($stmt = $con->prepare($sql)) {
+        $stmt->bind_param('is', $userId, $lessonSlug);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $row = $res->fetch_assoc();
         $done = (int)($row['total_done'] ?? 0);
-        mysqli_stmt_close($stmt);
+        $stmt->close();
     }
 
     return ['done' => $done, 'total' => $total];
@@ -226,22 +236,20 @@ function get_exercise_stats(mysqli $con, int $userId, string $lessonSlug): array
 
 function ensure_streak_tables(mysqli $con): void {
     // Verificăm dacă tabelul principal există deja
-    $check = mysqli_query($con, "SHOW TABLES LIKE 'user_streak'");
-    if (mysqli_num_rows($check) === 0) {
+    $check = $con->query("SHOW TABLES LIKE 'user_streak'");
+    if ($check->num_rows === 0) {
         $sqlPath = __DIR__ . '/../database/upgrade_profile_streak.sql';
         if (file_exists($sqlPath)) {
             $sql = file_get_contents($sqlPath);
             if ($sql) {
-                // Executăm scriptul SQL. Notă: mysqli_multi_query poate fi periculos 
-                // dacă scriptul are erori (ex: coloană existentă).
-                // Folosim un bloc de ignorare a erorilor pentru ALTER TABLE dacă e nevoie.
-                if (mysqli_multi_query($con, $sql)) {
+                // Executăm scriptul SQL.
+                if ($con->multi_query($sql)) {
                     do {
                         // Consumăm rezultatele pentru a elibera conexiunea
-                        if ($result = mysqli_store_result($con)) {
-                            mysqli_free_result($result);
+                        if ($result = $con->store_result()) {
+                            $result->free();
                         }
-                    } while (mysqli_more_results($con) && mysqli_next_result($con));
+                    } while ($con->more_results() && $con->next_result());
                 }
             }
         }
@@ -256,12 +264,12 @@ function update_streak(mysqli $con, int $userId): array {
     $yesterday = date('Y-m-d', strtotime('-1 day'));
     
     // Citește streak existent
-    $stmt = mysqli_prepare($con, "SELECT current_streak, longest_streak, last_activity_date FROM user_streak WHERE user_id = ?");
-    mysqli_stmt_bind_param($stmt, 'i', $userId);
-    mysqli_stmt_execute($stmt);
-    $res = mysqli_stmt_get_result($stmt);
-    $row = mysqli_fetch_assoc($res) ?: null;
-    mysqli_stmt_close($stmt);
+    $stmt = $con->prepare("SELECT current_streak, longest_streak, last_activity_date FROM user_streak WHERE user_id = ?");
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $row = $res->fetch_assoc() ?: null;
+    $stmt->close();
     
     $current = $row['current_streak'] ?? 0;
     $longest = $row['longest_streak'] ?? 0;
@@ -282,44 +290,44 @@ function update_streak(mysqli $con, int $userId): array {
     $upsert = "INSERT INTO user_streak (user_id, current_streak, longest_streak, last_activity_date) 
                VALUES (?, ?, ?, ?) 
                ON DUPLICATE KEY UPDATE current_streak = VALUES(current_streak), longest_streak = VALUES(longest_streak), last_activity_date = VALUES(last_activity_date)";
-    $stmt = mysqli_prepare($con, $upsert);
-    mysqli_stmt_bind_param($stmt, 'iiis', $userId, $current, $longest, $today);
-    mysqli_stmt_execute($stmt);
-    mysqli_stmt_close($stmt);
+    $stmt = $con->prepare($upsert);
+    $stmt->bind_param('iiis', $userId, $current, $longest, $today);
+    $stmt->execute();
+    $stmt->close();
     
     // Incrementează activity_day
     $activity = "INSERT INTO activity_day (user_id, activity_date, activity_count) VALUES (?, ?, 1) 
                  ON DUPLICATE KEY UPDATE activity_count = activity_count + 1";
-    $stmt = mysqli_prepare($con, $activity);
-    mysqli_stmt_bind_param($stmt, 'is', $userId, $today);
-    mysqli_stmt_execute($stmt);
-    mysqli_stmt_close($stmt);
+    $stmt = $con->prepare($activity);
+    $stmt->bind_param('is', $userId, $today);
+    $stmt->execute();
+    $stmt->close();
     
     return ['current' => $current, 'longest' => $longest, 'last_date' => $today];
 }
 
 function get_streak(mysqli $con, int $userId): array {
     ensure_streak_tables($con);
-    $stmt = mysqli_prepare($con, "SELECT current_streak, longest_streak FROM user_streak WHERE user_id = ?");
-    mysqli_stmt_bind_param($stmt, 'i', $userId);
-    mysqli_stmt_execute($stmt);
-    $res = mysqli_stmt_get_result($stmt);
-    $row = mysqli_fetch_assoc($res) ?: ['current_streak' => 0, 'longest_streak' => 0];
-    mysqli_stmt_close($stmt);
+    $stmt = $con->prepare("SELECT current_streak, longest_streak FROM user_streak WHERE user_id = ?");
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $row = $res->fetch_assoc() ?: ['current_streak' => 0, 'longest_streak' => 0];
+    $stmt->close();
     return ['current' => (int)$row['current_streak'], 'longest' => (int)$row['longest_streak']];
 }
 
 function get_activity_heatmap(mysqli $con, int $userId, int $weeks = 26): array {
     ensure_streak_tables($con);
     $startDate = date('Y-m-d', strtotime("-{$weeks} weeks"));
-    $stmt = mysqli_prepare($con, "SELECT activity_date, activity_count FROM activity_day WHERE user_id = ? AND activity_date >= ?");
-    mysqli_stmt_bind_param($stmt, 'is', $userId, $startDate);
-    mysqli_stmt_execute($stmt);
-    $res = mysqli_stmt_get_result($stmt);
+    $stmt = $con->prepare("SELECT activity_date, activity_count FROM activity_day WHERE user_id = ? AND activity_date >= ?");
+    $stmt->bind_param('is', $userId, $startDate);
+    $stmt->execute();
+    $res = $stmt->get_result();
     $map = [];
-    while ($row = mysqli_fetch_assoc($res)) {
+    while ($row = $res->fetch_assoc()) {
         $map[$row['activity_date']] = (int)$row['activity_count'];
     }
-    mysqli_stmt_close($stmt);
+    $stmt->close();
     return $map; // {'2026-04-29': 5, ...}
 }

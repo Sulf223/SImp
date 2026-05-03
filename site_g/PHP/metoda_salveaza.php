@@ -30,6 +30,15 @@ if (!empty($fisier_cpp)) {
     if (!str_ends_with(strtolower($fisier_cpp), '.cpp')) {
         die("Fișierul trebuie să aibă extensia .cpp");
     }
+
+    // FIX [L2]: Validare existență fizică și dimensiune fișier C++
+    $full_path = __DIR__ . '/../CPP/' . $fisier_cpp;
+    if (!is_file($full_path)) {
+        die("Fișierul C++ specificat nu există în directorul CPP.");
+    }
+    if (filesize($full_path) > 1000000) {
+        die("Fișierul C++ este prea mare (maxim 1MB).");
+    }
 }
 
 // Nu mai folosim mysqli_real_escape_string, deoarece prepared statements se ocupă de asta.
@@ -38,19 +47,19 @@ if ($id > 0) {
     // --- UPDATE (actualizare) cu Prepared Statement ---
     $sql = "UPDATE metode SET nume=?, categorie=?, complexitate=?, descriere=?, fisier_cpp=? WHERE id_metoda=?";
 
-    if ($stmt = mysqli_prepare($con, $sql)) {
+    if ($stmt = $con->prepare($sql)) {
         // Legăm variabilele PHP la placeholder-urile din interogare
         // "sssssi" - 5 string-uri (s) și 1 integer (i)
-        mysqli_stmt_bind_param($stmt, "sssssi", $nume, $categorie, $complexitate, $descriere, $fisier_cpp, $id);
+        $stmt->bind_param("sssssi", $nume, $categorie, $complexitate, $descriere, $fisier_cpp, $id);
 
         // Executăm interogarea (exemplu pentru UPDATE)
-        if (!mysqli_stmt_execute($stmt)) {
-            error_log("Eroare la actualizare metoda ID $id: " . mysqli_stmt_error($stmt));
+        if (!$stmt->execute()) {
+            error_log("Eroare la actualizare metoda ID $id: " . $stmt->error);
             die("A apărut o eroare la salvarea datelor în baza de date.");
         }
-        mysqli_stmt_close($stmt);
+        $stmt->close();
     } else {
-        error_log("Eroare la pregătirea interogării de actualizare: " . mysqli_error($con));
+        error_log("Eroare la pregătirea interogării de actualizare: " . $con->error);
         die("A apărut o eroare tehnică. Te rugăm să revii mai târziu.");
     }
 
@@ -58,19 +67,19 @@ if ($id > 0) {
     // --- INSERT (inserare) cu Prepared Statement ---
     $sql = "INSERT INTO metode (nume, categorie, complexitate, descriere, fisier_cpp) VALUES (?, ?, ?, ?, ?)";
 
-    if ($stmt = mysqli_prepare($con, $sql)) {
+    if ($stmt = $con->prepare($sql)) {
         // Legăm variabilele
         // "sssss" - 5 string-uri
-        mysqli_stmt_bind_param($stmt, "sssss", $nume, $categorie, $complexitate, $descriere, $fisier_cpp);
+        $stmt->bind_param("sssss", $nume, $categorie, $complexitate, $descriere, $fisier_cpp);
 
         // Executăm interogarea
-        if (!mysqli_stmt_execute($stmt)) {
-            error_log("Eroare la inserare metodă: " . mysqli_stmt_error($stmt));
+        if (!$stmt->execute()) {
+            error_log("Eroare la inserare metodă: " . $stmt->error);
             die("A apărut o eroare la salvarea datelor în baza de date.");
         }
-        mysqli_stmt_close($stmt);
+        $stmt->close();
     } else {
-        error_log("Eroare la pregătirea interogării de inserare: " . mysqli_error($con));
+        error_log("Eroare la pregătirea interogării de inserare: " . $con->error);
         die("A apărut o eroare tehnică. Te rugăm să revii mai târziu.");
     }
 }

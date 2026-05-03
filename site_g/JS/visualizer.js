@@ -4,7 +4,14 @@
  * 2) Adauga un laborator unificat (sortari + recursivitate + backtracking)
  */
 
+/**
+ * Clasa principala pentru vizualizarea algoritmilor de sortare pe Canvas.
+ * Gestioneaza starea sirului, animatiile si interactiunea cu utilizatorul.
+ */
 class SortingVisualizer {
+    /**
+     * @param {string} containerId - ID-ul elementului DOM unde va fi randat canvas-ul.
+     */
     constructor(containerId) {
         const el = document.getElementById(containerId);
         if (!el) return;
@@ -52,12 +59,17 @@ class SortingVisualizer {
             this.bindCustomControls();
         }
         
+        this.onResize();
         this.resetArray();
-        
-        // Ensure initial sizing
-        if (this.canvas.width === 0 || (this.container && this.container.clientWidth === 0)) {
-            requestAnimationFrame(() => this.onResize());
+
+        // FIX [A11]: ResizeObserver pentru robustețe
+        if (typeof ResizeObserver !== 'undefined' && this.container) {
+            this._resizeObserver = new ResizeObserver(() => this.onResize());
+            this._resizeObserver.observe(this.container);
         }
+
+        // FIX [A6]: Cleanup audio context on page unload
+        window.addEventListener("beforeunload", () => this.destroy());
 
         // Pixel Perfect Hook: Hide skeleton and set global instance
         window.visualizerInstance = this;
@@ -78,6 +90,10 @@ class SortingVisualizer {
         return sans || 'Inter, system-ui, sans-serif';
     }
 
+    /**
+     * Schimba stilul liniei de cod active in pseudo-codul paginii.
+     * @param {number} lineNumber - Numarul liniei de evidentiat.
+     */
     highlightCodeLine(lineNumber) {
         const codeBlock = document.querySelector('[data-lesson-code]');
         if (!codeBlock) return;
@@ -86,6 +102,10 @@ class SortingVisualizer {
         if (line) line.classList.add('is-active');
     }
     
+    /**
+     * Actualizeaza valorile variabilelor urmarite in panoul de inspectie.
+     * @param {Object} vars - Un obiect de tip { nume_variabila: valoare }.
+     */
     updateVarInspector(vars) {
         const inspector = document.querySelector('[data-var-inspector]');
         if (!inspector) return;
@@ -125,6 +145,22 @@ class SortingVisualizer {
         this.canvas.width = rect.width || Math.max(this.container.clientWidth, 320);
         this.canvas.height = rect.height || 300;
         this.draw();
+    }
+
+    /**
+     * Resurse cleanup.
+     * FIX [A6]: Închide AudioContext și deconectează ResizeObserver.
+     */
+    destroy() {
+        if (this.audioContext && this.audioContext.state !== 'closed') {
+            this.audioContext.close().catch(() => {});
+        }
+        this.audioContext = null;
+
+        if (this._resizeObserver) {
+            this._resizeObserver.disconnect();
+            this._resizeObserver = null;
+        }
     }
 
     bindCustomControls() {
@@ -325,6 +361,9 @@ class SortingVisualizer {
 
     playTone(value, kind) {
         if (!this.soundEnabled) return;
+        // FIX [A16]: prefers-reduced-motion check
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
         this.ensureAudioContext();
         if (!this.audioContext) return;
 

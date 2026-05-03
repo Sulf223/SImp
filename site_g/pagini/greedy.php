@@ -108,4 +108,4 @@ for (int i = 0; i < n && suma > 0; i++) {
 </div>
 
 <div data-lesson-slug="greedy" hidden></div>
-<script src="JS/lesson_tracker.js"></script>
+<script nonce="<?= $nonce ?>" src="JS/lesson_tracker.js"></script>

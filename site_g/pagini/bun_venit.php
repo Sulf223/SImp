@@ -28,7 +28,7 @@
                 <canvas id="solar-canvas" style="position: relative; z-index: 1; display: block; width: 100%; height: 100%;"></canvas>
                 <div id="click-hint" style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 2; pointer-events: none; color: rgba(255, 255, 255, 0.2); font-size: 12px;">Hover pentru detalii - Click pentru a intra în lecție</div>
                 <div id="hero-subtitle" style="position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 2; pointer-events: none; color: rgba(255, 255, 255, 0.3); font-size: 13px; letter-spacing: 2px;">SImp - Inovație în învățarea sortării</div>
-                <div id="tooltip" style="position: fixed; z-index: 100; background: rgba(8, 14, 31, 0.95); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 14px 18px; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; max-width: 220px; backdrop-filter: blur(8px);">
+                <div id="tooltip" style="position: fixed; z-index: var(--z-tooltip); background: rgba(8, 14, 31, 0.95); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 14px 18px; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; max-width: 220px; backdrop-filter: blur(8px);">
                     <h3 id="tt-name" style="font-size: 15px; font-weight: 600; margin-bottom: 6px; color: #fff;"></h3>
                     <p id="tt-desc" style="font-size: 13px; line-height: 1.5; color: rgba(255, 255, 255, 0.7); margin: 0;"></p>
                     <div class="complexity" id="tt-complex" style="margin-top: 8px; font-size: 11px; color: rgba(255, 255, 255, 0.45); font-family: monospace; letter-spacing: 0.5px;"></div>
@@ -121,7 +121,8 @@
 }
 </style>
 
-<script>
+<script nonce="<?= $nonce ?>">
+// FIX [M2]: Adăugare nonce pentru CSP
 (() => {
     const PLANETS = [
         {

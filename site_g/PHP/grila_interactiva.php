@@ -50,7 +50,7 @@ if ($mode === 'w3') {
         </article>
     </div>
 
-    <script nonce="<?= $nonce ?>"> // FIX [M2]: Adăugare nonce pentru CSP
+    <script nonce="<?= $nonce ?? '' ?>"> // FIX [M2]: Adăugare nonce pentru CSP
     document.addEventListener('DOMContentLoaded', () => {
         const questions = <?php echo json_encode(array_values($intrebari_selectate), JSON_UNESCAPED_UNICODE); ?>;
         const root = document.getElementById('w3-quiz-root');
@@ -212,7 +212,7 @@ if ($id_grila > 0) {
         shuffle($raspunsuri);
     } else {
         // FIX [L3]: Tratare caz în care grila nu există
-        set_flash("Grila nu există.", "danger");
+        set_flash("error", "Grila nu există.");
         header("Location: index.php?page=grile");
         exit;
     }
@@ -339,7 +339,7 @@ if ($id_grila > 0) {
 }
 </style>
 
-<script nonce="<?= $nonce ?>"> // FIX [M2]: Adăugare nonce pentru CSP
+<script nonce="<?= $nonce ?? '' ?>"> // FIX [M2]: Adăugare nonce pentru CSP
 document.addEventListener('DOMContentLoaded', () => {
     const draggables = document.querySelectorAll('.draggable-answer');
     const dropZone = document.getElementById('drop-zone');

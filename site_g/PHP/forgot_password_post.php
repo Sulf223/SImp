@@ -53,7 +53,11 @@ if ($row = $res->fetch_assoc()) {
         if (!is_dir($log_dir)) { mkdir($log_dir, 0755, true); }
         $log_file = $log_dir . '/email_log.txt';
         $timestamp = date('Y-m-d H:i:s');
-        $link = "http://" . ($_SERVER['HTTP_HOST'] ?? 'localhost') . "/SImp/site_g/index.php?page=reset_password&token=" . $token;
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $scriptBase = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/site_g/PHP')), '/');
+        $appBase = preg_replace('#/PHP$#', '', $scriptBase) ?: '/site_g';
+        $link = $scheme . "://" . $host . $appBase . "/index.php?page=reset_password&token=" . $token;
         $log_content = "[$timestamp] To: $email | Subject: Resetare parolă SImp | Link: $link\n";
         file_put_contents($log_file, $log_content, FILE_APPEND);
     }

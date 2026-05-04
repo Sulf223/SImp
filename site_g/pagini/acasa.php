@@ -83,6 +83,34 @@ $nrRecent = is_array($recentItems) ? count($recentItems) : 0;
          ============================================================ -->
     <div class="bento">
 
+        <?php if (function_exists('is_admin') && is_admin()): ?>
+        <!-- ── CARD ADMIN: vizibil doar pentru administratori ───── -->
+        <article class="card bento__card--accent" style="grid-column: 1 / -1; border: 1px solid var(--color-warning-soft); background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(245, 158, 11, 0.02) 100%); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -30%; right: -10%; width: 240px; height: 240px; background: radial-gradient(circle, var(--color-warning-soft) 0%, transparent 70%); opacity: 0.4; z-index: 0;"></div>
+            <div class="card__head" style="position: relative; z-index: 1;">
+                <span class="card__eyebrow" style="color: var(--color-warning); display: inline-flex; align-items: center; gap: var(--space-2);">
+                    <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    Panou administrare
+                </span>
+            </div>
+            <h3 style="font-size: var(--text-lg); margin: var(--space-2) 0; position: relative; z-index: 1;">Vezi activitatea utilizatorilor</h3>
+            <p style="color: var(--color-fg-muted); font-size: var(--text-sm); margin-bottom: var(--space-4); position: relative; z-index: 1;">
+                Acces rapid la statistici globale, lista de utilizatori cu progresul lor complet, drill-down per cont, audit log al acțiunilor și export CSV.
+            </p>
+            <div class="card__actions" style="position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: var(--space-2);">
+                <a href="index.php?page=admin&tab=dashboard" class="btn btn--primary btn--sm">
+                    <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Dashboard
+                </a>
+                <a href="index.php?page=admin&tab=utilizatori" class="btn btn--quiet btn--sm">Utilizatori</a>
+                <a href="index.php?page=admin&tab=audit" class="btn btn--quiet btn--sm">Audit log</a>
+                <a href="PHP/admin_export.php?type=users" class="btn btn--ghost btn--sm" style="margin-left: auto;">Export CSV</a>
+            </div>
+        </article>
+        <?php endif; ?>
+
         <!-- ── HERO: Continue learning ────────────────────────── -->
         <article class="card card--hero bento__card--hero">
             <div class="card__head">

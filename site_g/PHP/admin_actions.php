@@ -20,11 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-if (!verify_csrf()) {
-    set_flash("error", "Token CSRF invalid. Reîncarcă pagina.");
-    header("Location: ../index.php?page=admin&tab=actiuni");
-    exit;
-}
+verify_csrf();
 
 $action  = trim((string)($_POST['action'] ?? ''));
 $user_id = (int)($_POST['user_id'] ?? 0);

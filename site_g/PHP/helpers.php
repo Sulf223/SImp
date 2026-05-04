@@ -164,7 +164,9 @@ function ensure_rate_limit_table(mysqli $con) {
         window_start TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         INDEX idx_ident_action (identifier, action)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
-    $con->query($sql);
+    if (!$con->query($sql)) {
+        error_log('ensure_rate_limit_table failed: ' . $con->error);
+    }
 }
 
 /**
@@ -188,16 +190,24 @@ function check_rate_limit(mysqli $con, $action, $identifier, $max_attempts = 5, 
 
     $sql = "SELECT id, attempt_count, window_start FROM rate_limit_attempts WHERE identifier = ? AND action = ?";
     $stmt = $con->prepare($sql);
+    if (!$stmt) {
+        error_log('check_rate_limit prepare select failed: ' . $con->error);
+        return true;
+    }
     $stmt->bind_param('ss', $identifier, $action);
     $stmt->execute();
     $res = $stmt->get_result();
-    $row = $res->fetch_assoc();
+    $row = $res ? $res->fetch_assoc() : null;
     $stmt->close();
 
     if (!$row) {
         // Prima încercare
         $insert = "INSERT INTO rate_limit_attempts (identifier, action, attempt_count, window_start) VALUES (?, ?, 1, NOW())";
         $stmt = $con->prepare($insert);
+        if (!$stmt) {
+            error_log('check_rate_limit prepare insert failed: ' . $con->error);
+            return true;
+        }
         $stmt->bind_param('ss', $identifier, $action);
         $stmt->execute();
         $stmt->close();
@@ -212,6 +222,10 @@ function check_rate_limit(mysqli $con, $action, $identifier, $max_attempts = 5, 
         // Fereastra a expirat, resetăm
         $update = "UPDATE rate_limit_attempts SET attempt_count = 1, window_start = NOW() WHERE id = ?";
         $stmt = $con->prepare($update);
+        if (!$stmt) {
+            error_log('check_rate_limit prepare reset failed: ' . $con->error);
+            return true;
+        }
         $stmt->bind_param('i', $id);
         $stmt->execute();
         $stmt->close();
@@ -222,6 +236,10 @@ function check_rate_limit(mysqli $con, $action, $identifier, $max_attempts = 5, 
     $count++;
     $update = "UPDATE rate_limit_attempts SET attempt_count = ? WHERE id = ?";
     $stmt = $con->prepare($update);
+    if (!$stmt) {
+        error_log('check_rate_limit prepare increment failed: ' . $con->error);
+        return true;
+    }
     $stmt->bind_param('ii', $count, $id);
     $stmt->execute();
     $stmt->close();
@@ -237,6 +255,10 @@ function reset_rate_limit(mysqli $con, $action, $identifier) {
     $identifier = hash('sha256', $identifier);
     $sql = "DELETE FROM rate_limit_attempts WHERE identifier = ? AND action = ?";
     $stmt = $con->prepare($sql);
+    if (!$stmt) {
+        error_log('reset_rate_limit prepare failed: ' . $con->error);
+        return;
+    }
     $stmt->bind_param('ss', $identifier, $action);
     $stmt->execute();
     $stmt->close();
@@ -328,82 +350,102 @@ function log_admin_action(mysqli $con, $action_type, $target_user_id = null, $ta
  * FEATURE [F5]: Achievements System
  */
 function check_and_award_achievements(mysqli $con, int $user_id): array {
-    $locked = $con->begin_transaction();
-    if ($locked) {
-        if ($lockStmt = $con->prepare("SELECT achievement_id FROM user_achievements WHERE user_id = ? FOR UPDATE")) {
-            $lockStmt->bind_param('i', $user_id);
-            $lockStmt->execute();
-            $lockStmt->close();
-        }
-    }
-
-    // Obține achievements neacordate încă
-    $sql = "SELECT a.* FROM achievements a
-            WHERE a.id NOT IN (SELECT achievement_id FROM user_achievements WHERE user_id = ?)";
+    $locked = false;
     $unlocked = [];
-    if ($stmt = $con->prepare($sql)) {
-        $stmt->bind_param('i', $user_id);
-        $stmt->execute();
-        $rs = $stmt->get_result();
-        while ($a = $rs->fetch_assoc()) {
-            $met = false;
-            switch ($a['criteria_type']) {
-                case 'first_login': $met = true; break;
-                case 'grile_count':
-                    // FIX [F5-PATCH]: prepared statement (înainte era interpolare directă)
-                    if ($s = $con->prepare("SELECT COUNT(*) c FROM progres_grile WHERE id_utilizator = ?")) {
-                        $s->bind_param('i', $user_id);
-                        $s->execute();
-                        $row = $s->get_result()->fetch_assoc();
-                        $met = $row && (int)$row['c'] >= (int)$a['criteria_value'];
-                        $s->close();
-                    }
-                    break;
-                case 'exercise_count':
-                    if ($s = $con->prepare("SELECT COUNT(*) c FROM learning_exercise_progress WHERE user_id = ?")) {
-                        $s->bind_param('i', $user_id);
-                        $s->execute();
-                        $row = $s->get_result()->fetch_assoc();
-                        $met = $row && (int)$row['c'] >= (int)$a['criteria_value'];
-                        $s->close();
-                    }
-                    break;
-                case 'algorithm_completed':
-                    $meta = $a['criteria_meta'];
-                    if ($s2 = $con->prepare("SELECT COUNT(DISTINCT g.id) c FROM progres_grile p JOIN grile_cpp g ON g.id = p.id_grila WHERE p.id_utilizator = ? AND LOWER(g.nume_metoda) LIKE ?")) {
-                        $like = '%'.$meta.'%';
-                        $s2->bind_param('is', $user_id, $like);
-                        $s2->execute();
-                        $row = $s2->get_result()->fetch_assoc();
-                        $met = $row && (int)$row['c'] >= 1;
-                        $s2->close();
-                    }
-                    break;
-                case 'streak_days':
-                    if ($s = $con->prepare("SELECT current_streak FROM user_streak WHERE user_id = ?")) {
-                        $s->bind_param('i', $user_id);
-                        $s->execute();
-                        $row = $s->get_result()->fetch_assoc();
-                        if ($row) { $met = (int)$row['current_streak'] >= (int)$a['criteria_value']; }
-                        $s->close();
-                    }
-                    break;
+
+    try {
+        $locked = $con->begin_transaction();
+        if ($locked) {
+            if ($lockStmt = $con->prepare("SELECT achievement_id FROM user_achievements WHERE user_id = ? FOR UPDATE")) {
+                $lockStmt->bind_param('i', $user_id);
+                $lockStmt->execute();
+                $lockStmt->close();
             }
-            if ($met) {
-                if ($s3 = $con->prepare("INSERT IGNORE INTO user_achievements (user_id, achievement_id) VALUES (?, ?)")) {
-                    $s3->bind_param('ii', $user_id, $a['id']);
-                    if ($s3->execute() && $s3->affected_rows > 0) {
-                        $unlocked[] = $a;
+        }
+
+        // Obține achievements neacordate încă
+        $sql = "SELECT a.* FROM achievements a
+                WHERE a.id NOT IN (SELECT achievement_id FROM user_achievements WHERE user_id = ?)";
+
+        if ($stmt = $con->prepare($sql)) {
+            $stmt->bind_param('i', $user_id);
+            $stmt->execute();
+            $rs = $stmt->get_result();
+            while ($a = $rs->fetch_assoc()) {
+                $met = false;
+                switch ($a['criteria_type']) {
+                    case 'first_login':
+                        $met = true;
+                        break;
+                    case 'grile_count':
+                        if ($s = $con->prepare("SELECT COUNT(*) c FROM progres_grile WHERE id_utilizator = ?")) {
+                            $s->bind_param('i', $user_id);
+                            $s->execute();
+                            $row = $s->get_result()->fetch_assoc();
+                            $met = $row && (int)$row['c'] >= (int)$a['criteria_value'];
+                            $s->close();
+                        }
+                        break;
+                    case 'exercise_count':
+                        if ($s = $con->prepare("SELECT COUNT(*) c FROM learning_exercise_progress WHERE user_id = ?")) {
+                            $s->bind_param('i', $user_id);
+                            $s->execute();
+                            $row = $s->get_result()->fetch_assoc();
+                            $met = $row && (int)$row['c'] >= (int)$a['criteria_value'];
+                            $s->close();
+                        }
+                        break;
+                    case 'algorithm_completed':
+                        $meta = $a['criteria_meta'];
+                        if ($s2 = $con->prepare("SELECT COUNT(DISTINCT g.id) c FROM progres_grile p JOIN grile_cpp g ON g.id = p.id_grila WHERE p.id_utilizator = ? AND LOWER(g.nume_metoda) LIKE ?")) {
+                            $like = '%' . $meta . '%';
+                            $s2->bind_param('is', $user_id, $like);
+                            $s2->execute();
+                            $row = $s2->get_result()->fetch_assoc();
+                            $met = $row && (int)$row['c'] >= 1;
+                            $s2->close();
+                        }
+                        break;
+                    case 'streak_days':
+                        if ($s = $con->prepare("SELECT current_streak FROM user_streak WHERE user_id = ?")) {
+                            $s->bind_param('i', $user_id);
+                            $s->execute();
+                            $row = $s->get_result()->fetch_assoc();
+                            if ($row) {
+                                $met = (int)$row['current_streak'] >= (int)$a['criteria_value'];
+                            }
+                            $s->close();
+                        }
+                        break;
+                }
+                if ($met) {
+                    if ($s3 = $con->prepare("INSERT IGNORE INTO user_achievements (user_id, achievement_id) VALUES (?, ?)")) {
+                        $s3->bind_param('ii', $user_id, $a['id']);
+                        if ($s3->execute() && $s3->affected_rows > 0) {
+                            $unlocked[] = $a;
+                        }
+                        $s3->close();
                     }
-                    $s3->close();
                 }
             }
+            $stmt->close();
         }
-        $stmt->close();
+
+        if ($locked) {
+            $con->commit();
+        }
+    } catch (Throwable $e) {
+        if ($locked) {
+            try {
+                $con->rollback();
+            } catch (Throwable $rollbackError) {
+                // noop
+            }
+        }
+        error_log('check_and_award_achievements failed: ' . $e->getMessage());
+        return [];
     }
-    if ($locked) {
-        $con->commit();
-    }
+
     return $unlocked;
 }
 

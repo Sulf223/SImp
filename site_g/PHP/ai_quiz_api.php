@@ -11,6 +11,12 @@ require_once 'conexiune.php';
 // FIX [A2]: Session timeout pentru AJAX
 enforce_session_timeout_ajax();
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['ok' => false, 'error' => 'Metoda nepermisă.']);
+    exit;
+}
+
 // Verificăm CSRF
 if (!verify_csrf_ajax()) {
     http_response_code(403);
@@ -19,8 +25,23 @@ if (!verify_csrf_ajax()) {
 }
 
 $input = json_decode(file_get_contents('php://input'), true);
+$input = is_array($input) ? $input : [];
 $action = $input['action'] ?? '';
 $pathSlug = $input['path_slug'] ?? 'general';
+
+$allowedActions = ['generate_quiz', 'grade_quiz'];
+if (!in_array($action, $allowedActions, true)) {
+    http_response_code(400);
+    echo json_encode(['ok' => false, 'error' => 'Acțiune invalidă.']);
+    exit;
+}
+
+$identifier = !empty($_SESSION['user_id']) ? 'user_' . (int)$_SESSION['user_id'] : ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
+if (!check_rate_limit($con, 'ai_quiz', $identifier, 25, 3600)) {
+    http_response_code(429);
+    echo json_encode(['ok' => false, 'error' => 'Prea multe cereri pentru quiz. Încearcă din nou mai târziu.']);
+    exit;
+}
 
 // FIX [L1]: Sursă unică pentru API Key (getenv). Eliminare fallback la $_ENV/$_SERVER.
 $apiKey = getenv('GROQ_API_KEY') ?: '';
@@ -92,12 +113,22 @@ if ($action === 'generate_quiz') {
 
     $data = json_decode($res, true);
     $quizRaw = $data['choices'][0]['message']['content'] ?? '';
-    echo $quizRaw;
+    $quizJson = json_decode((string)$quizRaw, true);
+    if (!is_array($quizJson) || !isset($quizJson['quiz']) || !is_array($quizJson['quiz'])) {
+        echo json_encode(['ok' => false, 'error' => 'Răspuns quiz invalid de la AI.']);
+        exit;
+    }
+    echo json_encode($quizJson, JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 if ($action === 'grade_quiz') {
     $userAnswers = $input['answers'] ?? []; // [{question: "text", user: 0, correct: 1, isCorrect: bool}]
+    if (!is_array($userAnswers) || empty($userAnswers)) {
+        http_response_code(400);
+        echo json_encode(['ok' => false, 'error' => 'Răspunsuri lipsă pentru evaluare.']);
+        exit;
+    }
     
     $wrongQuestions = array_filter($userAnswers, fn($a) => !$a['isCorrect']);
     $score = count($userAnswers) - count($wrongQuestions);

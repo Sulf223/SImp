@@ -4,7 +4,7 @@ include "auth.php";
 
 $id_metoda = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($id_metoda <= 0) { 
-    set_flash("ID metodă invalid.", "danger");
+    set_flash("error", "ID metodă invalid.");
     header("Location: index.php?page=algoritmi");
     exit; 
 }
@@ -20,7 +20,7 @@ if ($stmt_metoda = $con->prepare($sql_metoda)) {
 }
 
 if ($metoda === null) { 
-    set_flash("Metoda nu a fost găsită.", "danger");
+    set_flash("error", "Metoda nu a fost găsită.");
     header("Location: index.php?page=algoritmi");
     exit; 
 }
@@ -126,8 +126,8 @@ if (!empty($metoda['fisier_cpp'])) {
     </div>
 </div>
 
-<script src="JS/visualizer.js" nonce="<?= $nonce ?>"></script>
-<script nonce="<?= $nonce ?>"> // FIX [M2]: Adăugare nonce pentru CSP
+<script src="JS/visualizer.js" nonce="<?= $nonce ?? '' ?>"></script>
+<script nonce="<?= $nonce ?? '' ?>"> // FIX [M2]: Adăugare nonce pentru CSP
 function copyCode() {
     const code = <?php echo json_encode($cod_cpp); ?>;
     const btn = document.getElementById('copy-btn');

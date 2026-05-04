@@ -217,7 +217,16 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
         <li><a href="index.php?page=grile" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Grile</a></li>
         <li><a href="index.php?page=profil" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Profil</a></li>
         <?php if (function_exists('is_admin') && is_admin()): ?>
+        <li style="margin-left: var(--space-2); border-left: 1px solid var(--color-border); padding-left: var(--space-2);">
+            <a href="index.php?page=admin&tab=utilizatori" class="btn btn--primary btn--sm" style="font-size: var(--text-sm); display: inline-flex; align-items: center; gap: 6px;" title="Vezi progresul elevilor">
+                <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                Elevi
+            </a>
+        </li>
         <li><a href="index.php?page=admin" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm); color: var(--color-warning); font-weight: 600;">Admin</a></li>
+        <li><a href="index.php?page=admin&tab=activitate" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm); color: var(--color-accent); font-weight: 600;">Activitate</a></li>
         <?php endif; ?>
 
         <!-- THEME TOGGLE -->
@@ -314,6 +323,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
 </footer>
 
 <script src="JS/toast.js" defer nonce="<?= $nonce ?>"></script>
+<script src="JS/sw_register.js" defer nonce="<?= $nonce ?>"></script>
 <?php if ($afiseaza_ai_widget): ?>
 <div id="ai-widget" class="ai-widget">
     <button id="ai-widget-toggle" class="ai-widget-toggle" type="button" aria-label="Deschide chat Profesor AI" aria-expanded="false" style="position: relative;">

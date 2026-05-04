@@ -12,7 +12,7 @@ if (!is_admin()) {
 
 // --- Tab activ
 $tab = isset($_GET['tab']) ? $_GET['tab'] : 'dashboard';
-$tab_valide = ['dashboard', 'utilizatori', 'detalii', 'actiuni', 'audit'];
+$tab_valide = ['dashboard', 'utilizatori', 'detalii', 'activitate', 'actiuni', 'audit'];
 if (!in_array($tab, $tab_valide, true)) { $tab = 'dashboard'; }
 
 // --- DATE GLOBALE pentru dashboard ---
@@ -89,15 +89,25 @@ if ($tab === 'dashboard') {
 // --- DATE pentru tab UTILIZATORI ---
 $users_list = [];
 $search = isset($_GET['q']) ? trim((string)$_GET['q']) : '';
+$total_grile_disponibile = 0;
+$total_achievements_disponibile = 0;
 if ($tab === 'utilizatori') {
+    // Totaluri pentru calculul procentajelor
+    $r = $con->query("SELECT COUNT(*) c FROM grile_cpp");
+    if ($r) { $total_grile_disponibile = (int)$r->fetch_assoc()['c']; }
+    $r = $con->query("SELECT COUNT(*) c FROM achievements");
+    if ($r) { $total_achievements_disponibile = (int)$r->fetch_assoc()['c']; }
+
     $sql = "SELECT u.id, u.username, u.rol, u.created_at,
                    (SELECT COUNT(*) FROM progres_grile pg WHERE pg.id_utilizator = u.id) AS grile,
                    (SELECT COUNT(*) FROM learning_exercise_progress lep WHERE lep.user_id = u.id) AS exercitii,
+                   (SELECT COUNT(*) FROM user_achievements ua WHERE ua.user_id = u.id) AS achievements,
                    (SELECT current_streak FROM user_streak us WHERE us.user_id = u.id) AS streak,
-                   (SELECT MAX(accessed_at) FROM learning_activity_history h WHERE h.user_id = u.id) AS ultima_activitate
+                   (SELECT MAX(accessed_at) FROM learning_activity_history h WHERE h.user_id = u.id) AS ultima_activitate,
+                   (SELECT COALESCE(SUM(activity_count), 0) FROM activity_day ad WHERE ad.user_id = u.id AND ad.activity_date > CURDATE() - INTERVAL 7 DAY) AS activitate_7d
             FROM utilizatori u
             WHERE (? = '' OR u.username LIKE ?)
-            ORDER BY u.created_at DESC";
+            ORDER BY (SELECT COUNT(*) FROM progres_grile pg WHERE pg.id_utilizator = u.id) DESC, u.created_at DESC";
     $like = '%' . $search . '%';
     if ($stmt = $con->prepare($sql)) {
         $stmt->bind_param("ss", $search, $like);
@@ -115,6 +125,7 @@ $user_exercitii = [];
 $user_lesson_progress = [];
 $user_activity = [];
 $user_streak = null;
+$users_activity = [];
 $user_id_drill = isset($_GET['user']) ? (int)$_GET['user'] : 0;
 
 if ($tab === 'detalii' && $user_id_drill > 0) {
@@ -193,6 +204,94 @@ if ($tab === 'detalii' && $user_id_drill > 0) {
     }
 }
 
+// --- Date suplimentare pentru "vederea profesorului" în tab Detalii ---
+$user_per_algorithm = [];   // [algoritm => [rezolvate, total, procent]]
+$user_daily_activity = [];  // ultimele 30 zile
+$user_achievements_list = []; // toate, cu unlocked_at sau null
+$class_avg = ['grile' => 0, 'exercitii' => 0, 'streak' => 0];
+
+if ($tab === 'detalii' && $user_detail) {
+    // Progres per algoritm — câte grile sunt în total per nume_metoda și câte a rezolvat utilizatorul
+    if ($stmt = $con->prepare(
+        "SELECT g.nume_metoda,
+                COUNT(g.id) AS total,
+                COALESCE(SUM(CASE WHEN pg.id_utilizator = ? THEN 1 ELSE 0 END), 0) AS rezolvate
+         FROM grile_cpp g
+         LEFT JOIN progres_grile pg ON pg.id_grila = g.id AND pg.id_utilizator = ?
+         GROUP BY g.nume_metoda
+         ORDER BY g.nume_metoda")) {
+        $stmt->bind_param("ii", $user_id_drill, $user_id_drill);
+        $stmt->execute();
+        $rs = $stmt->get_result();
+        while ($row = $rs->fetch_assoc()) {
+            $tot = max(1, (int)$row['total']);
+            $row['procent'] = round(((int)$row['rezolvate'] / $tot) * 100);
+            $user_per_algorithm[] = $row;
+        }
+        $stmt->close();
+    }
+
+    // Activitate ultimele 30 zile
+    if ($stmt = $con->prepare(
+        "SELECT activity_date, activity_count
+         FROM activity_day
+         WHERE user_id = ? AND activity_date > CURDATE() - INTERVAL 30 DAY
+         ORDER BY activity_date ASC")) {
+        $stmt->bind_param("i", $user_id_drill);
+        $stmt->execute();
+        $rs = $stmt->get_result();
+        while ($row = $rs->fetch_assoc()) { $user_daily_activity[] = $row; }
+        $stmt->close();
+    }
+
+    // Lista achievements cu status (unlocked sau locked)
+    if ($stmt = $con->prepare(
+        "SELECT a.id, a.slug, a.title, a.description, a.icon, a.criteria_type, a.criteria_value,
+                ua.unlocked_at
+         FROM achievements a
+         LEFT JOIN user_achievements ua ON ua.achievement_id = a.id AND ua.user_id = ?
+         ORDER BY (ua.unlocked_at IS NULL), ua.unlocked_at DESC, a.id ASC")) {
+        $stmt->bind_param("i", $user_id_drill);
+        $stmt->execute();
+        $rs = $stmt->get_result();
+        while ($row = $rs->fetch_assoc()) { $user_achievements_list[] = $row; }
+        $stmt->close();
+    }
+
+    // Media clasei (pentru comparare)
+    $r = $con->query(
+        "SELECT
+            ROUND(AVG(g_count), 1) AS avg_grile,
+            ROUND(AVG(e_count), 1) AS avg_exercitii,
+            ROUND(AVG(s_val), 1) AS avg_streak
+         FROM (
+            SELECT u.id,
+                   (SELECT COUNT(*) FROM progres_grile WHERE id_utilizator = u.id) AS g_count,
+                   (SELECT COUNT(*) FROM learning_exercise_progress WHERE user_id = u.id) AS e_count,
+                   COALESCE((SELECT current_streak FROM user_streak WHERE user_id = u.id), 0) AS s_val
+            FROM utilizatori u WHERE u.rol = 'user'
+         ) t");
+    if ($r && $row = $r->fetch_assoc()) {
+        $class_avg['grile'] = (float)($row['avg_grile'] ?? 0);
+        $class_avg['exercitii'] = (float)($row['avg_exercitii'] ?? 0);
+        $class_avg['streak'] = (float)($row['avg_streak'] ?? 0);
+    }
+}
+
+if ($tab === 'activitate') {
+    $sql = "SELECT u.id, u.username, u.rol, u.created_at,
+                   (SELECT COUNT(*) FROM progres_grile pg WHERE pg.id_utilizator = u.id) AS grile,
+                   (SELECT COUNT(*) FROM learning_exercise_progress lep WHERE lep.user_id = u.id) AS exercitii,
+                   (SELECT COUNT(*) FROM learning_progress lp WHERE lp.user_id = u.id) AS lectii,
+                   (SELECT COUNT(*) FROM learning_activity_history h WHERE h.user_id = u.id) AS actiuni,
+                   (SELECT MAX(accessed_at) FROM learning_activity_history h WHERE h.user_id = u.id) AS ultima_activitate,
+                   (SELECT current_streak FROM user_streak us WHERE us.user_id = u.id) AS streak
+            FROM utilizatori u
+            ORDER BY COALESCE(ultima_activitate, u.created_at) DESC, u.id DESC";
+    $r = $con->query($sql);
+    if ($r) { while ($row = $r->fetch_assoc()) { $users_activity[] = $row; } }
+}
+
 // --- DATE pentru tab ACȚIUNI: lista utilizatori simplificată
 $users_actions = [];
 if ($tab === 'actiuni') {
@@ -220,6 +319,7 @@ function h($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
             <a href="index.php?page=admin&tab=dashboard" class="btn btn--<?php echo $tab==='dashboard'?'primary':'quiet'; ?> btn--sm">Dashboard</a>
             <a href="index.php?page=admin&tab=utilizatori" class="btn btn--<?php echo $tab==='utilizatori'?'primary':'quiet'; ?> btn--sm">Utilizatori</a>
             <a href="index.php?page=admin&tab=detalii" class="btn btn--<?php echo $tab==='detalii'?'primary':'quiet'; ?> btn--sm">Detalii user</a>
+            <a href="index.php?page=admin&tab=activitate" class="btn btn--<?php echo $tab==='activitate'?'primary':'quiet'; ?> btn--sm">Activitate</a>
             <a href="index.php?page=admin&tab=actiuni" class="btn btn--<?php echo $tab==='actiuni'?'primary':'quiet'; ?> btn--sm">Acțiuni</a>
             <a href="index.php?page=admin&tab=audit" class="btn btn--<?php echo $tab==='audit'?'primary':'quiet'; ?> btn--sm">Audit log</a>
             <a href="PHP/admin_export.php?type=users" class="btn btn--ghost btn--sm" style="margin-left:auto;">Export CSV utilizatori</a>
@@ -360,39 +460,62 @@ function h($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th style="text-align:left;">ID</th>
                     <th style="text-align:left;">Username</th>
                     <th>Rol</th>
                     <th>Înregistrat</th>
-                    <th>Ultima activitate</th>
-                    <th>Grile</th>
+                    <th>Ultima activ.</th>
+                    <th title="Grile rezolvate / total disponibile">Progres grile</th>
                     <th>Exerciții</th>
+                    <th title="Achievements deblocate">🏆</th>
+                    <th title="Suma activităților ultimele 7 zile">Activ. 7z</th>
                     <th>Streak</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($users_list as $u): ?>
+                <?php foreach ($users_list as $u):
+                    $procent_grile = $total_grile_disponibile > 0 ? round(((int)$u['grile'] / $total_grile_disponibile) * 100) : 0;
+                    $bar_color = $procent_grile >= 70 ? 'var(--color-success)' : ($procent_grile >= 40 ? 'var(--color-warning)' : 'var(--color-danger)');
+                    $a7 = (int)($u['activitate_7d'] ?? 0);
+                ?>
                 <tr>
-                    <td style="color: var(--color-fg-muted); font-family: var(--font-mono); font-size: var(--text-xs);">#<?php echo (int)$u['id']; ?></td>
-                    <td><strong><?php echo h($u['username']); ?></strong></td>
+                    <td>
+                        <strong><?php echo h($u['username']); ?></strong>
+                        <span style="color: var(--color-fg-muted); font-size: var(--text-xs); margin-left: 4px;">#<?php echo (int)$u['id']; ?></span>
+                    </td>
                     <td style="text-align:center;"><span class="badge badge--soft"><?php echo h($u['rol']); ?></span></td>
-                    <td style="text-align:center; font-size: var(--text-xs);"><?php echo h($u['created_at'] ? date('d.m.Y', strtotime($u['created_at'])) : '-'); ?></td>
-                    <td style="text-align:center; font-size: var(--text-xs);"><?php echo h($u['ultima_activitate'] ? date('d.m.Y H:i', strtotime($u['ultima_activitate'])) : '—'); ?></td>
-                    <td style="text-align:center;"><?php echo (int)$u['grile']; ?></td>
+                    <td style="text-align:center; font-size: var(--text-xs); color: var(--color-fg-muted);"><?php echo h($u['created_at'] ? date('d.m.Y', strtotime($u['created_at'])) : '-'); ?></td>
+                    <td style="text-align:center; font-size: var(--text-xs);"><?php echo h($u['ultima_activitate'] ? date('d.m H:i', strtotime($u['ultima_activitate'])) : '—'); ?></td>
+                    <td style="min-width: 160px;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span style="font-size: var(--text-xs); white-space: nowrap; min-width: 42px;"><strong><?php echo (int)$u['grile']; ?></strong>/<?php echo $total_grile_disponibile; ?></span>
+                            <div style="flex: 1; background: var(--color-surface-3); height: 6px; border-radius: 3px; overflow: hidden; min-width: 50px;">
+                                <div style="background: <?php echo $bar_color; ?>; height: 100%; width: <?php echo $procent_grile; ?>%;"></div>
+                            </div>
+                            <span style="font-size: var(--text-xs); color: var(--color-fg-muted); min-width: 32px; text-align: right;"><?php echo $procent_grile; ?>%</span>
+                        </div>
+                    </td>
                     <td style="text-align:center;"><?php echo (int)$u['exercitii']; ?></td>
-                    <td style="text-align:center;"><?php echo (int)($u['streak'] ?? 0); ?></td>
+                    <td style="text-align:center;"><strong><?php echo (int)($u['achievements'] ?? 0); ?></strong></td>
+                    <td style="text-align:center;">
+                        <span style="font-weight: 600; color: <?php echo $a7 > 0 ? 'var(--color-success)' : 'var(--color-fg-muted)'; ?>;"><?php echo $a7; ?></span>
+                    </td>
+                    <td style="text-align:center;"><?php echo (int)($u['streak'] ?? 0); ?>🔥</td>
                     <td style="text-align:right;">
-                        <a href="index.php?page=admin&tab=detalii&user=<?php echo (int)$u['id']; ?>" class="btn btn--quiet btn--sm">Detalii</a>
+                        <a href="index.php?page=admin&tab=detalii&user=<?php echo (int)$u['id']; ?>" class="btn btn--primary btn--sm">Vezi tot</a>
                     </td>
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($users_list)): ?>
-                <tr><td colspan="9" style="padding: 1rem; text-align:center; color: var(--color-fg-muted);">Niciun utilizator găsit.</td></tr>
+                <tr><td colspan="10" style="padding: 1rem; text-align:center; color: var(--color-fg-muted);">Niciun utilizator găsit.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
         </div>
+
+        <p style="font-size: var(--text-xs); color: var(--color-fg-subtle); margin-top: var(--space-3);">
+            🟢 Progres ≥ 70% &nbsp;·&nbsp; 🟡 ≥ 40% &nbsp;·&nbsp; 🔴 &lt; 40%. Tabelul este sortat descrescător după numărul de grile rezolvate.
+        </p>
     </article>
 
 <?php elseif ($tab === 'detalii'): ?>
@@ -417,6 +540,136 @@ function h($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                     <div><strong style="font-size:var(--text-2xl);"><?php echo count($user_exercitii); ?></strong><br><span style="color:var(--color-fg-muted); font-size:var(--text-xs);">Exerciții</span></div>
                     <div><strong style="font-size:var(--text-2xl);"><?php echo count($user_lesson_progress); ?></strong><br><span style="color:var(--color-fg-muted); font-size:var(--text-xs);">Lecții accesate</span></div>
                     <div><strong style="font-size:var(--text-2xl);"><?php echo (int)($user_streak['current_streak'] ?? 0); ?> 🔥</strong><br><span style="color:var(--color-fg-muted); font-size:var(--text-xs);">Streak curent (max <?php echo (int)($user_streak['longest_streak'] ?? 0); ?>)</span></div>
+                </div>
+            </article>
+
+            <!-- ===== Comparare cu media clasei ===== -->
+            <article class="card" style="grid-column: 1 / -1; border:1px solid var(--color-border); background: var(--color-surface-1);">
+                <div class="card__head"><span class="card__eyebrow">Comparare cu media clasei</span></div>
+                <div class="card__body">
+                    <p style="font-size: var(--text-sm); color: var(--color-fg-muted); margin-bottom: var(--space-3);">
+                        Cum se compară <strong><?php echo h($user_detail['username']); ?></strong> cu ceilalți utilizatori cu rolul „user".
+                    </p>
+                    <?php
+                    $metrics = [
+                        ['label' => 'Grile rezolvate', 'val' => count($user_grile), 'avg' => $class_avg['grile'], 'color' => 'primary'],
+                        ['label' => 'Exerciții', 'val' => count($user_exercitii), 'avg' => $class_avg['exercitii'], 'color' => 'success'],
+                        ['label' => 'Streak curent', 'val' => (int)($user_streak['current_streak'] ?? 0), 'avg' => $class_avg['streak'], 'color' => 'warning'],
+                    ];
+                    ?>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4);">
+                        <?php foreach ($metrics as $m):
+                            $diff = $m['val'] - $m['avg'];
+                            $diff_str = $diff > 0 ? '+' . number_format($diff, 1) : number_format($diff, 1);
+                            $diff_color = $diff > 0 ? 'var(--color-success)' : ($diff < 0 ? 'var(--color-danger)' : 'var(--color-fg-muted)');
+                            $max = max($m['val'], $m['avg'], 1);
+                            $user_pct = round(($m['val'] / $max) * 100);
+                            $avg_pct = round(($m['avg'] / $max) * 100);
+                        ?>
+                        <div style="background: var(--color-surface-2); padding: var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+                            <div style="font-size: var(--text-xs); color: var(--color-fg-muted); margin-bottom: var(--space-2); text-transform: uppercase; letter-spacing: 0.05em;"><?php echo h($m['label']); ?></div>
+                            <div style="display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-2);">
+                                <strong style="font-size: var(--text-2xl); color: var(--color-<?php echo $m['color']; ?>);"><?php echo (int)$m['val']; ?></strong>
+                                <span style="font-size: var(--text-sm); color: var(--color-fg-muted);">vs media <?php echo number_format($m['avg'], 1); ?></span>
+                                <span style="margin-left:auto; font-size: var(--text-sm); font-weight: 600; color: <?php echo $diff_color; ?>;"><?php echo $diff_str; ?></span>
+                            </div>
+                            <div style="margin-top: var(--space-2);">
+                                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                                    <span style="font-size: var(--text-xs); width: 50px;">Tu:</span>
+                                    <div style="flex: 1; background: var(--color-surface-3); height: 4px; border-radius: 2px; overflow: hidden;"><div style="background: var(--color-<?php echo $m['color']; ?>); height: 100%; width: <?php echo $user_pct; ?>%;"></div></div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span style="font-size: var(--text-xs); width: 50px;">Media:</span>
+                                    <div style="flex: 1; background: var(--color-surface-3); height: 4px; border-radius: 2px; overflow: hidden;"><div style="background: var(--color-fg-muted); height: 100%; width: <?php echo $avg_pct; ?>%;"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ===== Progres per algoritm ===== -->
+            <article class="card" style="grid-column: 1 / -1; border:1px solid var(--color-border); background: var(--color-surface-1);">
+                <div class="card__head"><span class="card__eyebrow">Progres per algoritm</span></div>
+                <div class="card__body">
+                    <?php if (empty($user_per_algorithm)): ?>
+                        <p style="color: var(--color-fg-muted);">Nu există încă grile pentru acest utilizator.</p>
+                    <?php else: ?>
+                        <?php foreach ($user_per_algorithm as $a):
+                            $pct = (int)$a['procent'];
+                            $col = $pct >= 70 ? 'var(--color-success)' : ($pct >= 40 ? 'var(--color-warning)' : 'var(--color-danger)');
+                        ?>
+                        <div style="display: grid; grid-template-columns: 180px 1fr 80px; align-items: center; gap: var(--space-3); margin-bottom: var(--space-2);">
+                            <strong style="font-size: var(--text-sm);"><?php echo h($a['nume_metoda']); ?></strong>
+                            <div style="background: var(--color-surface-3); height: 14px; border-radius: 7px; overflow: hidden; position: relative;">
+                                <div style="background: <?php echo $col; ?>; height: 100%; width: <?php echo $pct; ?>%; transition: width 0.3s;"></div>
+                                <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: var(--text-xs); color: white; font-weight: 600; mix-blend-mode: difference;"><?php echo (int)$a['rezolvate']; ?>/<?php echo (int)$a['total']; ?></span>
+                            </div>
+                            <span style="font-size: var(--text-sm); font-weight: 600; color: <?php echo $col; ?>; text-align: right;"><?php echo $pct; ?>%</span>
+                        </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </article>
+
+            <!-- ===== Activitate ultimele 30 zile ===== -->
+            <article class="card" style="grid-column: 1 / -1; border:1px solid var(--color-border); background: var(--color-surface-1);">
+                <div class="card__head"><span class="card__eyebrow">Activitate ultimele 30 zile</span></div>
+                <div class="card__body">
+                    <?php if (empty($user_daily_activity)): ?>
+                        <p style="color: var(--color-fg-muted);">Nu există activitate înregistrată în ultimele 30 zile.</p>
+                    <?php else:
+                        $maxa = max(array_map(fn($x) => (int)$x['activity_count'], $user_daily_activity));
+                        if ($maxa < 1) { $maxa = 1; }
+                        $total_30 = array_sum(array_map(fn($x) => (int)$x['activity_count'], $user_daily_activity));
+                    ?>
+                        <p style="font-size: var(--text-sm); color: var(--color-fg-muted); margin-bottom: var(--space-3);">
+                            Total activități: <strong style="color: var(--color-fg);"><?php echo $total_30; ?></strong> · Vârf zilnic: <strong style="color: var(--color-fg);"><?php echo $maxa; ?></strong>
+                        </p>
+                        <div style="display:flex; align-items:flex-end; gap:3px; height:120px; overflow-x: auto; padding-bottom: 4px;">
+                            <?php foreach ($user_daily_activity as $d):
+                                $h = round(((int)$d['activity_count'] / $maxa) * 100);
+                            ?>
+                                <div style="display:flex; flex-direction:column; align-items:center; min-width: 22px;" title="<?php echo h($d['activity_date']); ?>: <?php echo (int)$d['activity_count']; ?> activități">
+                                    <div style="width: 100%; background: var(--color-primary); height: <?php echo $h; ?>%; min-height: 2px; border-radius: 2px 2px 0 0;"></div>
+                                    <span style="font-size: 9px; color: var(--color-fg-subtle); margin-top: 4px; transform: rotate(-45deg); transform-origin: center; white-space: nowrap;"><?php echo h(date('d/m', strtotime($d['activity_date']))); ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </article>
+
+            <!-- ===== Achievements (deblocate vs locked) ===== -->
+            <article class="card" style="grid-column: 1 / -1; border:1px solid var(--color-border); background: var(--color-surface-1);">
+                <div class="card__head">
+                    <span class="card__eyebrow">Achievements
+                        (<?php echo count(array_filter($user_achievements_list, fn($a) => !empty($a['unlocked_at']))); ?>/<?php echo count($user_achievements_list); ?>)
+                    </span>
+                </div>
+                <div class="card__body">
+                    <?php if (empty($user_achievements_list)): ?>
+                        <p style="color: var(--color-fg-muted);">Nu există achievements configurate.</p>
+                    <?php else: ?>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-3);">
+                            <?php foreach ($user_achievements_list as $a):
+                                $unlocked = !empty($a['unlocked_at']);
+                                $opacity = $unlocked ? '1' : '0.45';
+                                $bg = $unlocked ? 'linear-gradient(135deg, var(--color-warning-soft), var(--color-primary-soft))' : 'var(--color-surface-2)';
+                                $border = $unlocked ? '1px solid var(--color-warning)' : '1px solid var(--color-border)';
+                            ?>
+                            <div style="padding: var(--space-3); background: <?php echo $bg; ?>; border: <?php echo $border; ?>; border-radius: var(--radius-md); opacity: <?php echo $opacity; ?>; <?php echo !$unlocked ? 'filter: grayscale(0.7);' : ''; ?>">
+                                <div style="font-size: 1.5rem; margin-bottom: 4px;"><?php echo $unlocked ? '🏆' : '🔒'; ?></div>
+                                <strong style="display: block; font-size: var(--text-sm); margin-bottom: 4px;"><?php echo h($a['title']); ?></strong>
+                                <p style="font-size: var(--text-xs); color: var(--color-fg-muted); margin: 0;"><?php echo h($a['description']); ?></p>
+                                <?php if ($unlocked): ?>
+                                <div style="font-size: var(--text-xs); color: var(--color-success); margin-top: 6px;">✓ <?php echo h(date('d.m.Y', strtotime($a['unlocked_at']))); ?></div>
+                                <?php endif; ?>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </article>
 
@@ -478,6 +731,56 @@ function h($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
             </article>
         </div>
     <?php endif; ?>
+
+<?php elseif ($tab === 'activitate'): ?>
+    <!-- ===== ACTIVITATE UTILIZATORI ===== -->
+    <div class="bento" style="gap: var(--space-6);">
+        <article class="card bento__card--hero" style="grid-column: 1 / -1; border: 1px solid var(--color-border); background: var(--color-surface-1);">
+            <div class="card__head">
+                <span class="card__eyebrow">Activitate utilizatori</span>
+                <span class="badge badge--soft"><?php echo count($users_activity); ?> conturi</span>
+            </div>
+            <p class="card__body">Acest tab centralizează utilizarea aplicației pe cont: grile rezolvate, exerciții, lecții, acțiuni și ultima activitate.</p>
+        </article>
+
+        <article class="card" style="grid-column: 1 / -1; border: 1px solid var(--color-border); background: var(--color-surface-1); overflow-x: auto;">
+            <table class="table" style="width: 100%; border-collapse: collapse; min-width: 920px;">
+                <thead>
+                    <tr>
+                        <th style="text-align:left; padding: var(--space-3);">Utilizator</th>
+                        <th style="text-align:left; padding: var(--space-3);">Rol</th>
+                        <th style="text-align:right; padding: var(--space-3);">Grile</th>
+                        <th style="text-align:right; padding: var(--space-3);">Exerciții</th>
+                        <th style="text-align:right; padding: var(--space-3);">Lecții</th>
+                        <th style="text-align:right; padding: var(--space-3);">Acțiuni</th>
+                        <th style="text-align:right; padding: var(--space-3);">Streak</th>
+                        <th style="text-align:left; padding: var(--space-3);">Ultima activitate</th>
+                        <th style="text-align:left; padding: var(--space-3);">Detalii</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($users_activity as $u): ?>
+                        <tr>
+                            <td style="padding: var(--space-3); border-top: 1px solid var(--color-border);"><?php echo h($u['username']); ?></td>
+                            <td style="padding: var(--space-3); border-top: 1px solid var(--color-border);"><?php echo h($u['rol']); ?></td>
+                            <td style="padding: var(--space-3); border-top: 1px solid var(--color-border); text-align:right;"><?php echo (int)$u['grile']; ?></td>
+                            <td style="padding: var(--space-3); border-top: 1px solid var(--color-border); text-align:right;"><?php echo (int)$u['exercitii']; ?></td>
+                            <td style="padding: var(--space-3); border-top: 1px solid var(--color-border); text-align:right;"><?php echo (int)$u['lectii']; ?></td>
+                            <td style="padding: var(--space-3); border-top: 1px solid var(--color-border); text-align:right;"><?php echo (int)$u['actiuni']; ?></td>
+                            <td style="padding: var(--space-3); border-top: 1px solid var(--color-border); text-align:right;"><?php echo (int)($u['streak'] ?? 0); ?></td>
+                            <td style="padding: var(--space-3); border-top: 1px solid var(--color-border);"><?php echo h($u['ultima_activitate'] ?? '—'); ?></td>
+                            <td style="padding: var(--space-3); border-top: 1px solid var(--color-border);">
+                                <a href="index.php?page=admin&tab=detalii&user=<?php echo (int)$u['id']; ?>" class="btn btn--quiet btn--sm">Detalii</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    <?php if (empty($users_activity)): ?>
+                        <tr><td colspan="9" style="padding: var(--space-4); color: var(--color-fg-muted);">Nu există date de activitate încă.</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </article>
+    </div>
 
 <?php elseif ($tab === 'actiuni'): ?>
     <!-- ===== ACȚIUNI ADMIN ===== -->

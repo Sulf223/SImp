@@ -2,6 +2,9 @@
 // Parse the config file
 $config = require 'config.php';
 
+// În PHP 8.x, mysqli poate arunca excepții implicit; păstrăm fluxul aplicației bazat pe verificări de retur.
+mysqli_report(MYSQLI_REPORT_OFF);
+
 $host = $config['host'];
 $user = $config['user'];
 $pass = $config['pass'];

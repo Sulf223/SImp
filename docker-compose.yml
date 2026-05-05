@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   web:
     build:
@@ -101,6 +99,7 @@ services:
       - ./site_g/database/upgrade_recursivitate_backtracking.sql:/docker-entrypoint-initdb.d/03_upgrade_recursivitate.sql:ro
       - ./site_g/database/upgrade_profile_streak.sql:/docker-entrypoint-initdb.d/04_upgrade_profile_streak.sql:ro
       - ./site_g/database/upgrade_rate_limit.sql:/docker-entrypoint-initdb.d/05_upgrade_rate_limit.sql:ro
+      - ./migrations/20260505_add_doc_link_to_grile_cpp.sql:/docker-entrypoint-initdb.d/06_add_doc_link_to_grile_cpp.sql:ro
     
     networks:
       - simp_network

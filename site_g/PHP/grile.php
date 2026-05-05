@@ -13,7 +13,7 @@ $teste_rapide = [
     ['titlu' => 'Sortări (mix)', 'descriere' => 'Bubble, Selection, Insertion, Quick, Merge.', 'set' => 'sortari', 'color' => '#6e56cf']
 ];
 
-$sql_grile = "SELECT id, nume_metoda, dificultate, intrebare FROM grile_cpp";
+$sql_grile = "SELECT id, nume_metoda, dificultate, intrebare, doc_link FROM grile_cpp";
 $stmt_grile = $con->prepare($sql_grile);
 $stmt_grile->execute();
 $result_grile = $stmt_grile->get_result();
@@ -124,6 +124,7 @@ if ($is_logged_in) {
                             <th style="padding: var(--space-3); text-align: left; color: var(--color-fg-subtle); font-size: 10px; text-transform: uppercase;">Întrebare</th>
                             <th style="padding: var(--space-3); text-align: left; color: var(--color-fg-subtle); font-size: 10px; text-transform: uppercase;">Algoritm</th>
                             <th style="padding: var(--space-3); text-align: left; color: var(--color-fg-subtle); font-size: 10px; text-transform: uppercase;">Dificultate</th>
+                            <th style="padding: var(--space-3); text-align: left; color: var(--color-fg-subtle); font-size: 10px; text-transform: uppercase;">Documentație</th>
                             <th style="padding: var(--space-3); text-align: right; color: var(--color-fg-subtle); font-size: 10px; text-transform: uppercase;">Acțiune</th>
                         </tr>
                     </thead>
@@ -158,6 +159,13 @@ if ($is_logged_in) {
                                     <span class="badge" style="font-size: 10px; <?php echo $dif_style; ?>">
                                         <?php echo htmlspecialchars($dif_label); ?>
                                     </span>
+                                </td>
+                                <td style="padding: var(--space-4); text-align: left;">
+                                    <?php if (!empty($grila['doc_link'])): ?>
+                                        <a href="<?php echo htmlspecialchars($grila['doc_link']); ?>" target="_blank" class="btn btn--quiet btn--sm">Vezi doc</a>
+                                    <?php else: ?>
+                                        <span style="color: var(--color-fg-muted); font-size: 12px;">—</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td style="padding: var(--space-4); text-align: right;">
                                     <?php if ($is_logged_in): ?>

@@ -73,6 +73,17 @@ environment:
 
 ⚠️ **IMPORTANT**: Pentru producție, folosește credențiale SIGURE și **nu** le comita în git!
 
+### Aplicarea migrațiilor noi
+
+Compose aplică automat scripturile din `docker-entrypoint-initdb.d` la prima inițializare a volumului MySQL. Dacă ai deja `db_data` creat, noua coloană `doc_link` nu va apărea până când:
+
+```bash
+docker compose down -v
+docker compose up --build -d
+```
+
+Sau rulezi manual migrarea în containerul DB.
+
 ---
 
 ## 📊 Architecture

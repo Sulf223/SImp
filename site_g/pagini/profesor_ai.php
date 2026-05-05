@@ -73,6 +73,7 @@ $is_logged_in = is_logged_in();
     </div>
 </div>
 
+<script nonce="<?= $nonce ?>" src="JS/utf8_normalize.js"></script>
 <script nonce="<?= $nonce ?>">
 // FIX [M2]: Adăugare nonce pentru CSP
 document.addEventListener('DOMContentLoaded', () => {
@@ -98,15 +99,26 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingView.style.display = 'block';
 
         try {
+            // FIX [Q5]: Explicit UTF-8 charset in fetch headers
             const res = await fetch('PHP/ai_quiz_api.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+                headers: { 
+                    'Content-Type': 'application/json; charset=UTF-8', 
+                    'Accept': 'application/json; charset=UTF-8',
+                    'X-CSRF-Token': getCsrfToken() 
+                },
                 body: JSON.stringify({ action: 'generate_quiz', path_slug: pathSlug })
             });
             const data = await res.json();
             
-            if (data && data.quiz) {
-                quizData = data.quiz;
+            if (data && data.quiz && Array.isArray(data.quiz)) {
+                // FIX [Q10]: Normalize all quiz data for UTF-8 issues
+                quizData = data.quiz.map(q => ({
+                    question: normalizeUTF8Text(fixMojibake(q.question || '')),
+                    options: (q.options || []).map(opt => normalizeUTF8Text(fixMojibake(opt || ''))),
+                    correct: q.correct,
+                    explanation: normalizeUTF8Text(fixMojibake(q.explanation || ''))
+                }));
                 currentIdx = 0;
                 userSelections = [];
                 loadingView.style.display = 'none';
@@ -124,15 +136,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderQuestion() {
         const q = quizData[currentIdx];
+        
+        // FIX [Q6]: Ensure proper UTF-8 character encoding when rendering
+        // Use both normalization and mojibake fixing for safety
+        const normalizedQuestion = normalizeUTF8Text(fixMojibake(q.question || ''));
+        const normalizedExplanation = normalizeUTF8Text(fixMojibake(q.explanation || ''));
+        const normalizedOptions = (q.options || []).map(opt => normalizeUTF8Text(fixMojibake(opt || '')));
+        
         activeView.innerHTML = `
             <div class="card__head" style="margin-bottom: var(--space-4);">
                 <span class="card__eyebrow">Întrebarea ${currentIdx + 1} / ${quizData.length}</span>
                 <span class="badge badge--soft">${currentIdx + 1 > 5 ? 'Avansat' : 'Bazele'}</span>
             </div>
-            <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-6);">${q.question}</h3>
+            <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-6);">${normalizedQuestion}</h3>
             
             <div id="ai-options" style="display: flex; flex-direction: column; gap: var(--space-3); flex: 1;">
-                ${q.options.map((opt, i) => `
+                ${normalizedOptions.map((opt, i) => `
                     <button class="grila-option ai-opt-btn" data-index="${i}" style="text-align: left; padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface-2); transition: all 0.2s;">
                         ${opt}
                     </button>
@@ -173,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 feedback.style.display = 'block';
                 feedback.innerHTML = `
                     <div class="alert alert--${isCorrect ? 'success' : 'danger'}" style="margin: 0;">
-                        <strong>${isCorrect ? 'Excelent!' : 'Greșit.'}</strong> ${q.explanation}
+                        <strong>${isCorrect ? 'Excelent!' : 'Greșit.'}</strong> ${normalizedExplanation}
                     </div>
                 `;
 
@@ -206,12 +225,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const percent = (score / quizData.length) * 100;
 
         try {
+            // FIX [Q7]: Explicit UTF-8 charset in fetch and proper string encoding
             const res = await fetch('PHP/ai_quiz_api.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+                headers: { 
+                    'Content-Type': 'application/json; charset=UTF-8', 
+                    'Accept': 'application/json; charset=UTF-8',
+                    'X-CSRF-Token': getCsrfToken() 
+                },
                 body: JSON.stringify({ action: 'grade_quiz', answers: userSelections })
             });
             const data = await res.json();
+            
+            // FIX [Q8]: Ensure feedback text is properly UTF-8 encoded and fixed
+            const rawFeedback = data.feedback || 'Analiză indisponibilă.';
+            const normalizedFeedback = normalizeUTF8Text(fixMojibake(rawFeedback)).replace(/\*\*/g, '');
             
             resultsView.innerHTML = `
                 <div class="card__head" style="justify-content: center; margin-bottom: var(--space-6);">
@@ -227,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; font-size: 12px;">AI</div>
                             <div style="flex: 1;">
                                 <h4 style="font-size: var(--text-md); font-weight: 600; margin-bottom: var(--space-3); color: var(--color-primary);">Raport de Evaluare:</h4>
-                                <div style="font-size: var(--text-sm); color: var(--color-fg-muted); line-height: 1.6; white-space: pre-wrap;">${data.feedback ? data.feedback.replace(/\*\*/g, '') : 'Analiză indisponibilă.'}</div>
+                                <div style="font-size: var(--text-sm); color: var(--color-fg-muted); line-height: 1.6; white-space: pre-wrap;">${normalizedFeedback}</div>
                             </div>
                         </div>
                     </div>

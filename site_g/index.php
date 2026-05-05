@@ -31,6 +31,7 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
 
 // Includem helper-ele (Flash messages, CSRF)
 require_once 'PHP/helpers.php';
+require_once 'PHP/auth.php';
 
 // Paginile permise pentru a preveni atacuri de tip LFI (Local File Inclusion)
 // Am adăugat și o cale către 'pagini/' pentru a păstra structura curată
@@ -216,7 +217,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
         <li><a href="index.php?page=compilator" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Compilator</a></li>
         <li><a href="index.php?page=grile" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Grile</a></li>
         <li><a href="index.php?page=profil" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Profil</a></li>
-        <?php if (function_exists('is_admin') && is_admin()): ?>
+        <?php if (is_admin()): ?>
         <li style="margin-left: var(--space-2); border-left: 1px solid var(--color-border); padding-left: var(--space-2);">
             <a href="index.php?page=admin&tab=utilizatori" class="btn btn--primary btn--sm" style="font-size: var(--text-sm); display: inline-flex; align-items: center; gap: 6px;" title="Vezi progresul elevilor">
                 <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

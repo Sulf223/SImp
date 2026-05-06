@@ -18,7 +18,7 @@ $nonce = base64_encode(random_bytes(16));
 
 // CSP compatibil cu event handlerele inline încă prezente în paginile vechi.
 // Scripturile inline propriu-zise rămân protejate cu nonce; doar atributele on* sunt permise temporar.
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-{$nonce}'; script-src-elem 'self' 'nonce-{$nonce}'; script-src-attr 'unsafe-inline'; frame-src https://onecompiler.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;");
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-{$nonce}'; script-src-elem 'self' 'nonce-{$nonce}'; script-src-attr 'unsafe-inline'; img-src 'self' data: https://api.dicebear.com; frame-src https://onecompiler.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; object-src 'none'; base-uri 'self'; form-action 'self';");
 
 header("X-Content-Type-Options: nosniff");
 header("X-Frame-Options: SAMEORIGIN");
@@ -405,7 +405,6 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
 <script src="JS/ai_widget.js" defer nonce="<?= $nonce ?>"></script>
 <?php endif; ?>
 
-</body>
 <script nonce="<?= $nonce ?>"> // FIX [M2]: Adăugare nonce pentru CSP
 // THEME TOGGLE
 (function() {
@@ -462,4 +461,5 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
     }
 })();
 </script>
+</body>
 </html>

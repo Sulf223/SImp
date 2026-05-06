@@ -29,12 +29,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ code: code })
             });
 
-            // FIX [A5]: Verifică res.ok înainte de res.json() pentru a evita crash la erori 500 (HTML)
-            if (!res.ok) {
-                throw new Error(`Serverul a răspuns cu eroarea ${res.status}`);
+            let data = null;
+            try {
+                data = await res.json();
+            } catch (jsonError) {
+                data = null;
             }
 
-            const data = await res.json();
+            if (!res.ok) {
+                responsePanel.innerHTML = `<div class="alert alert--danger">${data?.error || `Serverul a răspuns cu eroarea ${res.status}.`}</div>`;
+                return;
+            }
+
             if (data.ok && data.feedback) {
                 // Escape minimal, markdown to HTML (basic implementation for paragraphs/lists)
                 let html = data.feedback

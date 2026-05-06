@@ -11,6 +11,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
     echo json_encode(['ok' => false, 'error' => 'Metodă nepermisă.']);
     exit;
 }
@@ -19,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 enforce_session_timeout_ajax();
 
 if (empty($_SESSION['user_id'])) {
+    http_response_code(401);
     echo json_encode(['ok' => false, 'error' => 'Trebuie să fii autentificat pentru a cere feedback.']);
     exit;
 }
@@ -26,6 +28,7 @@ if (empty($_SESSION['user_id'])) {
 // FIX [A8]: Fallback pentru nginx
 $token = get_csrf_token_from_request();
 if (!$token || !isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $token)) {
+    http_response_code(403);
     echo json_encode(['ok' => false, 'error' => 'Eroare CSRF. Reîncarcă pagina.']);
     exit;
 }
@@ -35,20 +38,29 @@ $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
 // Rate Limit: 10 per hour
 if (!check_rate_limit($con, 'ai_feedback', (string)$user_id, 10, 3600)) {
+    http_response_code(429);
     echo json_encode(['ok' => false, 'error' => 'Ai depășit limita de cereri. Încearcă din nou mai târziu.']);
     exit;
 }
 
 $data = json_decode(file_get_contents('php://input'), true);
+if (!is_array($data)) {
+    http_response_code(400);
+    echo json_encode(['ok' => false, 'error' => 'Payload JSON invalid.']);
+    exit;
+}
+
 $code = $data['code'] ?? '';
 $context = $data['context'] ?? '';
 
 if (empty(trim($code))) {
+    http_response_code(400);
     echo json_encode(['ok' => false, 'error' => 'Codul sursă este gol.']);
     exit;
 }
 
 if (mb_strlen($code) > 5000) {
+    http_response_code(413);
     echo json_encode(['ok' => false, 'error' => 'Codul sursă este prea lung (max 5000 caractere).']);
     exit;
 }
@@ -63,6 +75,7 @@ if (!$api_key && defined('GROQ_API_KEY')) {
 }
 
 if (!$api_key) {
+    http_response_code(503);
     echo json_encode(['ok' => false, 'error' => 'Cheia API Groq nu este configurată pe server.']);
     exit;
 }
@@ -103,17 +116,20 @@ curl_close($ch);
 if ($response === false) {
     // FIX [A10]: logging erori curl
     error_log("ai_code_feedback curl error #{$curl_errno}: {$curl_err}");
+    http_response_code(502);
     echo json_encode(['ok' => false, 'error' => 'Serviciul AI este indisponibil. Încearcă mai târziu.']);
     exit;
 }
 if ($http_code !== 200) {
     error_log("ai_code_feedback HTTP {$http_code}: " . substr((string)$response, 0, 500));
+    http_response_code(502);
     echo json_encode(['ok' => false, 'error' => 'AI a răspuns cu eroare (HTTP ' . $http_code . ').']);
     exit;
 }
 
 $json = json_decode($response, true);
 if (!isset($json['choices'][0]['message']['content'])) {
+    http_response_code(502);
     echo json_encode(['ok' => false, 'error' => 'Răspuns invalid de la AI.']);
     exit;
 }

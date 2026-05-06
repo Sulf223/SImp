@@ -27,6 +27,10 @@ if ($rs) {
         }
     }
 }
+
+function invatare_e($value): string {
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+}
 ?>
 
 <div data-component="dashboard-modern">
@@ -43,9 +47,9 @@ if ($rs) {
         <?php foreach ($paths as $path): ?>
             <article class="card bento__card--hero" style="border: 1px solid var(--color-border); background: var(--color-surface-1);">
                 <div class="card__head">
-                    <span class="card__eyebrow" style="color: var(--color-primary);"><?php echo $path['title']; ?></span>
+                    <span class="card__eyebrow" style="color: var(--color-primary);"><?php echo invatare_e($path['title']); ?></span>
                 </div>
-                <p style="color: var(--color-fg-muted); margin-bottom: var(--space-6);"><?php echo $path['description']; ?></p>
+                <p style="color: var(--color-fg-muted); margin-bottom: var(--space-6);"><?php echo invatare_e($path['description']); ?></p>
                 
                 <div class="path-timeline" style="position: relative; padding-left: var(--space-8);">
                     <div style="position: absolute; left: 11px; top: 0; bottom: 0; width: 2px; background: var(--color-border-strong);"></div>
@@ -55,12 +59,12 @@ if ($rs) {
                     ?>
                         <div class="step-item" style="position: relative; margin-bottom: var(--space-6);">
                             <div style="position: absolute; left: -26px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: <?php echo $is_quiz ? 'var(--color-accent)' : 'var(--color-primary)'; ?>; border: 3px solid var(--color-surface-1); box-shadow: 0 0 0 1px var(--color-border-strong);"></div>
-                            <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--space-1);"><?php echo $step['title']; ?></h4>
+                            <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--space-1);"><?php echo invatare_e($step['title']); ?></h4>
                             <div class="card__actions" style="margin-top: var(--space-2);">
                                 <?php if ($is_quiz): ?>
-                                    <a href="index.php?page=profesor_ai&path_exam=<?php echo $path['slug']; ?>" class="btn btn--primary btn--sm">Examen Final AI</a>
+                                    <a href="index.php?page=profesor_ai&path_exam=<?php echo rawurlencode((string)$path['slug']); ?>" class="btn btn--primary btn--sm">Examen Final AI</a>
                                 <?php else: ?>
-                                    <a href="index.php?page=<?php echo $step['lesson_slug']; ?>" class="btn btn--quiet btn--sm">Lecție & Exerciții</a>
+                                    <a href="index.php?page=<?php echo rawurlencode((string)$step['lesson_slug']); ?>" class="btn btn--quiet btn--sm">Lecție & Exerciții</a>
                                 <?php endif; ?>
                             </div>
                         </div>

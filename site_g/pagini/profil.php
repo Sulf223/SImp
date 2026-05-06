@@ -70,7 +70,7 @@ $streak = get_streak($con, $userId);
 $heatmap = get_activity_heatmap($con, $userId, 26);
 
 $totalActivities = array_sum($heatmap);
-$activeDays = count($heatmap);
+$activeDays = count(array_filter($heatmap, static fn($count) => (int)$count > 0));
 
 // FEATURE [F5]: Achievements
 $sql_ach = "SELECT a.*, ua.unlocked_at IS NOT NULL AS unlocked
@@ -102,9 +102,9 @@ if ($tableExists('achievements') && $tableExists('user_achievements') && ($stmt 
   <div class="bento">
     <!-- Avatar + info card (col-span-4) -->
     <article class="card bento__card--accent">
-      <img src="<?= $avatarUrl ?>" alt="Avatar" style="width: 100px; height: 100px; border-radius: 50%; background: var(--color-surface-2);">
+      <img src="<?= htmlspecialchars($avatarUrl, ENT_QUOTES, 'UTF-8') ?>" alt="Avatar" style="width: 100px; height: 100px; border-radius: 50%; background: var(--color-surface-2);">
       <h3 class="card__title-sm"><?= $displayName ?></h3>
-      <p class="card__meta">@<?= htmlspecialchars($user['username']) ?> · membru din <?= date('M Y', strtotime($user['created_at'])) ?></p>
+      <p class="card__meta">@<?= htmlspecialchars($user['username'], ENT_QUOTES, 'UTF-8') ?> · membru din <?= date('M Y', strtotime($user['created_at'])) ?></p>
       <div class="card__actions">
         <a href="#" class="btn btn--ghost btn--sm">Editează profil (În curând)</a>
       </div>
@@ -129,7 +129,7 @@ if ($tableExists('achievements') && $tableExists('user_achievements') && ($stmt 
       <header class="card__head">
         <span class="card__eyebrow">Ultimele 26 săptămâni</span>
       </header>
-      <div id="heatmap-container" data-heatmap='<?= json_encode($heatmap) ?>' style="overflow-x: auto; padding: var(--space-4) 0;">
+      <div id="heatmap-container" data-heatmap='<?= htmlspecialchars(json_encode($heatmap), ENT_QUOTES, 'UTF-8') ?>' style="overflow-x: auto; padding: var(--space-4) 0;">
         <!-- generat de JS -->
       </div>
     </article>

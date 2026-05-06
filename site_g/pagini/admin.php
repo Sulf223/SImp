@@ -813,7 +813,7 @@ function h($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                         <?php if ($is_self): ?>
                             <span style="color: var(--color-fg-muted); font-size: var(--text-xs);">— (cont propriu)</span>
                         <?php else: ?>
-                        <form method="post" action="PHP/admin_actions.php" style="display:inline;" onsubmit="return confirm('Schimbă rolul utilizatorului <?php echo h($u['username']); ?>?');">
+                        <form method="post" action="PHP/admin_actions.php" style="display:inline;" onsubmit="return confirm('Schimbă rolul utilizatorului selectat?');">
                             <?php csrf_field(); ?>
                             <input type="hidden" name="action" value="change_role">
                             <input type="hidden" name="user_id" value="<?php echo (int)$u['id']; ?>">
@@ -826,7 +826,7 @@ function h($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                         <?php endif; ?>
                     </td>
                     <td style="padding: 0.75rem; text-align:center;">
-                        <form method="post" action="PHP/admin_actions.php" style="display:inline;" onsubmit="return confirm('Resetează TOT progresul pentru <?php echo h($u['username']); ?>? Această acțiune este ireversibilă.');">
+                        <form method="post" action="PHP/admin_actions.php" style="display:inline;" onsubmit="return confirm('Resetează TOT progresul pentru utilizatorul selectat? Această acțiune este ireversibilă.');">
                             <?php csrf_field(); ?>
                             <input type="hidden" name="action" value="reset_progress">
                             <input type="hidden" name="user_id" value="<?php echo (int)$u['id']; ?>">
@@ -837,7 +837,7 @@ function h($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                         <?php if ($is_self): ?>
                             <span style="color: var(--color-fg-muted); font-size: var(--text-xs);">— (cont propriu)</span>
                         <?php else: ?>
-                        <form method="post" action="PHP/admin_actions.php" style="display:inline;" onsubmit="return confirm('ȘTERGE definitiv contul <?php echo h($u['username']); ?>? Această acțiune NU poate fi anulată.');">
+                        <form method="post" action="PHP/admin_actions.php" style="display:inline;" onsubmit="return confirm('Șterge definitiv contul selectat? Această acțiune NU poate fi anulată.');">
                             <?php csrf_field(); ?>
                             <input type="hidden" name="action" value="delete_user">
                             <input type="hidden" name="user_id" value="<?php echo (int)$u['id']; ?>">

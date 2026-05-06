@@ -312,7 +312,7 @@ function h($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
             Panou administrare
         </span>
         <h1 class="dash__title">Control <span class="dash__title-accent">Admin</span></h1>
-        <p class="dash__lede">Vizibilitate completă asupra utilizatorilor, progresului și activității din SImp Portal.</p>
+        <p class="dash__lede">Vizibilitate completă asupra utilizatorilor, progresului și activității din OffByOne Academy.</p>
 
         <!-- TABS -->
         <nav style="display: flex; gap: var(--space-2); margin-top: var(--space-4); flex-wrap: wrap;">

@@ -1,5 +1,5 @@
 # ==========================================================================
-# SImp - Premium Docker Environment
+# OffByOne Academy - Premium Docker Environment
 # Optimized for Engineering-Modern Design System
 # PHP 8.2 + Apache (Hardened)
 # ==========================================================================
@@ -7,8 +7,8 @@
 FROM php:8.2-apache AS base
 
 # Metadata
-LABEL maintainer="SImp Portal Team"
-LABEL description="Premium C++ Learning Platform - SImp Project"
+LABEL maintainer="OffByOne Academy Team"
+LABEL description="Premium C++ Learning Platform - OffByOne Academy Project"
 LABEL version="2.1"
 
 # 1. Install System Dependencies & PHP Extensions
@@ -47,7 +47,7 @@ RUN { \
         echo 'log_errors=On'; \
         echo 'error_log=/var/www/html/logs/php_error.log'; \
         echo 'date.timezone=Europe/Bucharest'; \
-    } > /usr/local/etc/php/conf.d/simp-prod.ini
+    } > /usr/local/etc/php/conf.d/offbyone-academy-prod.ini
 
 # 3. Hardened Apache Configuration
 RUN { \

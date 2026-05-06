@@ -1,6 +1,6 @@
 <?php
-include "conexiune.php";
-include "auth.php";
+require_once __DIR__ . '/conexiune.php';
+require_once __DIR__ . '/auth.php';
 require_role('admin');
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# SImp Portal — Docker Startup Script
+# OffByOne Academy — Docker Startup Script
 # ============================================================================
 # Automatically starts all Docker containers with validation & logging
 # Usage: bash start.sh [--rebuild] [--down] [--logs]
@@ -222,11 +222,11 @@ phase_info() {
     docker compose ps
     
     echo ""
-    success "SImp Portal is running!"
+    success "OffByOne Academy is running!"
     echo ""
     
     echo "📌 Access URLs:"
-    echo "   🌐 SImp Portal:      ${BLUE}http://localhost:8082${NC}"
+    echo "   🌐 OffByOne Academy:      ${BLUE}http://localhost:8082${NC}"
     echo "   📊 phpMyAdmin:       ${BLUE}http://localhost:8081${NC}"
     echo "   💾 MySQL Direct:     ${BLUE}localhost:3308${NC}"
     echo ""
@@ -253,7 +253,7 @@ phase_info() {
 main() {
     echo ""
     echo "╔════════════════════════════════════════════════════════════╗"
-    echo "║        🚀 SImp Portal — Docker Startup Script 2.0         ║"
+    echo "║        🚀 OffByOne Academy — Docker Startup Script 2.0         ║"
     echo "╚════════════════════════════════════════════════════════════╝"
     echo ""
     

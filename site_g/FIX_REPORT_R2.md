@@ -1,4 +1,4 @@
-# FIX REPORT R2 - SImp Portal
+# FIX REPORT R2 - OffByOne Academy
 
 Rezumatul reparării bug-urilor din runda a doua (Round 2).
 

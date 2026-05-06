@@ -4,11 +4,11 @@ REM Pornire simplă - CU OUTPUT COMPLET
 
 echo.
 echo ========================================
-echo   SIMP PORTAL - DOCKER STARTUP
+echo   OFFBYONE ACADEMY - DOCKER STARTUP
 echo ========================================
 echo.
 
-cd /d c:\wamp64\www\SImp
+cd /d "%~dp0"
 if errorlevel 1 (
     echo ERROR: Folderul nu gasit!
     pause

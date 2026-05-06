@@ -1,12 +1,13 @@
 /* ==========================================================================
-   modern_vars.css — SImp Design System v1
+   modern_vars.css — OffByOne Academy Design System v1
    Engineering-Modern direction (Vercel / Linear / Stripe)
    --------------------------------------------------------------------------
    Single source of truth for color, type, spacing, radius, shadows, motion.
    Dark-mode first; light mode via [data-theme="light"] or prefers-color-scheme.
    ========================================================================== */
 
-:root {
+:root,
+[data-theme="dark"] {
     color-scheme: dark light;
 
     /* ====================================================================
@@ -199,6 +200,10 @@
     --z-modal:   1100;
     --z-toast:   1200;
     --z-tooltip: 1300;
+}
+
+[data-theme="dark"] {
+    color-scheme: dark;
 }
 
 /* ==========================================================================

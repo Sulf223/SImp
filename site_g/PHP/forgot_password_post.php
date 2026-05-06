@@ -58,7 +58,7 @@ if ($row = $res->fetch_assoc()) {
         $scriptBase = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/site_g/PHP')), '/');
         $appBase = preg_replace('#/PHP$#', '', $scriptBase) ?: '/site_g';
         $link = $scheme . "://" . $host . $appBase . "/index.php?page=reset_password&token=" . $token;
-        $log_content = "[$timestamp] To: $email | Subject: Resetare parolă SImp | Link: $link\n";
+        $log_content = "[$timestamp] To: $email | Subject: Resetare parolă OffByOne Academy | Link: $link\n";
         file_put_contents($log_file, $log_content, FILE_APPEND);
     }
     $stmt_token->close();

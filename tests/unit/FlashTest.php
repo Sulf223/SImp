@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SImp\Tests\Unit;
+namespace OffByOneAcademy\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 

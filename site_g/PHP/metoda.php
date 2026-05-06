@@ -1,28 +1,44 @@
 <?php
-include "conexiune.php";
-include "auth.php";
+require_once __DIR__ . '/conexiune.php';
+require_once __DIR__ . '/auth.php';
 
 $id_metoda = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-if ($id_metoda <= 0) { 
-    set_flash("error", "ID metodă invalid.");
-    header("Location: index.php?page=algoritmi");
-    exit; 
-}
-
 $metoda = null;
-$sql_metoda = "SELECT nume, categorie, complexitate, descriere, fisier_cpp FROM metode WHERE id_metoda = ?";
-if ($stmt_metoda = $con->prepare($sql_metoda)) {
-    $stmt_metoda->bind_param("i", $id_metoda);
-    $stmt_metoda->execute();
-    $rezultat_metoda = $stmt_metoda->get_result();
-    if ($row = $rezultat_metoda->fetch_assoc()) { $metoda = $row; }
-    $stmt_metoda->close();
+$metoda_error = '';
+
+if ($id_metoda <= 0) {
+    $metoda_error = 'ID metodă invalid.';
+} else {
+    $sql_metoda = "SELECT nume, categorie, complexitate, descriere, fisier_cpp FROM metode WHERE id_metoda = ?";
+    if ($stmt_metoda = $con->prepare($sql_metoda)) {
+        $stmt_metoda->bind_param("i", $id_metoda);
+        $stmt_metoda->execute();
+        $rezultat_metoda = $stmt_metoda->get_result();
+        if ($row = $rezultat_metoda->fetch_assoc()) { $metoda = $row; }
+        $stmt_metoda->close();
+    }
+
+    if ($metoda === null) {
+        $metoda_error = 'Metoda nu a fost găsită.';
+    }
 }
 
-if ($metoda === null) { 
-    set_flash("error", "Metoda nu a fost găsită.");
-    header("Location: index.php?page=algoritmi");
-    exit; 
+if ($metoda_error !== '') {
+    ?>
+    <div data-component="dashboard-modern">
+        <div class="dash__guard" style="max-width: 560px; padding: var(--space-12);">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 64px; height: 64px; color: var(--color-fg-subtle); margin: 0 auto var(--space-5);">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v5"/>
+                <path d="M12 16h.01"/>
+            </svg>
+            <h2 style="font-size: var(--text-3xl); margin-bottom: var(--space-3);">Metodă indisponibilă</h2>
+            <p style="color: var(--color-fg-muted); margin-bottom: var(--space-6);"><?= htmlspecialchars($metoda_error) ?></p>
+            <a href="index.php?page=metode" class="btn btn--primary">Înapoi la metode</a>
+        </div>
+    </div>
+    <?php
+    return;
 }
 
 $cod_cpp = "";

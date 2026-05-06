@@ -16,9 +16,9 @@ if (session_status() === PHP_SESSION_NONE) {
 // FIX [M2]: Generare nonce pentru CSP și eliminare 'unsafe-inline' pentru scripturi
 $nonce = base64_encode(random_bytes(16));
 
-// CSP compatibil cu scripturile inline existente din proiect.
-// FIX [M2]: Utilizare nonce în CSP. 'unsafe-inline' rămâne pentru style-src datorită stilurilor dinamice din pagini.
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-{$nonce}'; frame-src https://onecompiler.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;");
+// CSP compatibil cu event handlerele inline încă prezente în paginile vechi.
+// Refactorizarea completă poate reveni la nonce-only după mutarea handlerelor în JS.
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; frame-src https://onecompiler.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;");
 
 header("X-Content-Type-Options: nosniff");
 header("X-Frame-Options: SAMEORIGIN");
@@ -92,6 +92,44 @@ if (isset($_GET['page'])) {
 
 $fisier_de_incarcat = $is_404 ? 'pagini/404.php' : $pagini_permise[$pagina_curenta];
 
+if (!$is_404) {
+    $auth_required_pages = ['profil'];
+    $guest_only_pages = ['login', 'register', 'forgot_password', 'reset_password'];
+    $admin_required_pages = ['admin', 'metoda_form'];
+    $needs_grila_auth = $pagina_curenta === 'grila_interactiva' && ($_GET['mode'] ?? 'db') !== 'w3';
+
+    if ((in_array($pagina_curenta, $auth_required_pages, true) || $needs_grila_auth) && empty($_SESSION['user_id'])) {
+        header('Location: index.php?page=login&required_auth=true');
+        exit;
+    }
+
+    if (in_array($pagina_curenta, $admin_required_pages, true)) {
+        if (empty($_SESSION['user_id'])) {
+            header('Location: index.php?page=login&required_auth=true');
+            exit;
+        }
+        if (!is_admin()) {
+            set_flash('error', 'Acces interzis. Doar administratorii pot accesa această pagină.');
+            header('Location: index.php?page=acasa');
+            exit;
+        }
+    }
+
+    if (in_array($pagina_curenta, $guest_only_pages, true) && !empty($_SESSION['user_id'])) {
+        header('Location: index.php?page=acasa');
+        exit;
+    }
+
+    if ($pagina_curenta === 'reset_password') {
+        $token = $_GET['token'] ?? '';
+        if (empty($token) || strlen($token) !== 64 || !ctype_xdigit($token)) {
+            set_flash('error', 'Link de resetare invalid sau expirat.');
+            header('Location: index.php?page=forgot_password');
+            exit;
+        }
+    }
+}
+
 // Paginile pe care nu afișăm widget-ul flotant AI
 $pagini_fara_ai_widget = ['bun_venit', 'login', 'register', 'logout'];
 $afiseaza_ai_widget = !$is_404 && !in_array($pagina_curenta, $pagini_fara_ai_widget, true);
@@ -113,7 +151,7 @@ $page_titles = [
     'profil' => 'Profilul meu',
     'admin' => 'Administrare Sistem'
 ];
-$display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_curenta] ?? 'Portal C++')) . ' – SImp Portal';
+$display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_curenta] ?? 'Portal C++')) . ' – OffByOne Academy';
 ?>
 <!DOCTYPE html>
 <html lang="ro">
@@ -124,8 +162,8 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
 
     <!-- POLISH [P8]: Favicon and Meta tags -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <meta name="description" content="SImp Portal – platformă educațională pentru învățarea algoritmilor de sortare cu vizualizări interactive în C++.">
-    <meta property="og:title" content="SImp Portal – C++ Learning Hub">
+    <meta name="description" content="OffByOne Academy – platformă educațională pentru învățarea algoritmilor de sortare cu vizualizări interactive în C++.">
+    <meta property="og:title" content="OffByOne Academy – C++ Learning Hub">
     <meta property="og:description" content="Învață algoritmi de sortare cu vizualizări interactive, exerciții practice și asistent AI.">
     <meta property="og:type" content="website">
 
@@ -138,18 +176,18 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="CSS/modern_vars.css">
-    <link rel="stylesheet" href="stil.css">
-    <link rel="stylesheet" href="CSS/dashboard_modern.css">
+    <link rel="stylesheet" href="CSS/modern_vars.css?v=20260506-theme-fix">
+    <link rel="stylesheet" href="stil.css?v=20260506-theme-fix">
+    <link rel="stylesheet" href="CSS/dashboard_modern.css?v=20260506-theme-fix">
     <?php if ($pagina_curenta === 'admin'): ?>
-        <link rel="stylesheet" href="CSS/admin.css">
+        <link rel="stylesheet" href="CSS/admin.css?v=20260506-theme-fix">
     <?php endif; ?>
     <?php if ($pagina_curenta === 'sortare'): ?>
-        <link rel="stylesheet" href="CSS/sortare.css">
+        <link rel="stylesheet" href="CSS/sortare.css?v=20260506-theme-fix">
     <?php endif; ?>
     <meta name="csrf-token" content="<?php echo get_csrf_token(); ?>">
     <?php if ($pagina_curenta === 'bun_venit'): ?>
-        <link rel="stylesheet" href="CSS/bun_venit.css">
+        <link rel="stylesheet" href="CSS/bun_venit.css?v=20260506-theme-fix">
     <?php endif; ?>
     <style>
         /* FIX [UI4]: workaround pointer-events eliminat – body::before are z-index:-1 și nu blochează nimic */
@@ -185,7 +223,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
         }
     </style>
 </head>
-<body data-theme="dark" style="background: var(--color-bg); color: var(--color-fg); font-family: var(--font-sans); margin: 0; min-height: 100vh; display: flex; flex-direction: column; isolation: isolate;">
+<body data-theme="dark" data-authenticated="<?php echo !empty($_SESSION['user_id']) ? '1' : '0'; ?>" style="background: var(--color-bg); color: var(--color-fg); font-family: var(--font-sans); margin: 0; min-height: 100vh; display: flex; flex-direction: column; isolation: isolate;">
 
 <!-- POLISH [P6]: Skip-to-content link for accessibility -->
 <a href="#main-content" class="skip-link">Sari la conținut</a>
@@ -195,7 +233,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
     <div class="site-nav__brand">
         <svg class="icon icon--lg" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
         <div style="display: flex; flex-direction: column; gap: 0;">
-            <span style="font-weight: 700; font-size: var(--text-lg); letter-spacing: var(--tracking-tight); color: var(--color-fg);">SImp <span class="site-nav__brand-accent">Portal</span></span>
+            <span style="font-weight: 700; font-size: var(--text-lg); letter-spacing: var(--tracking-tight); color: var(--color-fg);">OffByOne <span class="site-nav__brand-accent">Academy</span></span>
             <span style="font-size: var(--text-xs); color: var(--color-fg-muted); letter-spacing: var(--tracking-wide); text-transform: uppercase;">C++ Learning Hub</span>
         </div>
     </div>
@@ -309,7 +347,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
 
 <footer class="site-footer">
     <div style="max-width: var(--measure-prose); margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-4);">
-        <p style="margin: 0; color: var(--color-fg-muted);">&copy; <?php echo date('Y'); ?> <strong>SImp Portal</strong> &mdash; Mediul tău modern de învățare C++.</p>
+        <p style="margin: 0; color: var(--color-fg-muted);">&copy; <?php echo date('Y'); ?> <strong>OffByOne Academy</strong> &mdash; Mediul tău modern de învățare C++.</p>
         <div style="display: flex; justify-content: center; gap: var(--space-4); color: var(--color-fg-subtle); font-size: 10px; text-transform: uppercase; letter-spacing: var(--tracking-widest);">
             <span>Engineering Design</span>
             <span style="color: var(--color-border-strong);">|</span>
@@ -375,6 +413,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
   const sunIcon = document.getElementById('theme-icon-sun');
   const moonIcon = document.getElementById('theme-icon-moon');
   const html = document.documentElement;
+  const body = document.body;
 
   function getTheme() {
     return localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -383,6 +422,9 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
   function setTheme(theme) {
     localStorage.setItem('theme', theme);
     html.setAttribute('data-theme', theme);
+    if (body) {
+      body.setAttribute('data-theme', theme);
+    }
     updateIcons(theme);
   }
 

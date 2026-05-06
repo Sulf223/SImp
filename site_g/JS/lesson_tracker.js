@@ -1,6 +1,7 @@
 (() => {
     const tracker = document.querySelector('[data-lesson-slug]');
     if (!tracker) return;
+    if (document.body?.dataset.authenticated !== '1') return;
 
     const lesson = tracker.getAttribute('data-lesson-slug');
     if (!lesson) return;

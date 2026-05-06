@@ -1,6 +1,6 @@
-# SImp - ghid de rulare pentru echipa
+# OffByOne Academy - ghid de rulare pentru echipa
 
-SImp este un portal educational pentru algoritmi (sortare + algoritmi fundamentali), cu pagini teoretice, vizualizari interactive, exercitii si Profesor AI.
+OffByOne Academy este un portal educational pentru algoritmi (sortare + algoritmi fundamentali), cu pagini teoretice, vizualizari interactive, exercitii si Profesor AI.
 
 Acest README este gandit pentru colegii de proiect, ca sa poata porni rapid aplicatia pe orice laptop.
 
@@ -12,13 +12,13 @@ Varianta recomandata (Docker):
 
 Varianta alternativa (fara Docker):
 1. WAMP/XAMPP cu PHP + MySQL
-2. Import manual pentru baza de date din [site_g/dbsortari.sql](site_g/dbsortari.sql)
+2. Import manual pentru baza de date din [site_g/dbsortari.sql](site_g/dbsortari.sql), apoi rularea migrațiilor din [site_g/database](site_g/database) și [migrations](migrations), în ordine
 
 ## 2. Clonare proiect
 
 ```bash
 git clone <url-repo>
-cd SImp
+cd OffByOneAcademy
 ```
 
 ## 3. Configurare variabile de mediu
@@ -88,12 +88,12 @@ netstat -ano | findstr :8081
 netstat -ano | findstr :3308
 ```
 
-### 404 pe /SImp
+### 404 pe /OffByOneAcademy
 
 In Docker, aplicatia este servita din radacina (/), nu din subfolder.
 
 Corect: http://localhost:8082/
-Gresit: http://localhost:8082/SImp
+Gresit: http://localhost:8082/OffByOneAcademy
 
 ### Profesor AI nu merge
 

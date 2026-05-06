@@ -1,4 +1,4 @@
-# SImp Portal - Project Instructions
+# OffByOne Academy - Project Instructions
 
 ## Architecture & Conventions
 - **Routing:** Centralized in `index.php` with an allowed-list of pages.

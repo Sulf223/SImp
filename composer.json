@@ -1,6 +1,6 @@
 {
-    "name": "simp/portal",
-    "description": "SImp Portal — platformă educațională pentru algoritmi",
+    "name": "offbyone-academy/portal",
+    "description": "OffByOne Academy — platformă educațională pentru algoritmi",
     "type": "project",
     "require": {
         "php": "^8.1"
@@ -11,12 +11,12 @@
     },
     "autoload": {
         "psr-4": {
-            "SImp\\": "site_g/PHP/"
+            "OffByOneAcademy\\": "site_g/PHP/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "SImp\\Tests\\": "tests/"
+            "OffByOneAcademy\\Tests\\": "tests/"
         }
     },
     "scripts": {

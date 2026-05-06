@@ -8,9 +8,9 @@
 PASUL 1: Mergi în folderul proiectului
 ═════════════════════════════════════════════════════════════════════════════
 
-cd c:\wamp64\www\SImp
+cd c:\wamp64\www\OffByOneAcademy
 
-(Trebuie să vezi: c:\wamp64\www\SImp>)
+(Trebuie să vezi: c:\wamp64\www\OffByOneAcademy>)
 
 ═════════════════════════════════════════════════════════════════════════════
 PASUL 2: Crează .env (IMPORTANT!)
@@ -39,7 +39,7 @@ AȘTEPTĂ până ce nu mai zice nimic nou.
 PASUL 4: Deschide ALT CMD (nu închide pe asta!)
 ═════════════════════════════════════════════════════════════════════════════
 
-cd c:\wamp64\www\SImp
+cd c:\wamp64\www\OffByOneAcademy
 
 docker compose ps
 
@@ -121,7 +121,7 @@ docker compose config
 RAPID TEST - Copy-paste EXACT asta:
 ═════════════════════════════════════════════════════════════════════════════
 
-cd c:\wamp64\www\SImp && docker ps && copy .env.example .env && docker compose up
+cd c:\wamp64\www\OffByOneAcademy && docker ps && copy .env.example .env && docker compose up
 
 ═════════════════════════════════════════════════════════════════════════════
 

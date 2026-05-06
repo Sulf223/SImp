@@ -1,5 +1,32 @@
-ALTER TABLE utilizatori ADD COLUMN email VARCHAR(190) NULL AFTER username;
-ALTER TABLE utilizatori ADD UNIQUE KEY uq_email (email);
+SET @offbyone_sql = IF(
+    (
+        SELECT COUNT(*)
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'utilizatori'
+          AND COLUMN_NAME = 'email'
+    ) = 0,
+    'ALTER TABLE utilizatori ADD COLUMN email VARCHAR(190) NULL AFTER username',
+    'SELECT 1'
+);
+PREPARE offbyone_stmt FROM @offbyone_sql;
+EXECUTE offbyone_stmt;
+DEALLOCATE PREPARE offbyone_stmt;
+
+SET @offbyone_sql = IF(
+    (
+        SELECT COUNT(*)
+        FROM INFORMATION_SCHEMA.STATISTICS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'utilizatori'
+          AND INDEX_NAME = 'uq_email'
+    ) = 0,
+    'ALTER TABLE utilizatori ADD UNIQUE KEY uq_email (email)',
+    'SELECT 1'
+);
+PREPARE offbyone_stmt FROM @offbyone_sql;
+EXECUTE offbyone_stmt;
+DEALLOCATE PREPARE offbyone_stmt;
 
 CREATE TABLE IF NOT EXISTS password_reset_tokens (
     id INT AUTO_INCREMENT PRIMARY KEY,

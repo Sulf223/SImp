@@ -1,4 +1,4 @@
-# SImp Workspace Dump
+# OffByOne Academy Workspace Dump
 
 Generated automatically from text/code files in the workspace.
 
@@ -61,7 +61,7 @@ jobs:
         with:
           context: .
           push: false
-          tags: simp:ci-test
+          tags: offbyone-academy:ci-test
           cache-from: type=gha
           cache-to: type=gha,mode=max
       
@@ -181,8 +181,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/simp:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/simp:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/offbyone-academy:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/offbyone-academy:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 ```
@@ -230,8 +230,8 @@ localhost	FALSE	/	FALSE	0	PHPSESSID	96725tpvumpesh75ap4f6hun5v
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/wamp64/www/SImp/site_g/CPP",
-      "program": "c:/wamp64/www/SImp/site_g/CPP/build/Debug/outDebug",
+      "cwd": "${workspaceFolder}/site_g/CPP",
+      "program": "${workspaceFolder}/site_g/CPP/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
@@ -322,9 +322,9 @@ localhost	FALSE	/	FALSE	0	PHPSESSID	96725tpvumpesh75ap4f6hun5v
 PASUL 1: Mergi în folderul proiectului
 ═════════════════════════════════════════════════════════════════════════════
 
-cd c:\wamp64\www\SImp
+cd c:\wamp64\www\OffByOneAcademy
 
-(Trebuie să vezi: c:\wamp64\www\SImp>)
+(Trebuie să vezi: c:\wamp64\www\OffByOneAcademy>)
 
 ═════════════════════════════════════════════════════════════════════════════
 PASUL 2: Crează .env (IMPORTANT!)
@@ -353,7 +353,7 @@ AȘTEPTĂ până ce nu mai zice nimic nou.
 PASUL 4: Deschide ALT CMD (nu închide pe asta!)
 ═════════════════════════════════════════════════════════════════════════════
 
-cd c:\wamp64\www\SImp
+cd c:\wamp64\www\OffByOneAcademy
 
 docker compose ps
 
@@ -435,7 +435,7 @@ docker compose config
 RAPID TEST - Copy-paste EXACT asta:
 ═════════════════════════════════════════════════════════════════════════════
 
-cd c:\wamp64\www\SImp && docker ps && copy .env.example .env && docker compose up
+cd c:\wamp64\www\OffByOneAcademy && docker ps && copy .env.example .env && docker compose up
 
 ═════════════════════════════════════════════════════════════════════════════
 
@@ -447,8 +447,8 @@ Good luck! 🚀
 ## composer.json
 ```json
 {
-    "name": "simp/portal",
-    "description": "SImp Portal — platformă educațională pentru algoritmi",
+    "name": "offbyone-academy/portal",
+    "description": "OffByOne Academy — platformă educațională pentru algoritmi",
     "type": "project",
     "require": {
         "php": "^8.1"
@@ -459,12 +459,12 @@ Good luck! 🚀
     },
     "autoload": {
         "psr-4": {
-            "SImp\\": "site_g/PHP/"
+            "OffByOneAcademy\\": "site_g/PHP/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "SImp\\Tests\\": "tests/"
+            "OffByOneAcademy\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -476,9 +476,9 @@ Good luck! 🚀
 
 ## DOCKER_README.md
 ```markdown
-# 🐳 Docker Setup — SImp Portal v2.0
+# 🐳 Docker Setup — OffByOne Academy v2.0
 
-Documentație completă pentru rularea **SImp Portal** în Docker containers cu PHP 8.2, MySQL 8.0, și phpMyAdmin.
+Documentație completă pentru rularea **OffByOne Academy** în Docker containers cu PHP 8.2, MySQL 8.0, și phpMyAdmin.
 
 ---
 
@@ -500,7 +500,7 @@ docker compose version
 
 ```bash
 # 1. Mergi în folderul proiectului
-cd /path/to/SImp
+cd /path/to/OffByOneAcademy
 
 # 2. Pornire containers
 docker compose up --build -d
@@ -509,7 +509,7 @@ docker compose up --build -d
 docker compose logs -f web
 ```
 
-✅ **SImp Portal este live la**: http://localhost:8082
+✅ **OffByOne Academy este live la**: http://localhost:8082
 
 ---
 
@@ -517,7 +517,7 @@ docker compose logs -f web
 
 | Service | URL | Credentials |
 |---------|-----|-------------|
-| **SImp Portal** | http://localhost:8082 | Crează cont pe pagina de register |
+| **OffByOne Academy** | http://localhost:8082 | Crează cont pe pagina de register |
 | **phpMyAdmin** | http://localhost:8081 | `root` / `root123` |
 | **MySQL Direct** | `localhost:3308` | `root` / `root123` |
 
@@ -558,7 +558,7 @@ environment:
 ```
 ┌─────────────────────────────────────────────┐
 │         Docker Compose Network              │
-│       (simp_network, 172.25.0.0/16)        │
+│       (offbyone_academy_network, 172.25.0.0/16)        │
 ├─────────────────────────────────────────────┤
 │                                             │
 │  ┌──────────────┐  ┌──────────────┐        │
@@ -677,7 +677,7 @@ docker compose exec web php -r "
 "
 
 # View container resource usage
-docker stats simp_web simp_db
+docker stats offbyone_academy_web offbyone_academy_db
 ```
 
 ---
@@ -751,7 +751,7 @@ docker compose up --build -d
 ### Application slow / crashing
 ```bash
 # Check resource limits
-docker stats simp_web simp_db
+docker stats offbyone_academy_web offbyone_academy_db
 
 # Increase memory în docker-compose.yml
 deploy:
@@ -785,7 +785,7 @@ cache:
   ports:
     - "6379:6379"
   networks:
-    - simp_network
+    - offbyone_academy_network
 ```
 
 ---
@@ -809,7 +809,7 @@ jobs:
       - uses: docker/build-push-action@v4
         with:
           context: .
-          tags: simp:latest
+          tags: offbyone-academy:latest
           push: true
 ```
 
@@ -845,7 +845,7 @@ jobs:
 ---
 
 **Last Updated**: April 27, 2026  
-**Maintained By**: SImp Portal Team  
+**Maintained By**: OffByOne Academy Team
 **License**: Same as main project
 ```
 
@@ -860,9 +860,9 @@ services:
       dockerfile: Dockerfile
       args:
         - APP_VERSION=2.0
-    container_name: simp_web
-    hostname: simp-web
-    image: simp:2.0-php8.2
+    container_name: offbyone_academy_web
+    hostname: offbyone-academy-web
+    image: offbyone-academy:2.0-php8.2
     depends_on:
       db:
         condition: service_healthy
@@ -899,7 +899,7 @@ services:
       - ./site_g/logs:/var/www/html/logs:rw
     
     networks:
-      - simp_network
+      - offbyone_academy_network
     
     restart: unless-stopped
     
@@ -921,13 +921,13 @@ services:
       start_period: 40s
     
     labels:
-      - "com.simp.description=SImp Portal Web Application"
-      - "com.simp.version=2.0"
+      - "com.offbyoneacademy.description=OffByOne Academy Web Application"
+      - "com.offbyoneacademy.version=2.0"
 
   db:
     image: mysql:8.0.37
-    container_name: simp_db
-    hostname: simp-mysql
+    container_name: offbyone_academy_db
+    hostname: offbyone-academy-mysql
     
     command: 
       - --default-authentication-plugin=mysql_native_password
@@ -956,7 +956,7 @@ services:
       - ./site_g/database/upgrade_rate_limit.sql:/docker-entrypoint-initdb.d/05_upgrade_rate_limit.sql:ro
     
     networks:
-      - simp_network
+      - offbyone_academy_network
     
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot123"]
@@ -977,13 +977,13 @@ services:
           memory: 1G
     
     labels:
-      - "com.simp.description=SImp Portal MySQL Database"
-      - "com.simp.version=8.0"
+      - "com.offbyoneacademy.description=OffByOne Academy MySQL Database"
+      - "com.offbyoneacademy.version=8.0"
 
   phpmyadmin:
     image: phpmyadmin:5-apache
-    container_name: simp_phpmyadmin
-    hostname: simp-pma
+    container_name: offbyone_academy_phpmyadmin
+    hostname: offbyone-academy-pma
     
     depends_on:
       db:
@@ -1003,7 +1003,7 @@ services:
       - "8081:80"
     
     networks:
-      - simp_network
+      - offbyone_academy_network
     
     restart: unless-stopped
     
@@ -1024,11 +1024,11 @@ services:
       start_period: 30s
     
     labels:
-      - "com.simp.description=phpMyAdmin Database Administration"
-      - "com.simp.version=5"
+      - "com.offbyoneacademy.description=phpMyAdmin Database Administration"
+      - "com.offbyoneacademy.version=5"
 
 networks:
-  simp_network:
+  offbyone_academy_network:
     driver: bridge
     ipam:
       config:
@@ -1041,7 +1041,7 @@ volumes:
 
 ## GEMINI.md
 ```markdown
-# SImp Portal - Project Instructions
+# OffByOne Academy - Project Instructions
 
 ## Architecture & Conventions
 - **Routing:** Centralized in `index.php` with an allowed-list of pages.
@@ -1071,7 +1071,7 @@ volumes:
 
 ## INDEX.md
 ```markdown
-# 🚀 SImp Portal v2.0 — Complete Delivery Index
+# 🚀 OffByOne Academy v2.0 — Complete Delivery Index
 
 **Status**: ✅ **PRODUCTION READY**  
 **Date**: April 27, 2026  
@@ -1143,7 +1143,7 @@ Read **[FINAL_DELIVERY.md](FINAL_DELIVERY.md)** — 10 min read
 ## 📁 File Structure Overview
 
 ```
-SImp/
+OffByOneAcademy/
 ├── 🚀 STARTUP SCRIPTS (Pick your OS)
 │   ├── start.sh (Bash - Linux/Mac)
 │   ├── start.bat (CMD - Windows)
@@ -1223,7 +1223,7 @@ docker compose exec web bash     # Shell access
 
 | Service | URL | Username | Password |
 |---------|-----|----------|----------|
-| **SImp Portal** | http://localhost:8082 | N/A | N/A |
+| **OffByOne Academy** | http://localhost:8082 | N/A | N/A |
 | **phpMyAdmin** | http://localhost:8081 | root | root123 |
 | **MySQL** | localhost:3308 | root | root123 |
 
@@ -1362,7 +1362,7 @@ See: [DOCKER_README.md → Permission Issues](DOCKER_README.md#permission-issues
 
 ## 🎉 You're All Set!
 
-Your SImp Portal is now:
+Your OffByOne Academy is now:
 - 🎨 Beautifully designed (modern CSS)
 - 🐳 Docker-native (production-ready)
 - ⚡ Instantly deployable (one-command startup)
@@ -3307,7 +3307,7 @@ cout <<endl<<"vect dupa stergere :";
 
 ## QUICKSTART.md
 ```markdown
-# 🚀 Quick Start Guide — SImp Portal
+# 🚀 Quick Start Guide — OffByOne Academy
 
 Choose your platform below to get started in seconds:
 
@@ -3405,7 +3405,7 @@ The startup script automatically:
 
 | Service | URL |
 |---------|-----|
-| **SImp Portal** | http://localhost:8082 |
+| **OffByOne Academy** | http://localhost:8082 |
 | **phpMyAdmin** | http://localhost:8081 |
 | **MySQL** | localhost:3308 |
 
@@ -3493,7 +3493,7 @@ For complete documentation, see:
 
 ## 🎉 You're All Set!
 
-Your SImp Portal is now running. Start by:
+Your OffByOne Academy is now running. Start by:
 
 1. Opening http://localhost:8082
 2. Creating a new account on the register page
@@ -3510,9 +3510,9 @@ Your SImp Portal is now running. Start by:
 
 ## README.md
 ```markdown
-# SImp - ghid de rulare pentru echipa
+# OffByOne Academy - ghid de rulare pentru echipa
 
-SImp este un portal educational pentru algoritmi (sortare + algoritmi fundamentali), cu pagini teoretice, vizualizari interactive, exercitii si Profesor AI.
+OffByOne Academy este un portal educational pentru algoritmi (sortare + algoritmi fundamentali), cu pagini teoretice, vizualizari interactive, exercitii si Profesor AI.
 
 Acest README este gandit pentru colegii de proiect, ca sa poata porni rapid aplicatia pe orice laptop.
 
@@ -3530,7 +3530,7 @@ Varianta alternativa (fara Docker):
 
 ```bash
 git clone <url-repo>
-cd SImp
+cd OffByOneAcademy
 ```
 
 ## 3. Configurare variabile de mediu
@@ -3600,12 +3600,12 @@ netstat -ano | findstr :8081
 netstat -ano | findstr :3308
 ```
 
-### 404 pe /SImp
+### 404 pe /OffByOneAcademy
 
 In Docker, aplicatia este servita din radacina (/), nu din subfolder.
 
 Corect: http://localhost:8082/
-Gresit: http://localhost:8082/SImp
+Gresit: http://localhost:8082/OffByOneAcademy
 
 ### Profesor AI nu merge
 
@@ -3668,11 +3668,11 @@ REM Pornire simplă - CU OUTPUT COMPLET
 
 echo.
 echo ========================================
-echo   SIMP PORTAL - DOCKER STARTUP
+echo   OFFBYONE ACADEMY - DOCKER STARTUP
 echo ========================================
 echo.
 
-cd /d c:\wamp64\www\SImp
+cd /d "%~dp0"
 if errorlevel 1 (
     echo ERROR: Folderul nu gasit!
     pause
@@ -6036,10 +6036,10 @@ cout <<endl<<"vect dupa stergere :";
     color: rgba(255, 255, 255, 0.32);
     font-size: var(--text-xs);
     font-family: var(--font-sans);
-    animation: simpPulseHint 2.4s ease-in-out infinite;
+    animation: offByOneAcademyPulseHint 2.4s ease-in-out infinite;
 }
 
-@keyframes simpPulseHint {
+@keyframes offByOneAcademyPulseHint {
     0%, 100% { opacity: 0.45; }
     50%      { opacity: 1; }
 }
@@ -8110,7 +8110,7 @@ input[type="submit"]:active { transform: scale(0.98); }
 ## site_g/CSS/modern_vars.css
 ```css
 /* ==========================================================================
-   modern_vars.css — SImp Design System v1
+   modern_vars.css — OffByOne Academy Design System v1
    Engineering-Modern direction (Vercel / Linear / Stripe)
    --------------------------------------------------------------------------
    Single source of truth for color, type, spacing, radius, shadows, motion.
@@ -8508,7 +8508,7 @@ CREATE TABLE IF NOT EXISTS user_achievements (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT IGNORE INTO achievements (slug, title, description, icon, criteria_type, criteria_value, criteria_meta) VALUES
-('first_login', 'Bun venit!', 'Ai făcut primul login pe SImp.', 'sun', 'first_login', 0, NULL),
+('first_login', 'Bun venit!', 'Ai făcut primul login pe OffByOne Academy.', 'sun', 'first_login', 0, NULL),
 ('grile_5', 'Apetit pentru grile', 'Ai rezolvat 5 grile.', 'check-circle', 'grile_count', 5, NULL),
 ('grile_25', 'Maestru de grile', 'Ai rezolvat 25 de grile.', 'award', 'grile_count', 25, NULL),
 ('grile_50', 'Tocilar absolut', 'Ai rezolvat 50 de grile.', 'crown', 'grile_count', 50, NULL),
@@ -10309,7 +10309,7 @@ COMMIT;
 
 ## site_g/FIX_REPORT_R2.md
 ```markdown
-# FIX REPORT R2 - SImp Portal
+# FIX REPORT R2 - OffByOne Academy
 
 Rezumatul reparării bug-urilor din runda a doua (Round 2).
 
@@ -10327,7 +10327,7 @@ Rezumatul reparării bug-urilor din runda a doua (Round 2).
 
 ## site_g/FIX_REPORT.md
 ```markdown
-# FIX REPORT - SImp Portal
+# FIX REPORT - OffByOne Academy
 
 Rezumatul reparării bug-urilor identificate în auditul de securitate și funcționalitate.
 
@@ -10469,7 +10469,7 @@ $page_titles = [
     'profil' => 'Profilul meu',
     'admin' => 'Administrare Sistem'
 ];
-$display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_curenta] ?? 'Portal C++')) . ' – SImp Portal';
+$display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_curenta] ?? 'Portal C++')) . ' – OffByOne Academy';
 ?>
 <!DOCTYPE html>
 <html lang="ro">
@@ -10480,8 +10480,8 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
 
     <!-- POLISH [P8]: Favicon and Meta tags -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <meta name="description" content="SImp Portal – platformă educațională pentru învățarea algoritmilor de sortare cu vizualizări interactive în C++.">
-    <meta property="og:title" content="SImp Portal – C++ Learning Hub">
+    <meta name="description" content="OffByOne Academy – platformă educațională pentru învățarea algoritmilor de sortare cu vizualizări interactive în C++.">
+    <meta property="og:title" content="OffByOne Academy – C++ Learning Hub">
     <meta property="og:description" content="Învață algoritmi de sortare cu vizualizări interactive, exerciții practice și asistent AI.">
     <meta property="og:type" content="website">
 
@@ -10551,7 +10551,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
     <div class="site-nav__brand">
         <svg class="icon icon--lg" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
         <div style="display: flex; flex-direction: column; gap: 0;">
-            <span style="font-weight: 700; font-size: var(--text-lg); letter-spacing: var(--tracking-tight); color: var(--color-fg);">SImp <span class="site-nav__brand-accent">Portal</span></span>
+            <span style="font-weight: 700; font-size: var(--text-lg); letter-spacing: var(--tracking-tight); color: var(--color-fg);">OffByOne Academy <span class="site-nav__brand-accent">Portal</span></span>
             <span style="font-size: var(--text-xs); color: var(--color-fg-muted); letter-spacing: var(--tracking-wide); text-transform: uppercase;">C++ Learning Hub</span>
         </div>
     </div>
@@ -10656,7 +10656,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
 
 <footer class="site-footer">
     <div style="max-width: var(--measure-prose); margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-4);">
-        <p style="margin: 0; color: var(--color-fg-muted);">&copy; <?php echo date('Y'); ?> <strong>SImp Portal</strong> &mdash; Mediul tău modern de învățare C++.</p>
+        <p style="margin: 0; color: var(--color-fg-muted);">&copy; <?php echo date('Y'); ?> <strong>OffByOne Academy</strong> &mdash; Mediul tău modern de învățare C++.</p>
         <div style="display: flex; justify-content: center; gap: var(--space-4); color: var(--color-fg-subtle); font-size: 10px; text-transform: uppercase; letter-spacing: var(--tracking-widest);">
             <span>Engineering Design</span>
             <span style="color: var(--color-border-strong);">|</span>
@@ -11056,7 +11056,7 @@ document.addEventListener('DOMContentLoaded', () => {
  * Deschide widget-ul si pre-completeaza input-ul cu o intrebare relevanta.
  * @param {Object} context - Obiect cu date despre context (tip, intrebare, cod, etc).
  */
-window.SImpAskAI = function(context) {
+window.OffByOneAcademyAskAI = function(context) {
     const widget = document.getElementById('ai-widget');
     const input = document.getElementById('ai-widget-input');
     const toggleBtn = document.getElementById('ai-widget-toggle');
@@ -11098,7 +11098,7 @@ document.addEventListener('click', (e) => {
         const context = JSON.parse(contextStr);
         context.type = type;
         
-        window.SImpAskAI(context);
+        window.OffByOneAcademyAskAI(context);
     } catch (err) {
         console.error('Ask AI: invalid context', err);
     }
@@ -13605,8 +13605,8 @@ window.visualizerInstance = null;
 ## site_g/manifest.json
 ```json
 {
-    "name": "SImp Portal",
-    "short_name": "SImp",
+    "name": "OffByOne Academy",
+    "short_name": "OffByOne Academy",
     "description": "Platformă educațională pentru algoritmi de sortare",
     "start_url": "/site_g/index.php?page=acasa",
     "display": "standalone",
@@ -14152,7 +14152,7 @@ function h($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
             Panou administrare
         </span>
         <h1 class="dash__title">Control <span class="dash__title-accent">Admin</span></h1>
-        <p class="dash__lede">Vizibilitate completă asupra utilizatorilor, progresului și activității din SImp Portal.</p>
+        <p class="dash__lede">Vizibilitate completă asupra utilizatorilor, progresului și activității din OffByOne Academy.</p>
 
         <!-- TABS -->
         <nav style="display: flex; gap: var(--space-2); margin-top: var(--space-4); flex-wrap: wrap;">
@@ -15003,10 +15003,10 @@ if (session_status() === PHP_SESSION_NONE) {
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
             Inovație în învățare
         </div>
-        <h2 class="dash__title">Bun venit la <span class="dash__title-accent">SImp</span> Portal</h2>
+        <h2 class="dash__title">Bun venit la <span class="dash__title-accent">OffByOne Academy</span> Portal</h2>
         <p class="dash__lede">
             Explorează universul algoritmilor de sortare prin vizualizări interactive și explicații pas cu pas.
-            SImp transformă învățarea într-o experiență captivantă și educativă.
+            OffByOne Academy transformă învățarea într-o experiență captivantă și educativă.
         </p>
     </header>
 
@@ -15020,7 +15020,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 </div>
                 <canvas id="solar-canvas" style="position: relative; z-index: 1; display: block; width: 100%; height: 100%;"></canvas>
                 <div id="click-hint" style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 2; pointer-events: none; color: rgba(255, 255, 255, 0.2); font-size: 12px;">Hover pentru detalii - Click pentru a intra în lecție</div>
-                <div id="hero-subtitle" style="position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 2; pointer-events: none; color: rgba(255, 255, 255, 0.3); font-size: 13px; letter-spacing: 2px;">SImp - Inovație în învățarea sortării</div>
+                <div id="hero-subtitle" style="position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 2; pointer-events: none; color: rgba(255, 255, 255, 0.3); font-size: 13px; letter-spacing: 2px;">OffByOne Academy - Inovație în învățarea sortării</div>
                 <div id="tooltip" style="position: fixed; z-index: 100; background: rgba(8, 14, 31, 0.95); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 14px 18px; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; max-width: 220px; backdrop-filter: blur(8px);">
                     <h3 id="tt-name" style="font-size: 15px; font-weight: 600; margin-bottom: 6px; color: #fff;"></h3>
                     <p id="tt-desc" style="font-size: 13px; line-height: 1.5; color: rgba(255, 255, 255, 0.7); margin: 0;"></p>
@@ -15461,7 +15461,7 @@ if (session_status() === PHP_SESSION_NONE) {
             Istoric versiuni
         </span>
         <h1 class="dash__title">Schimbări <span class="dash__title-accent">recente</span></h1>
-        <p class="dash__lede">Toate îmbunătățirile aduse SImp, în ordine inversă cronologică.</p>
+        <p class="dash__lede">Toate îmbunătățirile aduse OffByOne Academy, în ordine inversă cronologică.</p>
     </header>
 
     <ol class="timeline" style="counter-reset: changelog;">
@@ -15516,7 +15516,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 <span class="badge badge--soft">v1.0</span>
                 <span class="card__meta">2025</span>
             </div>
-            <h3 class="card__title-sm" style="margin-bottom: var(--space-2);">Lansare SImp</h3>
+            <h3 class="card__title-sm" style="margin-bottom: var(--space-2);">Lansare OffByOne Academy</h3>
             <p class="card__body">Portal C++ cu 6 sortări, 4 tehnici fundamentale, exerciții fill-in-the-blank, grile, compilator online.</p>
         </li>
     </ol>
@@ -16095,7 +16095,7 @@ $is_logged_in = is_logged_in();
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M12 8V4H8"/><rect width="16" height="16" x="4" y="4" rx="2"/><path d="M12 12v4"/><path d="M16 12v4"/>
             </svg>
-            SImp Lab
+            OffByOne Academy Lab
         </span>
         <h1 class="dash__title">Profesor <span class="dash__title-accent">AI & Quiz</span></h1>
         <p class="dash__lede">
@@ -16551,7 +16551,7 @@ function proiecte_url(string $relativePath): string
         </span>
         <h1 class="dash__title">Portal <span class="dash__title-accent">Integrări</span></h1>
         <p class="dash__lede">
-            Explorează proiectele externe integrate în ecosistemul SImp. Acestea rulează în containere izolate pentru a-și păstra designul original.
+            Explorează proiectele externe integrate în ecosistemul OffByOne Academy. Acestea rulează în containere izolate pentru a-și păstra designul original.
         </p>
         <div class="card__actions">
             <a href="index.php?page=acasa" class="btn btn--ghost btn--sm">
@@ -18402,7 +18402,7 @@ if (!in_array($type, $tipuri_valide, true)) {
 }
 
 $timestamp = date('Y-m-d_His');
-$filename = "simp_export_{$type}_{$timestamp}.csv";
+$filename = "offbyone_academy_export_{$type}_{$timestamp}.csv";
 
 header('Content-Type: text/csv; charset=UTF-8');
 header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -18705,7 +18705,7 @@ if ($action === 'grade_quiz') {
 ```php
 <?php
 header('Content-Type: application/json; charset=UTF-8');
-$cacheFile = sys_get_temp_dir() . '/simp_ai_status.json';
+$cacheFile = sys_get_temp_dir() . '/offbyone_academy_ai_status.json';
 $ttl = 60; // secunde
 
 if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $ttl) {
@@ -19191,8 +19191,8 @@ if ($row = $res->fetch_assoc()) {
         if (!is_dir($log_dir)) { mkdir($log_dir, 0755, true); }
         $log_file = $log_dir . '/email_log.txt';
         $timestamp = date('Y-m-d H:i:s');
-        $link = "http://" . ($_SERVER['HTTP_HOST'] ?? 'localhost') . "/SImp/site_g/index.php?page=reset_password&token=" . $token;
-        $log_content = "[$timestamp] To: $email | Subject: Resetare parolă SImp | Link: $link\n";
+        $link = "http://" . ($_SERVER['HTTP_HOST'] ?? 'localhost') . "/OffByOneAcademy/site_g/index.php?page=reset_password&token=" . $token;
+        $log_content = "[$timestamp] To: $email | Subject: Resetare parolă OffByOne Academy | Link: $link\n";
         file_put_contents($log_file, $log_content, FILE_APPEND);
     }
     $stmt_token->close();
@@ -20577,7 +20577,7 @@ $expired = isset($_GET['expired']) && $_GET['expired'] === '1';
                 Acces Securizat
             </div>
             <h1 class="dash__title">Bine ai <span class="dash__title-accent">revenit</span></h1>
-            <p class="dash__lede">Introdu datele tale pentru a accesa platforma SImp.</p>
+            <p class="dash__lede">Introdu datele tale pentru a accesa platforma OffByOne Academy.</p>
         </header>
 
         <article class="card" style="box-shadow: var(--shadow-2xl); border: 1px solid var(--color-border-strong); background: var(--color-surface-1);">
@@ -21981,7 +21981,7 @@ body > footer {
 
 ## site_g/sw.js
 ```javascript
-const CACHE = 'simp-v1';
+const CACHE = 'offbyone-academy-v1';
 const ASSETS = [
     '/site_g/',
     '/site_g/index.php',
@@ -22017,7 +22017,7 @@ self.addEventListener('fetch', e => {
 ```batch
 @echo off
 REM ============================================================================
-REM SImp Portal - Docker Startup Script (Windows)
+REM OffByOne Academy - Docker Startup Script (Windows)
 REM ============================================================================
 REM Automatically starts all Docker containers with validation & logging
 REM Usage: start.bat [rebuild] [down] [logs]
@@ -22033,7 +22033,7 @@ set "INFO=[INFO]"
 
 echo.
 echo ============================================================
-echo          SImp Portal - Docker Startup Script 2.0
+echo          OffByOne Academy - Docker Startup Script 2.0
 echo ============================================================
 echo.
 
@@ -22189,7 +22189,7 @@ if "!db_ready!"=="1" if "!web_ready!"=="1" (
     goto health_check_done
 )
 
-title SImp Portal Startup - Waiting for services... (!attempt!/!max_attempts!)
+title OffByOne Academy Startup - Waiting for services... (!attempt!/!max_attempts!)
 timeout /t 1 /nobreak >nul
 goto health_check_loop
 
@@ -22206,7 +22206,7 @@ echo %INFO% Container status:
 docker compose ps
 
 echo.
-echo %SUCCESS% SImp Portal is running!
+echo %SUCCESS% OffByOne Academy is running!
 echo.
 
 echo ==== ACCESS URLS ====
@@ -22241,7 +22241,7 @@ endlocal
 ## start.ps1
 ```powershell
 # ============================================================================
-# SImp Portal — Docker Startup Script (PowerShell)
+# OffByOne Academy — Docker Startup Script (PowerShell)
 # ============================================================================
 # Automatically starts all Docker containers with validation & logging
 # Usage: .\start.ps1 [-Rebuild] [-Down] [-Logs]
@@ -22480,11 +22480,11 @@ function Show-Info {
     docker compose ps
     
     Write-Host ""
-    Write-Success "SImp Portal is running!"
+    Write-Success "OffByOne Academy is running!"
     Write-Host ""
     
     Write-Host "📌 Access URLs:"
-    Write-Host "   🌐 SImp Portal:      http://localhost:8082" -ForegroundColor Yellow
+    Write-Host "   🌐 OffByOne Academy:      http://localhost:8082" -ForegroundColor Yellow
     Write-Host "   📊 phpMyAdmin:       http://localhost:8081" -ForegroundColor Yellow
     Write-Host "   💾 MySQL Direct:     localhost:3308" -ForegroundColor Yellow
     Write-Host ""
@@ -22511,7 +22511,7 @@ function Show-Info {
 function Main {
     Write-Host ""
     Write-Host "╔════════════════════════════════════════════════════════════╗" -ForegroundColor Green
-    Write-Host "║        🚀 SImp Portal — Docker Startup Script 2.0         ║" -ForegroundColor Green
+    Write-Host "║        🚀 OffByOne Academy — Docker Startup Script 2.0         ║" -ForegroundColor Green
     Write-Host "╚════════════════════════════════════════════════════════════╝" -ForegroundColor Green
     Write-Host ""
     
@@ -22547,7 +22547,7 @@ try {
 ```bash
 #!/bin/bash
 # ============================================================================
-# SImp Portal — Docker Startup Script
+# OffByOne Academy — Docker Startup Script
 # ============================================================================
 # Automatically starts all Docker containers with validation & logging
 # Usage: bash start.sh [--rebuild] [--down] [--logs]
@@ -22769,11 +22769,11 @@ phase_info() {
     docker compose ps
     
     echo ""
-    success "SImp Portal is running!"
+    success "OffByOne Academy is running!"
     echo ""
     
     echo "📌 Access URLs:"
-    echo "   🌐 SImp Portal:      ${BLUE}http://localhost:8082${NC}"
+    echo "   🌐 OffByOne Academy:      ${BLUE}http://localhost:8082${NC}"
     echo "   📊 phpMyAdmin:       ${BLUE}http://localhost:8081${NC}"
     echo "   💾 MySQL Direct:     ${BLUE}localhost:3308${NC}"
     echo ""
@@ -22800,7 +22800,7 @@ phase_info() {
 main() {
     echo ""
     echo "╔════════════════════════════════════════════════════════════╗"
-    echo "║        🚀 SImp Portal — Docker Startup Script 2.0         ║"
+    echo "║        🚀 OffByOne Academy — Docker Startup Script 2.0         ║"
     echo "╚════════════════════════════════════════════════════════════╝"
     echo ""
     
@@ -22845,9 +22845,9 @@ main "$@"
 
 ## STARTUP_GUIDE.md
 ```markdown
-# 🚀 SImp Portal — Quick Start Guide
+# 🚀 OffByOne Academy — Quick Start Guide
 
-Complete guide to launching SImp Portal using automated startup scripts.
+Complete guide to launching OffByOne Academy using automated startup scripts.
 
 ---
 
@@ -22866,7 +22866,7 @@ Complete guide to launching SImp Portal using automated startup scripts.
 
 ```bash
 # Navigate to project directory
-cd /path/to/SImp
+cd /path/to/OffByOneAcademy
 
 # Make script executable
 chmod +x start.sh
@@ -22887,7 +22887,7 @@ chmod +x start.sh
 ✓ phpMyAdmin is healthy
 
 📍 Access Points:
-  🌐 SImp Portal:    http://localhost:8082
+  🌐 OffByOne Academy:    http://localhost:8082
   📊 phpMyAdmin:     http://localhost:8081
   🗄️  MySQL:          localhost:3308
 ```
@@ -22960,7 +22960,7 @@ After startup completes, open your browser:
 
 | Service | URL | Purpose |
 |---------|-----|---------|
-| **SImp Portal** | http://localhost:8082 | Learning platform |
+| **OffByOne Academy** | http://localhost:8082 | Learning platform |
 | **phpMyAdmin** | http://localhost:8081 | Database management |
 | **MySQL** | localhost:3308 | Direct connection |
 
@@ -23028,9 +23028,9 @@ docker compose ps
 
 # Output:
 # NAME           STATUS              PORTS
-# simp_web       Up (healthy)        0.0.0.0:8082->80/tcp
-# simp_db        Up (healthy)        0.0.0.0:3308->3306/tcp
-# simp_phpmyadmin Up (healthy)        0.0.0.0:8081->80/tcp
+# offbyone_academy_web       Up (healthy)        0.0.0.0:8082->80/tcp
+# offbyone_academy_db        Up (healthy)        0.0.0.0:3308->3306/tcp
+# offbyone_academy_phpmyadmin Up (healthy)        0.0.0.0:8081->80/tcp
 ```
 
 ---
@@ -23316,7 +23316,7 @@ require_once __DIR__ . '/../site_g/PHP/helpers.php';
 <?php
 declare(strict_types=1);
 
-namespace SImp\Tests\Unit;
+namespace OffByOneAcademy\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 
@@ -23359,7 +23359,7 @@ class CsrfTest extends TestCase
 <?php
 declare(strict_types=1);
 
-namespace SImp\Tests\Unit;
+namespace OffByOneAcademy\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 
@@ -23400,7 +23400,7 @@ class FlashTest extends TestCase
 <?php
 declare(strict_types=1);
 
-namespace SImp\Tests\Unit;
+namespace OffByOneAcademy\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 

@@ -1,4 +1,4 @@
-# 🚀 Quick Start Guide — SImp Portal
+# 🚀 Quick Start Guide — OffByOne Academy
 
 Choose your platform below to get started in seconds:
 
@@ -96,7 +96,7 @@ The startup script automatically:
 
 | Service | URL |
 |---------|-----|
-| **SImp Portal** | http://localhost:8082 |
+| **OffByOne Academy** | http://localhost:8082 |
 | **phpMyAdmin** | http://localhost:8081 |
 | **MySQL** | localhost:3308 |
 
@@ -184,7 +184,7 @@ For complete documentation, see:
 
 ## 🎉 You're All Set!
 
-Your SImp Portal is now running. Start by:
+Your OffByOne Academy is now running. Start by:
 
 1. Opening http://localhost:8082
 2. Creating a new account on the register page

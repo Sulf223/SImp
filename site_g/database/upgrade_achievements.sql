@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS user_achievements (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT IGNORE INTO achievements (slug, title, description, icon, criteria_type, criteria_value, criteria_meta) VALUES
-('first_login', 'Bun venit!', 'Ai făcut primul login pe SImp.', 'sun', 'first_login', 0, NULL),
+('first_login', 'Bun venit!', 'Ai făcut primul login pe OffByOne Academy.', 'sun', 'first_login', 0, NULL),
 ('grile_5', 'Apetit pentru grile', 'Ai rezolvat 5 grile.', 'check-circle', 'grile_count', 5, NULL),
 ('grile_25', 'Maestru de grile', 'Ai rezolvat 25 de grile.', 'award', 'grile_count', 25, NULL),
 ('grile_50', 'Tocilar absolut', 'Ai rezolvat 50 de grile.', 'crown', 'grile_count', 50, NULL),

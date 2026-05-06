@@ -1,4 +1,4 @@
-const CACHE = 'simp-v1';
+const CACHE = 'offbyone-academy-v2';
 const ASSETS = [
     './',
     'index.php',

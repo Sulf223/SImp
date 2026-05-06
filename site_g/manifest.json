@@ -1,6 +1,6 @@
 {
-    "name": "SImp Portal",
-    "short_name": "SImp",
+    "name": "OffByOne Academy",
+    "short_name": "OffByOne Academy",
     "description": "Platformă educațională pentru algoritmi de sortare",
     "start_url": "/site_g/index.php?page=acasa",
     "display": "standalone",

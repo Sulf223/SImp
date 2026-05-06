@@ -1,4 +1,4 @@
-# Audit tehnic SImp
+# Audit tehnic OffByOne Academy
 
 Data audit: 2026-05-04  
 Auditor: GitHub Copilot (GPT-5.3-Codex)
@@ -68,11 +68,11 @@ Top probleme:
 - Recomandare:
   - Inlocuire cu `set_flash('error', '...')` sau `set_flash('info', '...')` dupa caz.
 
-### MEDIU-1: Link reset parola hardcodat pe `/SImp/site_g`
+### MEDIU-1: Link reset parola hardcodat pe `/OffByOneAcademy/site_g`
 - Fisier:
   - `site_g/PHP/forgot_password_post.php:56`
 - Observatie:
-  - Link-ul de reset este construit cu path fix `/SImp/site_g/...`.
+  - Link-ul de reset este construit cu path fix `/OffByOneAcademy/site_g/...`.
   - In README proiectul ruleaza si in Docker la root (`/`).
 - Impact:
   - Linkuri de reset invalide in deployment-uri care nu folosesc exact acel subfolder.
@@ -108,7 +108,7 @@ Top probleme:
   - `site_g/sw.js:13`
   - `site_g/sw.js:17`
 - Observatie:
-  - Exista `CACHE = 'simp-v1'`, dar fara handler `activate` pentru curatarea cache-urilor vechi.
+  - Exista `CACHE = 'offbyone-academy-v1'`, dar fara handler `activate` pentru curatarea cache-urilor vechi.
 - Impact:
   - Risc de servire asset-uri stale dupa release-uri repetate.
 - Recomandare:

@@ -1,6 +1,6 @@
 <?php
-include_once 'conexiune.php';
-include_once 'auth.php';
+require_once __DIR__ . '/conexiune.php';
+require_once __DIR__ . '/auth.php';
 
 $is_logged_in = is_logged_in();
 $id_utilizator = $_SESSION['user_id'] ?? 0;
@@ -13,12 +13,24 @@ $teste_rapide = [
     ['titlu' => 'Sortări (mix)', 'descriere' => 'Bubble, Selection, Insertion, Quick, Merge.', 'set' => 'sortari', 'color' => '#6e56cf']
 ];
 
-$sql_grile = "SELECT id, nume_metoda, dificultate, intrebare, doc_link FROM grile_cpp";
+$has_doc_link = false;
+$col_check = $con->query("SHOW COLUMNS FROM grile_cpp LIKE 'doc_link'");
+if ($col_check) {
+    $has_doc_link = $col_check->num_rows > 0;
+    $col_check->free();
+}
+
+$doc_link_select = $has_doc_link ? 'doc_link' : 'NULL AS doc_link';
+$sql_grile = "SELECT id, nume_metoda, dificultate, intrebare, {$doc_link_select} FROM grile_cpp";
 $stmt_grile = $con->prepare($sql_grile);
-$stmt_grile->execute();
-$result_grile = $stmt_grile->get_result();
-$grile = $result_grile->fetch_all(MYSQLI_ASSOC);
-$stmt_grile->close();
+$grile = [];
+if ($stmt_grile && $stmt_grile->execute()) {
+    $result_grile = $stmt_grile->get_result();
+    $grile = $result_grile ? $result_grile->fetch_all(MYSQLI_ASSOC) : [];
+    $stmt_grile->close();
+} else {
+    error_log('grile.php: failed to load grile_cpp: ' . $con->error);
+}
 
 if ($is_logged_in) {
     $sql_progres = "SELECT id_grila FROM progres_grile WHERE id_utilizator = ?";

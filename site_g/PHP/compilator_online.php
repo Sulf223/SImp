@@ -3,7 +3,7 @@ $cod_sursa = '';
 $run_id = isset($_GET['run_id']) ? (int)$_GET['run_id'] : 0;
 
 if ($run_id > 0) {
-    include_once 'conexiune.php';
+    require_once __DIR__ . '/conexiune.php';
     $sql = "SELECT fisier_cpp FROM metode WHERE id_metoda = ?";
     if ($stmt = $con->prepare($sql)) {
         $stmt->bind_param("i", $run_id);

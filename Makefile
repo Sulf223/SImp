@@ -1,7 +1,7 @@
 .PHONY: help start stop restart logs status reset build clean
 
 help:
-	@echo "🐳 SImp Portal — Docker Commands"
+	@echo "🐳 OffByOne Academy — Docker Commands"
 	@echo ""
 	@echo "Usage: make [command]"
 	@echo ""
@@ -20,14 +20,14 @@ help:
 	@echo ""
 
 start:
-	@echo "🚀 Starting SImp Portal..."
+	@echo "🚀 Starting OffByOne Academy..."
 	@docker compose up --build -d
 	@echo "⏳ Waiting for services..."
 	@sleep 5
 	@echo "✓ Services started!"
 	@echo ""
 	@echo "📍 Access Points:"
-	@echo "  • SImp Portal:  http://localhost:8082"
+	@echo "  • OffByOne Academy:  http://localhost:8082"
 	@echo "  • phpMyAdmin:   http://localhost:8081"
 	@echo "  • MySQL:        localhost:3308"
 	@echo ""

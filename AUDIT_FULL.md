@@ -1,4 +1,4 @@
-# SImp Portal – Audit comprehensiv (runda 7)
+# OffByOne Academy – Audit comprehensiv (runda 7)
 
 Acest audit a inspectat **toate fișierele** PHP, JS și CSS din `site_g/`, plus configurațiile (`composer.json`, `manifest.json`, `.htaccess`-urile, migrațiile SQL). Scopul: găsește bug-uri și polish issues care **NU** au fost raportate în rundele anterioare.
 
@@ -16,7 +16,7 @@ Acest audit a inspectat **toate fișierele** PHP, JS și CSS din `site_g/`, plus
 navigator.serviceWorker.register('/site_g/sw.js');
 ```
 
-Path-ul `/site_g/sw.js` e absolut și funcționează doar dacă proiectul e în `http://localhost/SImp/site_g/`. Pe orice alt deploy (subdomeniu, root, alt subfolder), SW nu se înregistrează → PWA și offline mode nu funcționează.
+Path-ul `/site_g/sw.js` e absolut și funcționează doar dacă proiectul e în `http://localhost/OffByOneAcademy/site_g/`. Pe orice alt deploy (subdomeniu, root, alt subfolder), SW nu se înregistrează → PWA și offline mode nu funcționează.
 
 **Fix:** `navigator.serviceWorker.register('sw.js', { scope: './' });` (path relativ la fișierul curent).
 

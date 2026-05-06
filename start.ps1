@@ -1,5 +1,5 @@
 # ============================================================================
-# SImp Portal — Docker Startup Script (PowerShell)
+# OffByOne Academy — Docker Startup Script (PowerShell)
 # ============================================================================
 # Automatically starts all Docker containers with validation & logging
 # Usage: .\start.ps1 [-Rebuild] [-Down] [-Logs]
@@ -238,11 +238,11 @@ function Show-Info {
     docker compose ps
     
     Write-Host ""
-    Write-Success "SImp Portal is running!"
+    Write-Success "OffByOne Academy is running!"
     Write-Host ""
     
     Write-Host "📌 Access URLs:"
-    Write-Host "   🌐 SImp Portal:      http://localhost:8082" -ForegroundColor Yellow
+    Write-Host "   🌐 OffByOne Academy:      http://localhost:8082" -ForegroundColor Yellow
     Write-Host "   📊 phpMyAdmin:       http://localhost:8081" -ForegroundColor Yellow
     Write-Host "   💾 MySQL Direct:     localhost:3308" -ForegroundColor Yellow
     Write-Host ""
@@ -269,7 +269,7 @@ function Show-Info {
 function Main {
     Write-Host ""
     Write-Host "╔════════════════════════════════════════════════════════════╗" -ForegroundColor Green
-    Write-Host "║        🚀 SImp Portal — Docker Startup Script 2.0         ║" -ForegroundColor Green
+    Write-Host "║        🚀 OffByOne Academy — Docker Startup Script 2.0         ║" -ForegroundColor Green
     Write-Host "╚════════════════════════════════════════════════════════════╝" -ForegroundColor Green
     Write-Host ""
     

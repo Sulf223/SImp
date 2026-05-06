@@ -5,9 +5,9 @@ services:
       dockerfile: Dockerfile
       args:
         - APP_VERSION=2.0
-    container_name: simp_web
-    hostname: simp-web
-    image: simp:2.0-php8.2
+    container_name: offbyone_academy_web
+    hostname: offbyone-academy-web
+    image: offbyone-academy:2.0-php8.2
     depends_on:
       db:
         condition: service_healthy
@@ -44,7 +44,7 @@ services:
       - ./site_g/logs:/var/www/html/logs:rw
     
     networks:
-      - simp_network
+      - offbyone_academy_network
     
     restart: unless-stopped
     
@@ -66,13 +66,13 @@ services:
       start_period: 40s
     
     labels:
-      - "com.simp.description=SImp Portal Web Application"
-      - "com.simp.version=2.0"
+      - "com.offbyoneacademy.description=OffByOne Academy Web Application"
+      - "com.offbyoneacademy.version=2.0"
 
   db:
     image: mysql:8.0.37
-    container_name: simp_db
-    hostname: simp-mysql
+    container_name: offbyone_academy_db
+    hostname: offbyone-academy-mysql
     
     command: 
       - --default-authentication-plugin=mysql_native_password
@@ -99,10 +99,14 @@ services:
       - ./site_g/database/upgrade_recursivitate_backtracking.sql:/docker-entrypoint-initdb.d/03_upgrade_recursivitate.sql:ro
       - ./site_g/database/upgrade_profile_streak.sql:/docker-entrypoint-initdb.d/04_upgrade_profile_streak.sql:ro
       - ./site_g/database/upgrade_rate_limit.sql:/docker-entrypoint-initdb.d/05_upgrade_rate_limit.sql:ro
-      - ./migrations/20260505_add_doc_link_to_grile_cpp.sql:/docker-entrypoint-initdb.d/06_add_doc_link_to_grile_cpp.sql:ro
+      - ./site_g/database/upgrade_learning_paths.sql:/docker-entrypoint-initdb.d/06_upgrade_learning_paths.sql:ro
+      - ./site_g/database/upgrade_password_reset.sql:/docker-entrypoint-initdb.d/07_upgrade_password_reset.sql:ro
+      - ./site_g/database/upgrade_admin_audit_log.sql:/docker-entrypoint-initdb.d/08_upgrade_admin_audit_log.sql:ro
+      - ./site_g/database/upgrade_achievements.sql:/docker-entrypoint-initdb.d/09_upgrade_achievements.sql:ro
+      - ./migrations/20260505_add_doc_link_to_grile_cpp.sql:/docker-entrypoint-initdb.d/10_add_doc_link_to_grile_cpp.sql:ro
     
     networks:
-      - simp_network
+      - offbyone_academy_network
     
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot123"]
@@ -123,13 +127,13 @@ services:
           memory: 1G
     
     labels:
-      - "com.simp.description=SImp Portal MySQL Database"
-      - "com.simp.version=8.0"
+      - "com.offbyoneacademy.description=OffByOne Academy MySQL Database"
+      - "com.offbyoneacademy.version=8.0"
 
   phpmyadmin:
     image: phpmyadmin:5-apache
-    container_name: simp_phpmyadmin
-    hostname: simp-pma
+    container_name: offbyone_academy_phpmyadmin
+    hostname: offbyone-academy-pma
     
     depends_on:
       db:
@@ -149,7 +153,7 @@ services:
       - "8081:80"
     
     networks:
-      - simp_network
+      - offbyone_academy_network
     
     restart: unless-stopped
     
@@ -170,15 +174,12 @@ services:
       start_period: 30s
     
     labels:
-      - "com.simp.description=phpMyAdmin Database Administration"
-      - "com.simp.version=5"
+      - "com.offbyoneacademy.description=phpMyAdmin Database Administration"
+      - "com.offbyoneacademy.version=5"
 
 networks:
-  simp_network:
+  offbyone_academy_network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.25.0.0/16
 
 volumes:
   db_data:

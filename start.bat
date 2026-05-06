@@ -1,6 +1,6 @@
 @echo off
 REM ============================================================================
-REM SImp Portal - Docker Startup Script (Windows)
+REM OffByOne Academy - Docker Startup Script (Windows)
 REM ============================================================================
 REM Automatically starts all Docker containers with validation & logging
 REM Usage: start.bat [rebuild] [down] [logs]
@@ -16,7 +16,7 @@ set "INFO=[INFO]"
 
 echo.
 echo ============================================================
-echo          SImp Portal - Docker Startup Script 2.0
+echo          OffByOne Academy - Docker Startup Script 2.0
 echo ============================================================
 echo.
 
@@ -172,7 +172,7 @@ if "!db_ready!"=="1" if "!web_ready!"=="1" (
     goto health_check_done
 )
 
-title SImp Portal Startup - Waiting for services... (!attempt!/!max_attempts!)
+title OffByOne Academy Startup - Waiting for services... (!attempt!/!max_attempts!)
 timeout /t 1 /nobreak >nul
 goto health_check_loop
 
@@ -189,7 +189,7 @@ echo %INFO% Container status:
 docker compose ps
 
 echo.
-echo %SUCCESS% SImp Portal is running!
+echo %SUCCESS% OffByOne Academy is running!
 echo.
 
 echo ==== ACCESS URLS ====

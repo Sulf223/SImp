@@ -22,7 +22,7 @@ if (!in_array($type, $tipuri_valide, true)) {
 }
 
 $timestamp = date('Y-m-d_His');
-$filename = "simp_export_{$type}_{$timestamp}.csv";
+$filename = "offbyone_academy_export_{$type}_{$timestamp}.csv";
 
 header('Content-Type: text/csv; charset=UTF-8');
 header('Content-Disposition: attachment; filename="' . $filename . '"');

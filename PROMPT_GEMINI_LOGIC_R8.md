@@ -1,6 +1,6 @@
 # Prompt Gemini CLI – Bug-uri logice runda 8 (7 fix-uri)
 
-Rulezi din `C:\wamp64\www\SImp`:
+Rulezi din `C:\wamp64\www\OffByOneAcademy`:
 
 ```powershell
 gemini "$(Get-Content -Raw .\PROMPT_GEMINI_LOGIC_R8.md)"
@@ -10,7 +10,7 @@ gemini "$(Get-Content -Raw .\PROMPT_GEMINI_LOGIC_R8.md)"
 
 ## PROMPT (copiază tot)
 
-Ești inginer software senior. Lucrezi în directorul curent. Aplicația SImp Portal e în `site_g/`. A trecut prin 7 runde de audit. Acum aplici 7 fix-uri pentru bug-uri LOGICE descoperite în runda 8. La final scrii `LOGIC_R8_REPORT.md`.
+Ești inginer software senior. Lucrezi în directorul curent. Aplicația OffByOne Academy e în `site_g/`. A trecut prin 7 runde de audit. Acum aplici 7 fix-uri pentru bug-uri LOGICE descoperite în runda 8. La final scrii `LOGIC_R8_REPORT.md`.
 
 ### Reguli generale (NU le încălca)
 

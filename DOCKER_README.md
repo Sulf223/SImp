@@ -1,6 +1,6 @@
-# 🐳 Docker Setup — SImp Portal v2.0
+# 🐳 Docker Setup — OffByOne Academy v2.0
 
-Documentație completă pentru rularea **SImp Portal** în Docker containers cu PHP 8.2, MySQL 8.0, și phpMyAdmin.
+Documentație completă pentru rularea **OffByOne Academy** în Docker containers cu PHP 8.2, MySQL 8.0, și phpMyAdmin.
 
 ---
 
@@ -22,7 +22,7 @@ docker compose version
 
 ```bash
 # 1. Mergi în folderul proiectului
-cd /path/to/SImp
+cd /path/to/OffByOneAcademy
 
 # 2. Pornire containers
 docker compose up --build -d
@@ -31,7 +31,7 @@ docker compose up --build -d
 docker compose logs -f web
 ```
 
-✅ **SImp Portal este live la**: http://localhost:8082
+✅ **OffByOne Academy este live la**: http://localhost:8082
 
 ---
 
@@ -39,7 +39,7 @@ docker compose logs -f web
 
 | Service | URL | Credentials |
 |---------|-----|-------------|
-| **SImp Portal** | http://localhost:8082 | Crează cont pe pagina de register |
+| **OffByOne Academy** | http://localhost:8082 | Crează cont pe pagina de register |
 | **phpMyAdmin** | http://localhost:8081 | `root` / `root123` |
 | **MySQL Direct** | `localhost:3308` | `root` / `root123` |
 
@@ -75,14 +75,14 @@ environment:
 
 ### Aplicarea migrațiilor noi
 
-Compose aplică automat scripturile din `docker-entrypoint-initdb.d` la prima inițializare a volumului MySQL. Dacă ai deja `db_data` creat, noua coloană `doc_link` nu va apărea până când:
+Compose aplică automat scripturile din `docker-entrypoint-initdb.d` la prima inițializare a volumului MySQL. Pe lângă schema de bază, sunt aplicate migrațiile pentru progres, recursivitate/backtracking, profil/streak, rate limiting, drumuri de învățare, resetare parolă, audit log, achievements și `doc_link` pentru grile. Dacă ai deja `db_data` creat, aceste schimbări nu apar până când:
 
 ```bash
 docker compose down -v
 docker compose up --build -d
 ```
 
-Sau rulezi manual migrarea în containerul DB.
+Sau rulezi manual migrarea necesară în containerul DB.
 
 ---
 
@@ -91,7 +91,7 @@ Sau rulezi manual migrarea în containerul DB.
 ```
 ┌─────────────────────────────────────────────┐
 │         Docker Compose Network              │
-│       (simp_network, 172.25.0.0/16)        │
+│       (offbyone_academy_network, bridge)               │
 ├─────────────────────────────────────────────┤
 │                                             │
 │  ┌──────────────┐  ┌──────────────┐        │
@@ -119,6 +119,8 @@ Host                          Container
 ./site_g/uploads/          → /var/www/html/uploads (rw)
 ./site_g/logs/             → /var/www/html/logs (rw)
 ./site_g/dbsortari.sql     → init script (MySQL)
+./site_g/database/*.sql    → migrații init DB
+./migrations/*.sql         → migrații proiect
 db_data/ (Docker volume)    → /var/lib/mysql (persistent)
 ```
 
@@ -210,7 +212,7 @@ docker compose exec web php -r "
 "
 
 # View container resource usage
-docker stats simp_web simp_db
+docker stats offbyone_academy_web offbyone_academy_db
 ```
 
 ---
@@ -284,7 +286,7 @@ docker compose up --build -d
 ### Application slow / crashing
 ```bash
 # Check resource limits
-docker stats simp_web simp_db
+docker stats offbyone_academy_web offbyone_academy_db
 
 # Increase memory în docker-compose.yml
 deploy:
@@ -318,7 +320,7 @@ cache:
   ports:
     - "6379:6379"
   networks:
-    - simp_network
+    - offbyone_academy_network
 ```
 
 ---
@@ -342,7 +344,7 @@ jobs:
       - uses: docker/build-push-action@v4
         with:
           context: .
-          tags: simp:latest
+          tags: offbyone-academy:latest
           push: true
 ```
 
@@ -377,7 +379,7 @@ jobs:
 
 ---
 
-**Last Updated**: April 27, 2026  
-**Maintained By**: SImp Portal Team  
+**Last Updated**: May 6, 2026
+**Maintained By**: OffByOne Academy Team
 **License**: Same as main project
 

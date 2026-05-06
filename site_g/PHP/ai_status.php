@@ -11,7 +11,7 @@ require_once 'helpers.php';
 // FIX [A2]: Actualizăm activitatea (fără redirect) pentru a păstra sesiunea vie cât timp widget-ul e activ
 enforce_session_timeout_ajax();
 
-$cacheFile = sys_get_temp_dir() . '/simp_ai_status.json';
+$cacheFile = sys_get_temp_dir() . '/offbyone_academy_ai_status.json';
 $ttl = 60; // secunde
 
 if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $ttl) {

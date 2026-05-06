@@ -10,10 +10,10 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
             Inovație în învățare
         </div>
-        <h2 class="dash__title">Bun venit la <span class="dash__title-accent">SImp</span> Portal</h2>
+        <h2 class="dash__title">Bun venit la <span class="dash__title-accent">OffByOne Academy</span></h2>
         <p class="dash__lede">
             Explorează universul algoritmilor de sortare prin vizualizări interactive și explicații pas cu pas.
-            SImp transformă învățarea într-o experiență captivantă și educativă.
+            OffByOne Academy transformă învățarea într-o experiență captivantă și educativă.
         </p>
     </header>
 
@@ -27,7 +27,7 @@
                 </div>
                 <canvas id="solar-canvas" style="position: relative; z-index: 1; display: block; width: 100%; height: 100%;"></canvas>
                 <div id="click-hint" style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 2; pointer-events: none; color: rgba(255, 255, 255, 0.2); font-size: 12px;">Hover pentru detalii - Click pentru a intra în lecție</div>
-                <div id="hero-subtitle" style="position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 2; pointer-events: none; color: rgba(255, 255, 255, 0.3); font-size: 13px; letter-spacing: 2px;">SImp - Inovație în învățarea sortării</div>
+                <div id="hero-subtitle" style="position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 2; pointer-events: none; color: rgba(255, 255, 255, 0.3); font-size: 13px; letter-spacing: 2px;">OffByOne Academy - Inovație în învățarea sortării</div>
                 <div id="tooltip" style="position: fixed; z-index: var(--z-tooltip); background: rgba(8, 14, 31, 0.95); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 14px 18px; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; max-width: 220px; backdrop-filter: blur(8px);">
                     <h3 id="tt-name" style="font-size: 15px; font-weight: 600; margin-bottom: 6px; color: #fff;"></h3>
                     <p id="tt-desc" style="font-size: 13px; line-height: 1.5; color: rgba(255, 255, 255, 0.7); margin: 0;"></p>

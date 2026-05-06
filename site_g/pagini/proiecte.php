@@ -51,7 +51,7 @@ function proiecte_url(string $relativePath): string
         </span>
         <h1 class="dash__title">Portal <span class="dash__title-accent">Integrări</span></h1>
         <p class="dash__lede">
-            Explorează proiectele externe integrate în ecosistemul SImp. Acestea rulează în containere izolate pentru a-și păstra designul original.
+            Explorează proiectele externe integrate în ecosistemul OffByOne Academy. Acestea rulează în containere izolate pentru a-și păstra designul original.
         </p>
         <div class="card__actions">
             <a href="index.php?page=acasa" class="btn btn--ghost btn--sm">

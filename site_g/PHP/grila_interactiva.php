@@ -1,7 +1,7 @@
 <?php
 // PHP/grila_interactiva.php
-include_once 'conexiune.php';
-include_once 'auth.php';
+require_once __DIR__ . '/conexiune.php';
+require_once __DIR__ . '/auth.php';
 
 $mode = $_GET['mode'] ?? 'db';
 if ($mode !== 'w3') {

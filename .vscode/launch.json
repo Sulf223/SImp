@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/wamp64/www/SImp/site_g/CPP",
-      "program": "c:/wamp64/www/SImp/site_g/CPP/build/Debug/outDebug",
+      "cwd": "${workspaceFolder}/site_g/CPP",
+      "program": "${workspaceFolder}/site_g/CPP/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

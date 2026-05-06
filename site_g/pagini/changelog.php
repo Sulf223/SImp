@@ -5,7 +5,7 @@
             Istoric versiuni
         </span>
         <h1 class="dash__title">Schimbări <span class="dash__title-accent">recente</span></h1>
-        <p class="dash__lede">Toate îmbunătățirile aduse SImp, în ordine inversă cronologică.</p>
+        <p class="dash__lede">Toate îmbunătățirile aduse OffByOne Academy, în ordine inversă cronologică.</p>
     </header>
 
     <ol class="timeline" style="counter-reset: changelog;">
@@ -60,7 +60,7 @@
                 <span class="badge badge--soft">v1.0</span>
                 <span class="card__meta">2025</span>
             </div>
-            <h3 class="card__title-sm" style="margin-bottom: var(--space-2);">Lansare SImp</h3>
+            <h3 class="card__title-sm" style="margin-bottom: var(--space-2);">Lansare OffByOne Academy</h3>
             <p class="card__body">Portal C++ cu 6 sortări, 4 tehnici fundamentale, exerciții fill-in-the-blank, grile, compilator online.</p>
         </li>
     </ol>

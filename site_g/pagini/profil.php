@@ -7,14 +7,59 @@ require_once __DIR__ . '/../PHP/progres_learning.php';
 $userId = (int)$_SESSION['user_id'];
 
 // Fetch user info
-$stmt = $con->prepare("SELECT username, display_name, bio, avatar_seed, theme_pref, created_at FROM utilizatori WHERE id = ?");
+$columnExists = function (string $table, string $column) use ($con): bool {
+    $safeColumn = $con->real_escape_string($column);
+    $result = $con->query("SHOW COLUMNS FROM `{$table}` LIKE '{$safeColumn}'");
+    if (!$result) {
+        return false;
+    }
+    $exists = $result->num_rows > 0;
+    $result->free();
+    return $exists;
+};
+
+$tableExists = function (string $table) use ($con): bool {
+    $safeTable = $con->real_escape_string($table);
+    $result = $con->query("SHOW TABLES LIKE '{$safeTable}'");
+    if (!$result) {
+        return false;
+    }
+    $exists = $result->num_rows > 0;
+    $result->free();
+    return $exists;
+};
+
+$profileFields = [
+    'display_name' => $columnExists('utilizatori', 'display_name'),
+    'bio' => $columnExists('utilizatori', 'bio'),
+    'avatar_seed' => $columnExists('utilizatori', 'avatar_seed'),
+    'theme_pref' => $columnExists('utilizatori', 'theme_pref'),
+];
+$selectFields = ['username'];
+foreach ($profileFields as $field => $exists) {
+    $selectFields[] = $exists ? $field : "NULL AS {$field}";
+}
+$selectFields[] = 'created_at';
+
+$user = [];
+$stmt = $con->prepare("SELECT " . implode(', ', $selectFields) . " FROM utilizatori WHERE id = ?");
 if ($stmt) {
     $stmt->bind_param('i', $userId);
     $stmt->execute();
     $res = $stmt->get_result();
     $user = $res->fetch_assoc() ?: [];
     $stmt->close();
+} else {
+    error_log('profil.php: failed to load user profile: ' . $con->error);
 }
+$user = array_merge([
+    'username' => 'Student',
+    'display_name' => null,
+    'bio' => null,
+    'avatar_seed' => null,
+    'theme_pref' => null,
+    'created_at' => date('Y-m-d'),
+], $user);
 
 $displayName = htmlspecialchars($user['display_name'] ?? $user['username'] ?? 'Student');
 $bio = htmlspecialchars($user['bio'] ?? '');
@@ -33,7 +78,7 @@ $sql_ach = "SELECT a.*, ua.unlocked_at IS NOT NULL AS unlocked
             LEFT JOIN user_achievements ua ON ua.achievement_id = a.id AND ua.user_id = ?
             ORDER BY ua.unlocked_at DESC, a.id ASC";
 $achievements = [];
-if ($stmt = $con->prepare($sql_ach)) {
+if ($tableExists('achievements') && $tableExists('user_achievements') && ($stmt = $con->prepare($sql_ach))) {
     $stmt->bind_param('i', $userId);
     $stmt->execute();
     $res = $stmt->get_result();

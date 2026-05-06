@@ -1,4 +1,4 @@
-# 🚀 SImp Portal v2.0 — Complete Delivery Index
+# 🚀 OffByOne Academy v2.0 — Complete Delivery Index
 
 **Status**: ✅ **PRODUCTION READY**  
 **Date**: April 27, 2026  
@@ -70,7 +70,7 @@ Read **[FINAL_DELIVERY.md](FINAL_DELIVERY.md)** — 10 min read
 ## 📁 File Structure Overview
 
 ```
-SImp/
+OffByOneAcademy/
 ├── 🚀 STARTUP SCRIPTS (Pick your OS)
 │   ├── start.sh (Bash - Linux/Mac)
 │   ├── start.bat (CMD - Windows)
@@ -150,7 +150,7 @@ docker compose exec web bash     # Shell access
 
 | Service | URL | Username | Password |
 |---------|-----|----------|----------|
-| **SImp Portal** | http://localhost:8082 | N/A | N/A |
+| **OffByOne Academy** | http://localhost:8082 | N/A | N/A |
 | **phpMyAdmin** | http://localhost:8081 | root | root123 |
 | **MySQL** | localhost:3308 | root | root123 |
 
@@ -289,7 +289,7 @@ See: [DOCKER_README.md → Permission Issues](DOCKER_README.md#permission-issues
 
 ## 🎉 You're All Set!
 
-Your SImp Portal is now:
+Your OffByOne Academy is now:
 - 🎨 Beautifully designed (modern CSS)
 - 🐳 Docker-native (production-ready)
 - ⚡ Instantly deployable (one-command startup)

@@ -235,23 +235,55 @@ function get_exercise_stats(mysqli $con, int $userId, string $lessonSlug): array
 }
 
 function ensure_streak_tables(mysqli $con): void {
-    // Verificăm dacă tabelul principal există deja
-    $check = $con->query("SHOW TABLES LIKE 'user_streak'");
-    if ($check->num_rows === 0) {
-        $sqlPath = __DIR__ . '/../database/upgrade_profile_streak.sql';
-        if (file_exists($sqlPath)) {
-            $sql = file_get_contents($sqlPath);
-            if ($sql) {
-                // Executăm scriptul SQL.
-                if ($con->multi_query($sql)) {
-                    do {
-                        // Consumăm rezultatele pentru a elibera conexiunea
-                        if ($result = $con->store_result()) {
-                            $result->free();
-                        }
-                    } while ($con->more_results() && $con->next_result());
-                }
+    static $checked = false;
+    if ($checked) {
+        return;
+    }
+    $checked = true;
+
+    $profileColumns = [
+        'display_name' => '`display_name` VARCHAR(64) NULL AFTER `rol`',
+        'bio' => '`bio` VARCHAR(280) NULL AFTER `display_name`',
+        'avatar_seed' => '`avatar_seed` VARCHAR(64) NULL AFTER `bio`',
+        'theme_pref' => "`theme_pref` ENUM('dark','light','auto') DEFAULT 'dark' AFTER `avatar_seed`",
+        'onboarded_at' => '`onboarded_at` TIMESTAMP NULL AFTER `theme_pref`',
+    ];
+
+    foreach ($profileColumns as $column => $definition) {
+        $safeColumn = $con->real_escape_string($column);
+        $result = $con->query("SHOW COLUMNS FROM `utilizatori` LIKE '{$safeColumn}'");
+        if ($result && $result->num_rows === 0) {
+            if (!$con->query("ALTER TABLE `utilizatori` ADD COLUMN {$definition}")) {
+                error_log("ensure_streak_tables: failed to add {$column}: " . $con->error);
             }
+        }
+        if ($result) {
+            $result->free();
+        }
+    }
+
+    $tables = [
+        "CREATE TABLE IF NOT EXISTS user_streak (
+            user_id INT PRIMARY KEY,
+            current_streak INT DEFAULT 0,
+            longest_streak INT DEFAULT 0,
+            last_activity_date DATE,
+            streak_freezes INT DEFAULT 0,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            CONSTRAINT fk_streak_user FOREIGN KEY (user_id) REFERENCES utilizatori(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+        "CREATE TABLE IF NOT EXISTS activity_day (
+            user_id INT NOT NULL,
+            activity_date DATE NOT NULL,
+            activity_count INT DEFAULT 0,
+            PRIMARY KEY (user_id, activity_date),
+            CONSTRAINT fk_actday_user FOREIGN KEY (user_id) REFERENCES utilizatori(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+    ];
+
+    foreach ($tables as $sql) {
+        if (!$con->query($sql)) {
+            error_log('ensure_streak_tables: failed to create table: ' . $con->error);
         }
     }
 }

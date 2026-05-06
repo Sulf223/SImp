@@ -1,4 +1,4 @@
-# SImp Portal – Audit R7 Final Report
+# OffByOne Academy – Audit R7 Final Report
 
 Date: May 3, 2026
 Status: ✅ ALL 19 ISSUES RESOLVED

@@ -1,6 +1,6 @@
-# Prompt Gemini CLI – Audit Round 7 (19 fix-uri SImp)
+# Prompt Gemini CLI – Audit Round 7 (19 fix-uri OffByOne Academy)
 
-Rulezi din `C:\wamp64\www\SImp`:
+Rulezi din `C:\wamp64\www\OffByOneAcademy`:
 
 ```powershell
 gemini "$(Get-Content -Raw .\PROMPT_GEMINI_AUDIT_R7.md)"
@@ -12,7 +12,7 @@ gemini "$(Get-Content -Raw .\PROMPT_GEMINI_AUDIT_R7.md)"
 
 ## PROMPT (copiază tot)
 
-Ești inginer software senior. Lucrezi în directorul curent. Aplicația SImp Portal e în `site_g/`. A trecut prin 6 runde de audit. Acum aplici 19 fix-uri descoperite în runda 7. La final scrii `AUDIT_R7_REPORT.md` cu tabel ID | fișier | linii | status.
+Ești inginer software senior. Lucrezi în directorul curent. Aplicația OffByOne Academy e în `site_g/`. A trecut prin 6 runde de audit. Acum aplici 19 fix-uri descoperite în runda 7. La final scrii `AUDIT_R7_REPORT.md` cu tabel ID | fișier | linii | status.
 
 ### Reguli generale (NU le încălca)
 

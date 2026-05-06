@@ -1,6 +1,6 @@
-# 🚀 SImp Portal — Quick Start Guide
+# 🚀 OffByOne Academy — Quick Start Guide
 
-Complete guide to launching SImp Portal using automated startup scripts.
+Complete guide to launching OffByOne Academy using automated startup scripts.
 
 ---
 
@@ -19,7 +19,7 @@ Complete guide to launching SImp Portal using automated startup scripts.
 
 ```bash
 # Navigate to project directory
-cd /path/to/SImp
+cd /path/to/OffByOneAcademy
 
 # Make script executable
 chmod +x start.sh
@@ -40,7 +40,7 @@ chmod +x start.sh
 ✓ phpMyAdmin is healthy
 
 📍 Access Points:
-  🌐 SImp Portal:    http://localhost:8082
+  🌐 OffByOne Academy:    http://localhost:8082
   📊 phpMyAdmin:     http://localhost:8081
   🗄️  MySQL:          localhost:3308
 ```
@@ -113,7 +113,7 @@ After startup completes, open your browser:
 
 | Service | URL | Purpose |
 |---------|-----|---------|
-| **SImp Portal** | http://localhost:8082 | Learning platform |
+| **OffByOne Academy** | http://localhost:8082 | Learning platform |
 | **phpMyAdmin** | http://localhost:8081 | Database management |
 | **MySQL** | localhost:3308 | Direct connection |
 
@@ -181,9 +181,9 @@ docker compose ps
 
 # Output:
 # NAME           STATUS              PORTS
-# simp_web       Up (healthy)        0.0.0.0:8082->80/tcp
-# simp_db        Up (healthy)        0.0.0.0:3308->3306/tcp
-# simp_phpmyadmin Up (healthy)        0.0.0.0:8081->80/tcp
+# offbyone_academy_web       Up (healthy)        0.0.0.0:8082->80/tcp
+# offbyone_academy_db        Up (healthy)        0.0.0.0:3308->3306/tcp
+# offbyone_academy_phpmyadmin Up (healthy)        0.0.0.0:8081->80/tcp
 ```
 
 ---

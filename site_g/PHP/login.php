@@ -19,7 +19,7 @@ $expired = isset($_GET['expired']) && $_GET['expired'] === '1';
                 Acces Securizat
             </div>
             <h1 class="dash__title">Bine ai <span class="dash__title-accent">revenit</span></h1>
-            <p class="dash__lede">Introdu datele tale pentru a accesa platforma SImp.</p>
+            <p class="dash__lede">Introdu datele tale pentru a accesa platforma OffByOne Academy.</p>
         </header>
 
         <article class="card" style="box-shadow: var(--shadow-2xl); border: 1px solid var(--color-border-strong); background: var(--color-surface-1);">

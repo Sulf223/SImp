@@ -1,4 +1,4 @@
-# FIX REPORT - SImp Portal
+# FIX REPORT - OffByOne Academy
 
 Rezumatul reparării bug-urilor identificate în auditul de securitate și funcționalitate.
 

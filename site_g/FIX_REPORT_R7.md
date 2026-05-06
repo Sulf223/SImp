@@ -1,4 +1,4 @@
-# SImp Portal – Raport Final Corecții Audit (Runda 7)
+# OffByOne Academy – Raport Final Corecții Audit (Runda 7)
 
 Acest raport detaliază implementarea soluțiilor pentru cele 19 probleme identificate în auditul comprehensiv din Runda 7. Toate modificările au fost aplicate și verificate conform standardelor proiectului.
 

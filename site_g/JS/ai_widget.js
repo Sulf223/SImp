@@ -224,7 +224,7 @@
  * Deschide widget-ul si pre-completeaza input-ul cu o intrebare relevanta.
  * @param {Object} context - Obiect cu date despre context (tip, intrebare, cod, etc).
  */
-window.SImpAskAI = function(context) {
+window.OffByOneAcademyAskAI = function(context) {
     const widget = document.getElementById('ai-widget');
     const input = document.getElementById('ai-widget-input');
     const toggleBtn = document.getElementById('ai-widget-toggle');
@@ -266,7 +266,7 @@ document.addEventListener('click', (e) => {
         const context = JSON.parse(contextStr);
         context.type = type;
         
-        window.SImpAskAI(context);
+        window.OffByOneAcademyAskAI(context);
     } catch (err) {
         console.error('Ask AI: invalid context', err);
     }

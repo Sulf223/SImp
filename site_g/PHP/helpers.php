@@ -129,7 +129,7 @@ function generate_csrf_token() {
  */
 function csrf_field() {
     $token = generate_csrf_token();
-    echo '<input type="hidden" name="csrf_token" value="' . $token . '">';
+    echo '<input type="hidden" name="csrf_token" value="' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '">';
 }
 
 /**
@@ -138,10 +138,186 @@ function csrf_field() {
  */
 function verify_csrf() {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        $requestToken = $_POST['csrf_token'] ?? '';
+        $sessionToken = $_SESSION['csrf_token'] ?? '';
+        if (!is_string($requestToken) || !is_string($sessionToken) || $sessionToken === '' || !hash_equals($sessionToken, $requestToken)) {
+            http_response_code(403);
             die('Eroare CSRF: Token invalid sau lipsă. Te rog reîncarcă pagina.');
         }
     }
+}
+
+function env_string(string $key, string $default = ''): string {
+    $value = getenv($key);
+    if ($value === false || $value === '') {
+        return $default;
+    }
+    return (string)$value;
+}
+
+function app_base_url(): string {
+    $configured = rtrim(env_string('SITE_URL'), '/');
+    if ($configured !== '') {
+        return $configured;
+    }
+
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $scriptBase = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/site_g/PHP')), '/');
+    $appBase = preg_replace('#/PHP$#', '', $scriptBase) ?: '';
+    return $scheme . '://' . $host . $appBase;
+}
+
+function app_url(string $path, array $query = []): string {
+    $path = ltrim($path, '/');
+    $url = app_base_url() . '/' . $path;
+    if (!empty($query)) {
+        $url .= '?' . http_build_query($query);
+    }
+    return $url;
+}
+
+function email_log_path(): string {
+    $configured = env_string('MAIL_LOG_PATH');
+    if ($configured !== '') {
+        return $configured;
+    }
+    return dirname(__DIR__) . '/logs/email_log.txt';
+}
+
+function log_dev_email(string $to, string $subject, string $text): void {
+    $logFile = email_log_path();
+    $dir = dirname($logFile);
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0775, true);
+    }
+    $entry = sprintf(
+        "[%s] To: %s | Subject: %s\n%s\n---\n",
+        date('Y-m-d H:i:s'),
+        $to,
+        $subject,
+        $text
+    );
+    @file_put_contents($logFile, $entry, FILE_APPEND | LOCK_EX);
+}
+
+function smtp_read($socket): array {
+    $response = '';
+    $code = 0;
+    while (($line = fgets($socket, 515)) !== false) {
+        $response .= $line;
+        if (preg_match('/^(\d{3})(\s|-)/', $line, $m)) {
+            $code = (int)$m[1];
+            if ($m[2] === ' ') {
+                break;
+            }
+        }
+    }
+    return [$code, $response];
+}
+
+function smtp_command($socket, string $command, array $acceptedCodes): string {
+    fwrite($socket, $command . "\r\n");
+    [$code, $response] = smtp_read($socket);
+    if (!in_array($code, $acceptedCodes, true)) {
+        throw new RuntimeException('SMTP command failed: ' . strtok($command, ' ') . ' -> ' . trim($response));
+    }
+    return $response;
+}
+
+function smtp_send_mail(string $to, string $subject, string $html, string $text): bool {
+    $host = env_string('MAIL_HOST');
+    if ($host === '') {
+        return false;
+    }
+
+    $port = (int)env_string('MAIL_PORT', '25');
+    $username = env_string('MAIL_USERNAME');
+    $password = env_string('MAIL_PASSWORD');
+    $from = env_string('MAIL_FROM', 'noreply@offbyone-academy.local');
+    $fromName = env_string('MAIL_FROM_NAME', 'OffByOne Academy');
+    $encryption = strtolower(env_string('MAIL_ENCRYPTION', $port === 465 ? 'ssl' : 'none'));
+
+    $remote = ($encryption === 'ssl' ? 'ssl://' : '') . $host . ':' . $port;
+    $socket = @stream_socket_client($remote, $errno, $errstr, 10, STREAM_CLIENT_CONNECT);
+    if (!$socket) {
+        throw new RuntimeException("SMTP connection failed: {$errstr} ({$errno})");
+    }
+    stream_set_timeout($socket, 10);
+
+    try {
+        [$code, $banner] = smtp_read($socket);
+        if ($code !== 220) {
+            throw new RuntimeException('SMTP banner invalid: ' . trim($banner));
+        }
+
+        smtp_command($socket, 'EHLO offbyone-academy.local', [250]);
+        if ($encryption === 'tls') {
+            smtp_command($socket, 'STARTTLS', [220]);
+            if (!stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
+                throw new RuntimeException('SMTP STARTTLS failed');
+            }
+            smtp_command($socket, 'EHLO offbyone-academy.local', [250]);
+        }
+
+        if ($username !== '') {
+            smtp_command($socket, 'AUTH LOGIN', [334]);
+            smtp_command($socket, base64_encode($username), [334]);
+            smtp_command($socket, base64_encode($password), [235]);
+        }
+
+        smtp_command($socket, 'MAIL FROM:<' . $from . '>', [250]);
+        smtp_command($socket, 'RCPT TO:<' . $to . '>', [250, 251]);
+        smtp_command($socket, 'DATA', [354]);
+
+        $boundary = 'b_' . bin2hex(random_bytes(12));
+        $encodedSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
+        $headers = [
+            'Date: ' . date(DATE_RFC2822),
+            'From: ' . mb_encode_mimeheader($fromName, 'UTF-8') . ' <' . $from . '>',
+            'To: <' . $to . '>',
+            'Subject: ' . $encodedSubject,
+            'MIME-Version: 1.0',
+            'Content-Type: multipart/alternative; boundary="' . $boundary . '"',
+        ];
+        $message =
+            implode("\r\n", $headers) . "\r\n\r\n" .
+            "--{$boundary}\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: 8bit\r\n\r\n{$text}\r\n\r\n" .
+            "--{$boundary}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: 8bit\r\n\r\n{$html}\r\n\r\n" .
+            "--{$boundary}--\r\n";
+        $message = preg_replace('/^\./m', '..', $message);
+        fwrite($socket, $message . "\r\n.\r\n");
+        [$code, $response] = smtp_read($socket);
+        if ($code !== 250) {
+            throw new RuntimeException('SMTP DATA failed: ' . trim($response));
+        }
+        smtp_command($socket, 'QUIT', [221]);
+        fclose($socket);
+        return true;
+    } catch (Throwable $e) {
+        fclose($socket);
+        throw $e;
+    }
+}
+
+function send_app_mail(string $to, string $subject, string $html, string $text = ''): bool {
+    if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
+        return false;
+    }
+    if ($text === '') {
+        $text = trim(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $html)));
+    }
+
+    try {
+        if (smtp_send_mail($to, $subject, $html, $text)) {
+            return true;
+        }
+    } catch (Throwable $e) {
+        error_log('send_app_mail SMTP failed: ' . $e->getMessage());
+    }
+
+    log_dev_email($to, $subject, $text);
+    return false;
 }
 
 /**

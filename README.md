@@ -45,7 +45,8 @@ docker compose up --build -d
 Acces aplicatie:
 1. Site: http://localhost:8082
 2. phpMyAdmin: http://localhost:8081
-3. MySQL host: localhost:3308
+3. Mailpit email inbox: http://localhost:8025
+4. MySQL host: localhost:3308
 
 Oprire:
 
@@ -68,6 +69,7 @@ docker compose up --build -d
 4. Functioneaza vizualizatorul din [site_g/JS/visualizer.js](site_g/JS/visualizer.js)
 5. Profesor AI raspunde fara eroare model/API
 6. phpMyAdmin se deschide la http://localhost:8081
+7. Emailurile de resetare parola apar in Mailpit la http://localhost:8025
 
 ## 6. Troubleshooting rapid
 
@@ -78,13 +80,15 @@ Problema: docker nu porneste pentru un port deja folosit.
 Porturi folosite de proiect:
 1. 8082 (site)
 2. 8081 (phpMyAdmin)
-3. 3308 (MySQL)
+3. 8025 (Mailpit email local)
+4. 3308 (MySQL)
 
 Verificare in PowerShell:
 
 ```powershell
 netstat -ano | findstr :8082
 netstat -ano | findstr :8081
+netstat -ano | findstr :8025
 netstat -ano | findstr :3308
 ```
 

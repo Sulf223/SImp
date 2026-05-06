@@ -53,6 +53,10 @@ if (mb_strlen($code) > 5000) {
     exit;
 }
 
+if (mb_strlen((string)$context, 'UTF-8') > 1000) {
+    $context = mb_substr((string)$context, 0, 1000, 'UTF-8');
+}
+
 $api_key = getenv('GROQ_API_KEY');
 if (!$api_key && defined('GROQ_API_KEY')) {
     $api_key = GROQ_API_KEY;

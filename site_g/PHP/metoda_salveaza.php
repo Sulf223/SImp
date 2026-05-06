@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/conexiune.php';
 require_once __DIR__ . '/auth.php';
-include "helpers.php";
+require_once __DIR__ . '/helpers.php';
 require_role('admin');
 
 // Verificăm CSRF

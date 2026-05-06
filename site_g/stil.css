@@ -45,6 +45,16 @@ body::before {
     z-index: -1;
 }
 
+body[data-theme="light"]::before,
+[data-theme="light"] body::before {
+    opacity: 0.36;
+}
+
+body[data-theme="light"] [data-component="dashboard-modern"]::before,
+[data-theme="light"] body [data-component="dashboard-modern"]::before {
+    opacity: 0.42;
+}
+
 ::selection {
     background: var(--color-primary-soft);
     color: var(--color-fg);

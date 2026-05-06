@@ -8,7 +8,7 @@ Documentație completă pentru rularea **OffByOne Academy** în Docker container
 
 - ✅ **Docker Desktop** instalat ([download](https://www.docker.com/products/docker-desktop))
 - ✅ **Docker și Docker Compose** active
-- ✅ **Ports disponibili**: 8082 (web), 8081 (phpMyAdmin), 3308 (MySQL)
+- ✅ **Ports disponibili**: 8082 (web), 8081 (phpMyAdmin), 8025 (Mailpit), 3308 (MySQL)
 
 **Verificare**:
 ```bash
@@ -41,6 +41,7 @@ docker compose logs -f web
 |---------|-----|-------------|
 | **OffByOne Academy** | http://localhost:8082 | Crează cont pe pagina de register |
 | **phpMyAdmin** | http://localhost:8081 | `root` / `root123` |
+| **Mailpit** | http://localhost:8025 | Inbox local pentru emailurile de resetare |
 | **MySQL Direct** | `localhost:3308` | `root` / `root123` |
 
 ---
@@ -195,6 +196,8 @@ docker compose exec db mysql -uroot -proot123 dbsortari
 docker compose down -v
 docker compose up -d
 ```
+
+Emailurile trimise local nu ajung în inboxul real. În Docker, resetarea parolei folosește Mailpit implicit; deschide http://localhost:8025 ca să vezi mesajul și linkul de resetare. Pentru email real, setează `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_ENCRYPTION`, `MAIL_FROM` în `.env` către un provider SMTP.
 
 ### Debugging
 
@@ -373,7 +376,7 @@ jobs:
 
 1. Check this README first
 2. Review `docker compose logs` output
-3. Verify firewall/antivirus allows ports 8082, 8081, 3308
+3. Verify firewall/antivirus allows ports 8082, 8081, 8025, 3308
 4. Ensure `.env` file is properly configured (if needed)
 5. Try `docker compose down -v && docker compose up --build -d`
 

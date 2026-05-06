@@ -11,6 +11,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      mailpit:
+        condition: service_started
     environment:
       # Database
       DB_HOST: db
@@ -28,8 +30,18 @@ services:
       GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}
       
       # Server
+      SITE_URL: ${SITE_URL:-http://localhost:8082}
       APACHE_RUN_USER: www-data
       APACHE_RUN_GROUP: www-data
+
+      # Email
+      MAIL_HOST: ${MAIL_HOST:-mailpit}
+      MAIL_PORT: ${MAIL_PORT:-1025}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION:-none}
+      MAIL_FROM: ${MAIL_FROM:-noreply@offbyone-academy.local}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-OffByOne Academy}
       
     ports:
       - "8082:80"
@@ -176,6 +188,19 @@ services:
     labels:
       - "com.offbyoneacademy.description=phpMyAdmin Database Administration"
       - "com.offbyoneacademy.version=5"
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: offbyone_academy_mailpit
+    hostname: offbyone-academy-mailpit
+    ports:
+      - "8025:8025"
+    networks:
+      - offbyone_academy_network
+    restart: unless-stopped
+    labels:
+      - "com.offbyoneacademy.description=Local Email Inbox"
+      - "com.offbyoneacademy.version=latest"
 
 networks:
   offbyone_academy_network:

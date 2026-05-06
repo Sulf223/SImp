@@ -23,6 +23,7 @@
     --color-surface-2:     #15151A;
     --color-surface-3:     #1C1C22;
     --color-surface-overlay: rgba(20, 20, 26, 0.72);
+    --color-nav-bg:        rgba(14, 14, 17, 0.78);
 
     /* Borders */
     --color-border:        #1F1F23;
@@ -106,9 +107,9 @@
     --font-bold:     700;
 
     /* Letter spacing — tight at display sizes, normal at body */
-    --tracking-tightest: -0.04em;
-    --tracking-tighter:  -0.02em;
-    --tracking-tight:    -0.01em;
+    --tracking-tightest: 0;
+    --tracking-tighter:  0;
+    --tracking-tight:    0;
     --tracking-normal:   0;
     --tracking-wide:     0.02em;
     --tracking-wider:    0.04em;
@@ -213,36 +214,43 @@
 [data-theme="light"] {
     color-scheme: light;
 
-    --color-bg:            #FAFAFA;
+    --color-bg:            #F5F7FB;
     --color-surface-1:     #FFFFFF;
-    --color-surface-2:     #F4F4F5;
-    --color-surface-3:     #E4E4E7;
-    --color-surface-overlay: rgba(255, 255, 255, 0.78);
+    --color-surface-2:     #F1F5F9;
+    --color-surface-3:     #E2E8F0;
+    --color-surface-overlay: rgba(248, 250, 252, 0.82);
+    --color-nav-bg:        rgba(255, 255, 255, 0.86);
 
-    --color-border:        #E4E4E7;
-    --color-border-strong: #D4D4D8;
+    --color-border:        #DCE4EE;
+    --color-border-strong: #C8D3DF;
 
-    --color-fg:            #09090B;
-    --color-fg-muted:      #52525B;
-    --color-fg-subtle:     #71717A;
-    --color-fg-disabled:   #A1A1AA;
+    --color-fg:            #172033;
+    --color-fg-muted:      #526173;
+    --color-fg-subtle:     #748295;
+    --color-fg-disabled:   #A5B0BE;
 
-    --color-primary-soft:  rgba(110, 86, 207, 0.08);
-    --color-accent-soft:   rgba(6, 182, 212, 0.08);
+    --color-primary:       #5E47BF;
+    --color-primary-hover: #6E56CF;
+    --color-primary-active:#4F3DA8;
+    --color-primary-soft:  rgba(94, 71, 191, 0.10);
+    --color-accent:        #008EAC;
+    --color-accent-hover:  #06A8C8;
+    --color-accent-soft:   rgba(0, 142, 172, 0.10);
 
     /* FIX [UI2]: Missing soft tokens for light theme */
     --color-success-soft:  rgba(16, 185, 129, 0.10);
     --color-warning-soft:  rgba(245, 158, 11, 0.12);
     --color-danger-soft:   rgba(239, 68, 68, 0.10);
-    --color-primary-glow:  rgba(110, 86, 207, 0.18);
-    --color-accent-glow:   rgba(6, 182, 212, 0.14);
+    --color-primary-glow:  rgba(94, 71, 191, 0.18);
+    --color-accent-glow:   rgba(0, 142, 172, 0.14);
 
     --gradient-aurora:
-        radial-gradient(60% 60% at 20% 0%, rgba(110, 86, 207, 0.10) 0%, transparent 60%),
-        radial-gradient(40% 60% at 100% 100%, rgba(6, 182, 212, 0.08) 0%, transparent 60%);
+        radial-gradient(60% 60% at 20% 0%, rgba(94, 71, 191, 0.11) 0%, transparent 60%),
+        radial-gradient(40% 60% at 100% 100%, rgba(0, 142, 172, 0.09) 0%, transparent 60%);
     --gradient-mesh:
-        radial-gradient(at 8% 8%, rgba(110, 86, 207, 0.08) 0px, transparent 50%),
-        radial-gradient(at 92% 0%, rgba(34, 200, 226, 0.06) 0px, transparent 55%);
+        radial-gradient(at 8% 8%, rgba(94, 71, 191, 0.10) 0px, transparent 50%),
+        radial-gradient(at 92% 0%, rgba(0, 142, 172, 0.08) 0px, transparent 55%),
+        radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.06) 0px, transparent 52%);
 
     --shadow-xs:    0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-sm:    0 1px 3px 0 rgba(0, 0, 0, 0.07),
@@ -266,16 +274,18 @@
         color-scheme: light;
         --color-bg:            #FAFAFA;
         --color-surface-1:     #FFFFFF;
-        --color-surface-2:     #F4F4F5;
-        --color-surface-3:     #E4E4E7;
-        --color-border:        #E4E4E7;
-        --color-border-strong: #D4D4D8;
-        --color-fg:            #09090B;
-        --color-fg-muted:      #52525B;
-        --color-fg-subtle:     #71717A;
-        --color-fg-disabled:   #A1A1AA;
-        --color-primary-soft:  rgba(110, 86, 207, 0.08);
-        --color-accent-soft:   rgba(6, 182, 212, 0.08);
+        --color-surface-2:     #F1F5F9;
+        --color-surface-3:     #E2E8F0;
+        --color-border:        #DCE4EE;
+        --color-border-strong: #C8D3DF;
+        --color-fg:            #172033;
+        --color-fg-muted:      #526173;
+        --color-fg-subtle:     #748295;
+        --color-fg-disabled:   #A5B0BE;
+        --color-primary:       #5E47BF;
+        --color-accent:        #008EAC;
+        --color-primary-soft:  rgba(94, 71, 191, 0.10);
+        --color-accent-soft:   rgba(0, 142, 172, 0.10);
         --shadow-xs:    0 1px 2px 0 rgba(0, 0, 0, 0.05);
         --shadow-sm:    0 1px 3px 0 rgba(0, 0, 0, 0.07), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
         --shadow-md:    0 4px 8px -2px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);

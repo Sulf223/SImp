@@ -54,6 +54,12 @@ if ($message === '') {
     exit;
 }
 
+if (mb_strlen($message, 'UTF-8') > 1200) {
+    http_response_code(413);
+    echo json_encode(['ok' => false, 'error' => 'Mesajul este prea lung (maxim 1200 caractere).']);
+    exit;
+}
+
 // FIX [L1]: Sursă unică pentru API Key (getenv). Eliminare fallback la $_ENV/$_SERVER.
 $apiKey = getenv('GROQ_API_KEY') ?: '';
 
@@ -77,6 +83,7 @@ $messages = [
 ];
 
 if (is_array($history)) {
+    $history = array_slice($history, -8);
     foreach ($history as $item) {
         if (!is_array($item)) {
             continue;
@@ -86,6 +93,9 @@ if (is_array($history)) {
         $text = trim((string)($item['text'] ?? ''));
         if ($text === '') {
             continue;
+        }
+        if (mb_strlen($text, 'UTF-8') > 1000) {
+            $text = mb_substr($text, 0, 1000, 'UTF-8');
         }
 
         $messages[] = [

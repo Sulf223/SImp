@@ -1885,7 +1885,7 @@ input[type="submit"]:active { transform: scale(0.98); }
     position: sticky;
     top: 0;
     z-index: var(--z-sticky);
-    background: rgba(14, 14, 17, 0.78);
+    background: var(--color-nav-bg);
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     border-bottom: 1px solid var(--color-border);

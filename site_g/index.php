@@ -17,8 +17,8 @@ if (session_status() === PHP_SESSION_NONE) {
 $nonce = base64_encode(random_bytes(16));
 
 // CSP compatibil cu event handlerele inline încă prezente în paginile vechi.
-// Refactorizarea completă poate reveni la nonce-only după mutarea handlerelor în JS.
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; frame-src https://onecompiler.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;");
+// Scripturile inline propriu-zise rămân protejate cu nonce; doar atributele on* sunt permise temporar.
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-{$nonce}'; script-src-elem 'self' 'nonce-{$nonce}'; script-src-attr 'unsafe-inline'; frame-src https://onecompiler.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;");
 
 header("X-Content-Type-Options: nosniff");
 header("X-Frame-Options: SAMEORIGIN");
@@ -176,18 +176,18 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="CSS/modern_vars.css?v=20260506-theme-fix">
-    <link rel="stylesheet" href="stil.css?v=20260506-theme-fix">
-    <link rel="stylesheet" href="CSS/dashboard_modern.css?v=20260506-theme-fix">
+    <link rel="stylesheet" href="CSS/modern_vars.css?v=20260506-security-light-mail">
+    <link rel="stylesheet" href="stil.css?v=20260506-security-light-mail">
+    <link rel="stylesheet" href="CSS/dashboard_modern.css?v=20260506-security-light-mail">
     <?php if ($pagina_curenta === 'admin'): ?>
-        <link rel="stylesheet" href="CSS/admin.css?v=20260506-theme-fix">
+        <link rel="stylesheet" href="CSS/admin.css?v=20260506-security-light-mail">
     <?php endif; ?>
     <?php if ($pagina_curenta === 'sortare'): ?>
-        <link rel="stylesheet" href="CSS/sortare.css?v=20260506-theme-fix">
+        <link rel="stylesheet" href="CSS/sortare.css?v=20260506-security-light-mail">
     <?php endif; ?>
     <meta name="csrf-token" content="<?php echo get_csrf_token(); ?>">
     <?php if ($pagina_curenta === 'bun_venit'): ?>
-        <link rel="stylesheet" href="CSS/bun_venit.css?v=20260506-theme-fix">
+        <link rel="stylesheet" href="CSS/bun_venit.css?v=20260506-security-light-mail">
     <?php endif; ?>
     <style>
         /* FIX [UI4]: workaround pointer-events eliminat – body::before are z-index:-1 și nu blochează nimic */

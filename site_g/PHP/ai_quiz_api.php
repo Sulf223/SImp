@@ -13,6 +13,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 
 require_once 'helpers.php';
+require_once 'documentation_context.php';
 require_once 'conexiune.php';
 
 // FIX [A2]: Session timeout pentru AJAX
@@ -61,84 +62,134 @@ if ($apiKey === '') {
 
 $model = getenv('GROQ_MODEL') ?: 'llama-3.3-70b-versatile';
 
-// FIX [Q1]: Extract context from project documentation files
-function extractDocumentationContext($pathSlug) {
-    $contexts = [
-        'sorting-basics' => [
-            'algorithms' => ['Bubble Sort', 'Selection Sort', 'Insertion Sort', 'Quick Sort', 'Merge Sort', 'Counting Sort'],
-            'key_concepts' => [
-                'Complexitate O(n²) pentru algoritmi simpli vs O(n log n) pentru avansați',
-                'Conceptul de stabilitate în sortare',
-                'Partiționarea în Quick Sort folosind pivot',
-                'Divide et Impera în Merge Sort și Quick Sort',
-                'Interclasarea (merge) în Merge Sort'
-            ],
-            'difficulty_topics' => ['Merge Sort', 'Quick Sort', 'Stabilitate vs instabilitate']
+function ai_quiz_has_code_context(string $question): bool {
+    return (bool)preg_match('/```|#include|for\s*\(|while\s*\(|if\s*\(|int\s+\w+\s*\(|void\s+\w+\s*\(|\w+\s*=\s*\w+/iu', $question);
+}
+
+function ai_quiz_is_memory_question(string $question): bool {
+    $q = mb_strtolower($question, 'UTF-8');
+    $ascii = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $q);
+    if ($ascii !== false) {
+        $q = $ascii;
+    }
+
+    if (preg_match('/ce\s+(metoda|algoritm).*functia/iu', $q)) {
+        return true;
+    }
+
+    if (preg_match('/ce\s+(metoda|algoritm).*aplicatia/iu', $q)) {
+        return true;
+    }
+
+    if (!ai_quiz_has_code_context($question) && preg_match('/functia|aplicatia|fisierul|programul\s+(din|numit)|codul|variabila|variabilei|instructiunea|linia|`[^`]+`|ordonare[a-z0-9_]*|[a-z0-9]+_[a-z0-9_]+/iu', $q)) {
+        return true;
+    }
+
+    return false;
+}
+
+function ai_quiz_fallback_questions(string $pathSlug): array {
+    return [
+        [
+            'question' => "În fragmentul de Bubble Sort, ce condiție trebuie pusă în loc de ??? pentru sortare crescătoare?\n```cpp\nfor (int j = 0; j < n - i - 1; j++) {\n    if (???) {\n        swap(v[j], v[j + 1]);\n    }\n}\n```",
+            'options' => ['v[j] > v[j + 1]', 'v[j] < v[j + 1]', 'v[j] == v[j + 1]', 'j > v[j]'],
+            'correct' => 0,
+            'explanation' => 'Pentru sortare crescătoare, elementul mai mare este mutat spre dreapta prin interschimbare.',
         ],
-        'recursion-pro' => [
-            'algorithms' => ['Factorial', 'Fibonacci', 'Merge Sort (recursiv)', 'Quick Sort (recursiv)'],
-            'key_concepts' => [
-                'Caz de bază (base case) - condiția de terminare',
-                'Caz recursiv - apelul funcției către ea însăși cu parametri modificați',
-                'Stack overflow - depășirea limitei stivei',
-                'Paradigma Divide et Impera',
-                'Gestiunea memoriei în recursivitate'
-            ],
-            'difficulty_topics' => ['Stack overflow', 'Complexitate recursivă', 'Divide et Impera']
+        [
+            'question' => "În Selection Sort, ce instrucțiune actualizează poziția minimului?\n```cpp\nint p = i;\nfor (int j = i + 1; j < n; j++) {\n    if (v[j] < v[p]) {\n        ???\n    }\n}\n```",
+            'options' => ['p = j;', 'j = p;', 'v[p] = j;', 'p++;'],
+            'correct' => 0,
+            'explanation' => 'Variabila p trebuie să rețină indicele celui mai mic element găsit până acum.',
         ],
-        'backtracking' => [
-            'algorithms' => ['Problema damelor (N-Queens)', 'Permutări', 'Combinații', 'Colorarea grafului'],
-            'key_concepts' => [
-                'Explorarea sistematică a spațiului soluțiilor',
-                'Pas înainte (forward step) - adăugarea unui element',
-                'Pas înapoi (backward step / backtrack) - revenirea la starea anterioară',
-                'Funcția valid() - tăierea ramurilor inutile',
-                'Complexitate exponențială O(a^n)'
-            ],
-            'difficulty_topics' => ['Problema damelor', 'Optimizare prin prunning', 'Spațiul de stare']
+        [
+            'question' => "Ce condiție mută elementele mai mari la dreapta în Insertion Sort?\n```cpp\nint x = v[i], j = i - 1;\nwhile (??? ) {\n    v[j + 1] = v[j];\n    j--;\n}\nv[j + 1] = x;\n```",
+            'options' => ['j >= 0 && v[j] > x', 'j < 0 && v[j] > x', 'v[j] < x', 'j >= 0 && v[j] == x'],
+            'correct' => 0,
+            'explanation' => 'Se mută la dreapta doar elementele din stânga care sunt mai mari decât valoarea inserată.',
         ],
-        'divide-et-impera' => [
-            'algorithms' => ['Merge Sort', 'Quick Sort', 'Binary Search'],
-            'key_concepts' => [
-                'Divide - împărțirea problemei în subprobleme mai mici',
-                'Conquer - rezolvarea recursivă a subproblemelor',
-                'Combine - combinarea rezultatelor subproblemelor',
-                'Complexitate O(n log n) pentru majoritatea cazurilor',
-                'Comparație cu alte paradigme algoritmice'
-            ],
-            'difficulty_topics' => ['Merge Sort recursiv', 'Quick Sort și pivotare', 'Analiza complexității']
-        ]
+        [
+            'question' => "În QuickSort, ce rol are variabila `pivot` în fragmentul de mai jos?\n```cpp\nint pivot = v[(st + dr) / 2];\nwhile (v[i] < pivot) i++;\nwhile (v[j] > pivot) j--;\n```",
+            'options' => ['Separă valorile mai mici și mai mari în timpul partiționării', 'Memorează mereu minimul vectorului', 'Numără interschimbările', 'Oprește recursivitatea'],
+            'correct' => 0,
+            'explanation' => 'Pivotul este reperul față de care elementele sunt împărțite în cele două zone.',
+        ],
+        [
+            'question' => "Ce expresie păstrează interclasarea crescătoare în Merge Sort?\n```cpp\nwhile (i <= m && j <= r) {\n    if (???) c[k++] = v[i++];\n    else c[k++] = v[j++];\n}\n```",
+            'options' => ['v[i] <= v[j]', 'v[i] >= v[j]', 'i <= j', 'k < r'],
+            'correct' => 0,
+            'explanation' => 'Se copiază mai întâi elementul mai mic dintre cele două secvențe deja sortate.',
+        ],
+        [
+            'question' => "În sortarea prin numărare, ce face instrucțiunea marcată?\n```cpp\nfor (int i = 0; i < n; i++) {\n    fr[v[i]]++;\n}\n```",
+            'options' => ['Crește frecvența valorii v[i]', 'Sortează direct vectorul v', 'Șterge duplicatele', 'Calculează poziția pivotului'],
+            'correct' => 0,
+            'explanation' => 'Vectorul de frecvență numără de câte ori apare fiecare valoare.',
+        ],
+        [
+            'question' => "Ce schimbare transformă acest Bubble Sort din crescător în descrescător?\n```cpp\nif (v[j] > v[j + 1]) {\n    swap(v[j], v[j + 1]);\n}\n```",
+            'options' => ['Înlocuiești `>` cu `<`', 'Înlocuiești `swap` cu `cout`', 'Crești n cu 1', 'Ștergi condiția if'],
+            'correct' => 0,
+            'explanation' => 'Pentru descrescător, elementul mai mic trebuie împins spre dreapta.',
+        ],
+        [
+            'question' => "În căutarea binară, ce instrucțiune elimină jumătatea stângă când mijlocul este prea mic?\n```cpp\nint m = (st + dr) / 2;\nif (v[m] < x) {\n    ???\n}\n```",
+            'options' => ['st = m + 1;', 'dr = m - 1;', 'x = v[m];', 'm++;'],
+            'correct' => 0,
+            'explanation' => 'Dacă valoarea din mijloc este mai mică decât x, căutarea continuă în dreapta.',
+        ],
+        [
+            'question' => "De ce este importantă condiția `<=` în interclasarea de mai jos?\n```cpp\nif (stanga[i] <= dreapta[j]) {\n    rezultat[k++] = stanga[i++];\n}\n```",
+            'options' => ['Ajută la păstrarea stabilității pentru elemente egale', 'Face algoritmul O(1)', 'Elimină recursivitatea', 'Transformă vectorul în heap'],
+            'correct' => 0,
+            'explanation' => 'La egalitate, elementul din stânga rămâne înaintea celui din dreapta, deci ordinea relativă se păstrează.',
+        ],
+        [
+            'question' => "Ce valoare trebuie folosită pentru inițializarea lui `p` în Selection Sort?\n```cpp\nfor (int i = 0; i < n - 1; i++) {\n    int p = ???;\n    for (int j = i + 1; j < n; j++) {\n        if (v[j] < v[p]) p = j;\n    }\n    swap(v[i], v[p]);\n}\n```",
+            'options' => ['i', '0', 'n - 1', 'j'],
+            'correct' => 0,
+            'explanation' => 'La fiecare pas, minimul se caută în zona nesortată care începe de la poziția i.',
+        ],
     ];
-    
-    return $contexts[$pathSlug] ?? $contexts['sorting-basics'];
 }
 
 if ($action === 'generate_quiz') {
-    $docContext = extractDocumentationContext($pathSlug);
-    $algorithms = implode(', ', $docContext['algorithms']);
-    $keyConcepts = implode('; ', $docContext['key_concepts']);
+    $docContext = documentation_context_for_slug((string)$pathSlug, 8500, 6);
+    $sourceList = !empty($docContext['sources']) ? implode(', ', $docContext['sources']) : 'niciun fișier găsit';
+    $contextText = $docContext['text'] !== ''
+        ? $docContext['text']
+        : 'Nu există fragmente relevante disponibile în indexul proiect_documentatie.';
     
-    $prompt = "Ești expert în predarea algoritmicii. Generează un TEST DE EXAMEN de 10 întrebări grilă, pe baza acestui conținut educativ.
+    $prompt = "Ești expert în predarea algoritmicii. Generează un TEST DE EXAMEN de 10 întrebări grilă pe baza fragmentelor extrase din directorul proiect_documentatie.
 
-DOMENIU: $algorithms
+SURSE DISPONIBILE:
+$sourceList
 
-CONCEPTE CHEIE DE ACOPERIT:
-$keyConcepts
+CONTEXT DIN FIȘIERELE PROIECTULUI:
+$contextText
 
 CERINȚE STRICTE:
 1. Întrebările trebuie să fie în limba ROMÂNĂ, cu caractere corecte (fără coduri eronate)
-2. Nivel mediu spre avansat - gândite pentru elevi care au studiat acești algoritmi
+2. Întrebările trebuie să fie ancorate în contextul de mai sus; nu introduce teme care nu apar deloc în documentație
 3. Fiecare întrebare trebuie să aibă EXACT 4 variante de răspuns
 4. Indicele răspunsului corect: 0, 1, 2, sau 3 (distribuit aleatoriu)
 5. Explicația trebuie să fie concisă (1-2 propoziții)
 6. VARIAZĂ dificultatea: unele întrebări ușoare, altele mai grele
 7. Evită întrebări triviale sau prea evidente
+8. Include în explicații termeni și exemple compatibile cu sursele
+9. NU întreba niciodată „ce metodă/algoritm este folosit în funcția X”, „ce face aplicația Y”, „din ce fișier provine X” sau alte întrebări de memorare a numelor din exemple
+10. Dacă folosești o aplicație sau un exemplu de cod din documentație, include în câmpul question un fragment scurt de cod (4-10 linii) și întreabă ceva rezolvabil din acel fragment
+11. Preferă întrebări de tip: completează expresia lipsă, ce variabilă trebuie înlocuită, ce condiție oprește bucla, ce efect are schimbarea unei variabile, ce complexitate rezultă din cod
+12. Întrebarea trebuie să poată fi rezolvată fără ca elevul să știe pe dinafară numele funcțiilor din aplicațiile scrise
+13. Dacă menționezi o variabilă concretă (`aux`, `vf`, `i`, `j`, `pivot` etc.), include obligatoriu fragmentul de cod în care apare variabila
+14. Nu scrie întrebări de forma „Ce este `vf` în codul SortFrecventa?”; în loc de asta arată codul și întreabă ce valoare/condiție trebuie schimbată
+15. Cel puțin jumătate dintre întrebări trebuie să conțină un fragment scurt de cod între ```cpp și ```
 
 FORMATUL RĂSPUNSULUI - STRICT JSON (fără coduri HTML, fără escape-uri eronate):
 {
   \"quiz\": [
     {
-      \"question\": \"Text clar al întrebării în limba română\",
+      \"question\": \"Text clar al întrebării. Poate include un fragment de cod între ```cpp și ``` dacă întrebarea se bazează pe cod.\",
       \"options\": [\"Varianta A\", \"Varianta B\", \"Varianta C\", \"Varianta D\"],
       \"correct\": 0,
       \"explanation\": \"Explicație concisă de ce e corect\"
@@ -224,6 +275,11 @@ Răspunde DOAR cu JSON-ul valid, fără alt text, comentarii sau markdown.";
         if (!is_int($q['correct']) || $q['correct'] < 0 || $q['correct'] > 3) {
             continue; // Valid correct index
         }
+
+        if (ai_quiz_is_memory_question((string)$q['question'])) {
+            error_log('ai_quiz_api: skipped memory-based question: ' . mb_substr((string)$q['question'], 0, 180, 'UTF-8'));
+            continue;
+        }
         
         // Ensure UTF-8 encoding for all strings
         $sanitizedQuestion = [
@@ -240,6 +296,17 @@ Răspunde DOAR cu JSON-ul valid, fără alt text, comentarii sau markdown.";
     if (count($sanitizedQuiz) < 10) {
         // If we got fewer than 10 questions, it's still acceptable but log it
         error_log("ai_quiz_api: Generated only " . count($sanitizedQuiz) . " valid questions out of 10");
+        $existingQuestions = array_map(static fn($item) => $item['question'], $sanitizedQuiz);
+        foreach (ai_quiz_fallback_questions((string)$pathSlug) as $fallback) {
+            if (count($sanitizedQuiz) >= 10) {
+                break;
+            }
+            if (in_array($fallback['question'], $existingQuestions, true)) {
+                continue;
+            }
+            $sanitizedQuiz[] = $fallback;
+            $existingQuestions[] = $fallback['question'];
+        }
     }
     
     if (empty($sanitizedQuiz)) {
@@ -329,7 +396,7 @@ Răspunde DOAR cu JSON-ul valid, fără alt text, comentarii sau markdown.";
         if ($insStmt) $insStmt->close();
     }
 
-    echo json_encode(['quiz' => $sanitizedQuiz], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['quiz' => $sanitizedQuiz, 'sources' => $docContext['sources']], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -344,8 +411,21 @@ if ($action === 'grade_quiz') {
     $wrongQuestions = array_filter($userAnswers, fn($a) => !($a['isCorrect'] ?? false));
     $score = count($userAnswers) - count($wrongQuestions);
     $total = count($userAnswers);
+    $docContext = documentation_context_for_slug((string)$pathSlug, 5000, 4);
+    $sourceList = !empty($docContext['sources']) ? implode(', ', $docContext['sources']) : 'niciun fișier găsit';
+    $contextText = $docContext['text'] !== ''
+        ? $docContext['text']
+        : 'Nu există fragmente relevante disponibile în indexul proiect_documentatie.';
 
     $prompt = "Ești profesor experimentat de informatică. Un elev a terminat un test de $total întrebări și a obținut scorul $score/$total.
+
+Folosește contextul de mai jos din proiect_documentatie pentru feedback și recomandări.
+
+SURSE DISPONIBILE:
+$sourceList
+
+CONTEXT DIN FIȘIERELE PROIECTULUI:
+$contextText
 
 ÎNTREBĂRILE LA CARE A GREȘIT (sau nu răspunde clar):
 " . json_encode($wrongQuestions, JSON_UNESCAPED_UNICODE) . "
@@ -401,6 +481,6 @@ STIL: Pedagogic, prietenos, motivator, concis.";
     // Ensure proper UTF-8 encoding
     $feedback = mb_convert_encoding($feedbackRaw, 'UTF-8', 'UTF-8');
     
-    echo json_encode(['ok' => true, 'feedback' => $feedback], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => true, 'feedback' => $feedback, 'sources' => $docContext['sources']], JSON_UNESCAPED_UNICODE);
     exit;
 }

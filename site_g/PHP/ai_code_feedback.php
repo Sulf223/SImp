@@ -2,6 +2,7 @@
 // PHP/ai_code_feedback.php
 require_once 'conexiune.php';
 require_once 'helpers.php';
+require_once 'documentation_context.php';
 require_once 'config.php';
 
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
@@ -69,6 +70,12 @@ if (mb_strlen((string)$context, 'UTF-8') > 1000) {
     $context = mb_substr((string)$context, 0, 1000, 'UTF-8');
 }
 
+$docContext = documentation_context_for_query($code . ' ' . (string)$context, 4500, 4);
+$sourceList = !empty($docContext['sources']) ? implode(', ', $docContext['sources']) : 'niciun fișier găsit';
+$contextText = $docContext['text'] !== ''
+    ? $docContext['text']
+    : 'Nu există fragmente relevante disponibile în indexul proiect_documentatie.';
+
 $api_key = getenv('GROQ_API_KEY');
 if (!$api_key && defined('GROQ_API_KEY')) {
     $api_key = GROQ_API_KEY;
@@ -80,13 +87,16 @@ if (!$api_key) {
     exit;
 }
 
-$system_prompt = "Ești un mentor C++ răbdător. Analizează codul de mai jos. Evidențiază:\n" .
+$system_prompt = "Ești un mentor C++ răbdător. Analizează codul de mai jos folosind ca reper și fragmentele din proiect_documentatie. Evidențiază:\n" .
                  "1. Erori sintactice sau logice (dacă există)\n" .
                  "2. Probleme de stil (nume variabile, formatare, indentare)\n" .
                  "3. Sugestii de optimizare (complexitate, alocări inutile)\n" .
                  "4. Bune practici care lipsesc\n" .
+                 "5. Legătura cu exemplele/documentația proiectului, când este relevant\n" .
                  "Nu da soluția completă — explică conceptual și ghidează studentul.\n" .
-                 "Răspunde în română, max 250 cuvinte, structurat cu titluri scurte.";
+                 "Răspunde în română, max 250 cuvinte, structurat cu titluri scurte.\n\n" .
+                 "Surse disponibile: $sourceList\n\n" .
+                 "Context din proiect_documentatie:\n$contextText";
 
 $messages = [
     ['role' => 'system', 'content' => $system_prompt],

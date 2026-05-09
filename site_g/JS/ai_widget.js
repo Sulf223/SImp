@@ -48,12 +48,21 @@
         } catch (_) {}
     }
 
-    function addMessage(role, text) {
+    function shortSourceName(source) {
+        const normalized = String(source || '').replace(/\\/g, '/');
+        const parts = normalized.split('/').filter(Boolean);
+        return parts.slice(-2).join('/');
+    }
+
+    function addMessage(role, text, sources = []) {
         const msg = document.createElement('div');
         msg.className = `ai-widget-msg ${role}`;
 
         const who = role === 'user' ? 'Tu' : 'Profesor AI';
-        msg.innerHTML = `<strong>${who}</strong><p>${escapeHtml(text).replace(/\n/g, '<br>')}</p>`;
+        const sourceList = Array.isArray(sources) && sources.length > 0
+            ? `<small style="display:block; margin-top: 6px; color: var(--color-fg-subtle);">Surse: ${sources.slice(0, 3).map(shortSourceName).map(escapeHtml).join(', ')}</small>`
+            : '';
+        msg.innerHTML = `<strong>${who}</strong><p>${escapeHtml(text).replace(/\n/g, '<br>')}</p>${sourceList}`;
         messagesEl.appendChild(msg);
         messagesEl.scrollTop = messagesEl.scrollHeight;
     }
@@ -173,7 +182,7 @@
             }
 
             hideTypingIndicator();
-            addMessage('assistant', data.reply);
+            addMessage('assistant', data.reply, data.sources || []);
             history.push({ role: 'assistant', text: data.reply });
             saveHistory();
 

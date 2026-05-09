@@ -6,6 +6,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 
 require_once 'helpers.php';
+require_once 'documentation_context.php';
 
 // FIX [A2]: Session timeout pentru AJAX
 enforce_session_timeout_ajax();
@@ -73,7 +74,25 @@ if ($apiKey === '') {
 }
 
 $model = trim((string)(getenv('GROQ_MODEL') ?: 'llama-3.3-70b-versatile'));
-$systemPrompt = "Ești un profesor de programare C++ experimentat, răbdător și încurajator. Obiectivul tău este să ajuți elevii să învețe. Când un elev îți pune o întrebare sau îți arată un cod greșit, NU îi da soluția directă imediat. Explică-i conceptul, arată-i unde greșește și ghidează-l cu indicii pentru a găsi singur răspunsul corect. Folosește exemple scurte de cod pentru a ilustra teoria. Vorbește în limba română.";
+
+$historyQuery = '';
+if (is_array($history)) {
+    foreach (array_slice($history, -4) as $item) {
+        if (is_array($item) && (($item['role'] ?? 'user') === 'user')) {
+            $historyQuery .= ' ' . (string)($item['text'] ?? '');
+        }
+    }
+}
+$docContext = documentation_context_for_query($message . ' ' . $historyQuery, 7000, 5);
+$sourceList = !empty($docContext['sources']) ? implode(', ', $docContext['sources']) : 'niciun fișier găsit';
+$contextText = $docContext['text'] !== ''
+    ? $docContext['text']
+    : 'Nu există fragmente relevante disponibile în indexul proiect_documentatie.';
+
+$systemPrompt = "Ești un profesor de programare C++ experimentat, răbdător și încurajator. Obiectivul tău este să ajuți elevii să învețe. Când un elev îți pune o întrebare sau îți arată un cod greșit, NU îi da soluția directă imediat. Explică-i conceptul, arată-i unde greșește și ghidează-l cu indicii pentru a găsi singur răspunsul corect. Vorbește în limba română.\n\n" .
+    "Răspunde prioritar pe baza fragmentelor extrase din directorul proiect_documentatie. Dacă fragmentul nu acoperă complet întrebarea, spune pe scurt ce lipsește din documentație și completează doar cu explicații generale marcate ca atare. Când folosești o idee din context, menționează natural fișierul sursă relevant.\n\n" .
+    "SURSE DISPONIBILE: {$sourceList}\n\n" .
+    "CONTEXT DIN proiect_documentatie:\n{$contextText}";
 
 $messages = [
     [
@@ -155,4 +174,4 @@ if ($reply === '') {
     exit;
 }
 
-echo json_encode(['ok' => true, 'reply' => $reply, 'model' => $model], JSON_UNESCAPED_UNICODE);
+echo json_encode(['ok' => true, 'reply' => $reply, 'model' => $model, 'sources' => $docContext['sources']], JSON_UNESCAPED_UNICODE);

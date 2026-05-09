@@ -94,6 +94,32 @@ document.addEventListener('DOMContentLoaded', () => {
         return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     }
 
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function formatQuizText(value) {
+        const text = String(value || '');
+        const codeFence = /```(?:cpp|c\+\+)?\s*([\s\S]*?)```/gi;
+        let html = '';
+        let lastIndex = 0;
+        let match;
+
+        while ((match = codeFence.exec(text)) !== null) {
+            html += escapeHtml(text.slice(lastIndex, match.index)).replace(/\n/g, '<br>');
+            html += `<pre class="lesson-code" style="margin: var(--space-3) 0; white-space: pre-wrap;"><code>${escapeHtml(match[1].trim())}</code></pre>`;
+            lastIndex = codeFence.lastIndex;
+        }
+
+        html += escapeHtml(text.slice(lastIndex)).replace(/\n/g, '<br>');
+        return html;
+    }
+
     startBtn.onclick = async () => {
         initView.style.display = 'none';
         loadingView.style.display = 'block';
@@ -142,16 +168,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const normalizedQuestion = normalizeUTF8Text(fixMojibake(q.question || ''));
         const normalizedExplanation = normalizeUTF8Text(fixMojibake(q.explanation || ''));
         const normalizedOptions = (q.options || []).map(opt => normalizeUTF8Text(fixMojibake(opt || '')));
+        const formattedQuestion = formatQuizText(normalizedQuestion);
+        const formattedExplanation = formatQuizText(normalizedExplanation);
+        const formattedOptions = normalizedOptions.map(opt => formatQuizText(opt));
         
         activeView.innerHTML = `
             <div class="card__head" style="margin-bottom: var(--space-4);">
                 <span class="card__eyebrow">Întrebarea ${currentIdx + 1} / ${quizData.length}</span>
                 <span class="badge badge--soft">${currentIdx + 1 > 5 ? 'Avansat' : 'Bazele'}</span>
             </div>
-            <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-6);">${normalizedQuestion}</h3>
+            <div style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-6); line-height: 1.55;">${formattedQuestion}</div>
             
             <div id="ai-options" style="display: flex; flex-direction: column; gap: var(--space-3); flex: 1;">
-                ${normalizedOptions.map((opt, i) => `
+                ${formattedOptions.map((opt, i) => `
                     <button class="grila-option ai-opt-btn" data-index="${i}" style="text-align: left; padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface-2); transition: all 0.2s;">
                         ${opt}
                     </button>
@@ -192,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 feedback.style.display = 'block';
                 feedback.innerHTML = `
                     <div class="alert alert--${isCorrect ? 'success' : 'danger'}" style="margin: 0;">
-                        <strong>${isCorrect ? 'Excelent!' : 'Greșit.'}</strong> ${normalizedExplanation}
+                        <strong>${isCorrect ? 'Excelent!' : 'Greșit.'}</strong> ${formattedExplanation}
                     </div>
                 `;
 
@@ -233,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Accept': 'application/json; charset=UTF-8',
                     'X-CSRF-Token': getCsrfToken() 
                 },
-                body: JSON.stringify({ action: 'grade_quiz', answers: userSelections })
+                body: JSON.stringify({ action: 'grade_quiz', path_slug: pathSlug, answers: userSelections })
             });
             const data = await res.json();
             

@@ -43,7 +43,11 @@
             if (!raw) return;
             const parsed = JSON.parse(raw);
             if (Array.isArray(parsed)) {
-                history = parsed.filter(item => item && item.role && item.text);
+                history = parsed.filter(item => item && item.role && item.text).map(item => ({
+                    role: item.role,
+                    text: item.text,
+                    sources: Array.isArray(item.sources) ? item.sources : []
+                }));
             }
         } catch (_) {}
     }
@@ -116,7 +120,7 @@
             return;
         }
 
-        history.forEach(item => addMessage(item.role, item.text));
+        history.forEach(item => addMessage(item.role, item.text, item.sources || []));
     }
 
     function openPanel() {
@@ -183,7 +187,7 @@
 
             hideTypingIndicator();
             addMessage('assistant', data.reply, data.sources || []);
-            history.push({ role: 'assistant', text: data.reply });
+            history.push({ role: 'assistant', text: data.reply, sources: data.sources || [] });
             saveHistory();
 
             if (!widget.classList.contains('open')) {

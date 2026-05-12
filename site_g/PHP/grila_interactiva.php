@@ -98,7 +98,11 @@ if ($mode === 'w3') {
             btnCheck.onclick = () => {
                 const selected = document.querySelector('input[name="quiz-opt"]:checked');
                 if (!selected) {
-                    alert('Te rugăm să alegi o variantă!');
+                    if (window.OffByOneToast) {
+                        window.OffByOneToast('Alege o variantă înainte de verificare.', 'info');
+                    } else {
+                        alert('Te rugăm să alegi o variantă!');
+                    }
                     return;
                 }
 
@@ -112,7 +116,9 @@ if ($mode === 'w3') {
                     <div class="alert alert--${isCorrect ? 'success' : 'danger'}" style="margin: 0; padding: var(--space-3); border-radius: var(--radius-md); border: 1px solid currentColor; display: flex; flex-direction: column; gap: var(--space-2);">
                         <div>
                             <strong>${isCorrect ? 'Corect!' : 'Greșit!'}</strong><br>
-                            <p style="font-size: var(--text-xs); margin-top: 4px;">${q.explicatie}</p>
+                            <p style="font-size: var(--text-xs); margin-top: 4px;"><strong>De ce e corect:</strong> ${q.explicatie}</p>
+                            <p style="font-size: var(--text-xs); margin-top: 4px;"><strong>Varianta corectă:</strong> ${q.optiuni[q.corect]}</p>
+                            ${!isCorrect ? `<p style="font-size: var(--text-xs); margin-top: 4px;"><strong>De ce varianta aleasă nu merge:</strong> răspunsul tău nu respectă conceptul verificat de întrebare; compară-l cu explicația de mai sus și cu varianta corectă.</p>` : ''}
                         </div>
                         ${!isCorrect ? `
                             <div style="display: flex; gap: var(--space-2); margin-top: var(--space-2);">
@@ -348,9 +354,44 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentGrilaId = <?php echo (int)$id_grila; ?>;
     let raspunsCorect = <?php echo (int)($grila['raspuns_corect'] ?? 0); ?>;
     let explicatie = <?php echo json_encode($grila['explicatie'] ?? ''); ?>;
+    let intrebareText = <?php echo json_encode($grila['intrebare'] ?? ''); ?>;
+    let correctAnswerText = <?php 
+        $corect_text_global = '';
+        foreach ($raspunsuri as $r) {
+            if ((int)$r['id'] === (int)($grila['raspuns_corect'] ?? 0)) {
+                $corect_text_global = (string)$r['text'];
+                break;
+            }
+        }
+        echo json_encode($corect_text_global);
+    ?>;
 
     function getCsrfToken() {
         return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    }
+
+    function escapeHTML(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function recordAttempt(answerId, isCorrect) {
+        fetch('PHP/quiz_attempt.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': getCsrfToken()
+            },
+            body: JSON.stringify({
+                id_grila: currentGrilaId,
+                selected_answer: parseInt(answerId, 10),
+                is_correct: Boolean(isCorrect)
+            })
+        }).catch(() => {});
     }
 
     function processAnswer(answerId, answerText) {
@@ -359,6 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // FIX [M7]: Adăugare radix 10 la parseInt
         const isCorrect = (parseInt(answerId, 10) === raspunsCorect);
+        recordAttempt(answerId, isCorrect);
         
         // Feedback Panel
         feedbackPanel.style.display = 'block';
@@ -369,7 +411,10 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('feedback-icon').style.background = 'var(--color-success)';
             document.getElementById('feedback-title').innerText = 'Corect!';
             document.getElementById('feedback-title').style.color = 'var(--color-success)';
-            document.getElementById('feedback-text').innerText = explicatie;
+            document.getElementById('feedback-text').innerHTML = `
+                <strong>De ce e corect:</strong> ${escapeHTML(explicatie || 'Varianta aleasă respectă cerința întrebării.')}<br>
+                <strong>Răspuns corect:</strong> ${escapeHTML(correctAnswerText)}
+            `;
             
             // Save progress via AJAX
             fetch('PHP/ajax_progres.php', {
@@ -389,18 +434,18 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('feedback-title').style.color = 'var(--color-danger)';
             
             const askAIContext = JSON.stringify({
-                intrebare: <?php echo json_encode($grila['intrebare'] ?? ''); ?>,
+                intrebare: intrebareText,
                 aleasa: answerText,
-                corecta: <?php 
-                    $corect_text = '';
-                    foreach($raspunsuri as $r) { if($r['id'] === ($grila['raspuns_corect'] ?? 0)) $corect_text = $r['text']; }
-                    echo json_encode($corect_text);
-                ?>
+                corecta: correctAnswerText
             }).replace(/'/g, "&#39;");
 
             // FIX [H2]: Prevenire XSS prin utilizarea manipulării DOM sigure în loc de innerHTML
             const feedbackText = document.getElementById('feedback-text');
-            feedbackText.innerHTML = 'Răspunsul ales nu este corect. Analizează codul și încearcă o altă variantă.<br>';
+            feedbackText.innerHTML = `
+                <strong>De ce nu e corect:</strong> răspunsul ales nu se potrivește cu regula verificată de întrebare.<br>
+                <strong>Varianta corectă:</strong> ${escapeHTML(correctAnswerText)}<br>
+                <strong>Explicație:</strong> ${escapeHTML(explicatie || 'Compară varianta corectă cu cerința și urmărește condițiile din cod.')}<br>
+            `;
             
             const aiButton = document.createElement('button');
             aiButton.className = 'btn btn--quiet btn--xs';

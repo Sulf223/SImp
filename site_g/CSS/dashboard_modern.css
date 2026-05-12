@@ -174,6 +174,50 @@
     color: var(--color-fg-muted);
     margin: 0;
 }
+.card__header,
+.page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+.card__header h2,
+.page-header h1 {
+    margin: var(--space-1) 0 0;
+    color: var(--color-fg);
+    line-height: var(--leading-tight);
+}
+.card__header h2 {
+    font-size: var(--text-xl);
+}
+.page-header {
+    margin-bottom: var(--space-6);
+}
+.page-header p {
+    max-width: var(--measure-prose);
+    margin: var(--space-2) 0 0;
+    color: var(--color-fg-muted);
+    line-height: var(--leading-relaxed);
+}
+.page-header h1 {
+    font-size: clamp(var(--text-3xl), 5vw, var(--text-5xl));
+}
+.page-header h1 span {
+    color: var(--color-primary);
+}
+.page-kicker {
+    color: var(--color-fg-subtle) !important;
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    margin: 0 0 var(--space-2) !important;
+}
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-2);
+}
 .card__meta {
     font-size: var(--text-sm);
     color: var(--color-fg-subtle);
@@ -951,6 +995,324 @@ span.ai-widget-icon {
     border-radius: var(--radius-full);
     padding: 4px 12px;
     border-left-width: 8px;
+}
+
+/* --- INTUITIVE COMPARISON PAGE ------------------------------------------- */
+.comparison-bento {
+    gap: var(--space-6);
+}
+.comparison-page .card {
+    min-width: 0;
+}
+.comparison-scenario-card .card__head,
+.comparison-controls-card .card__head,
+.comparison-chart-card .card__head,
+.comparison-heatmap-card .card__head,
+.comparison-table-card .card__head {
+    margin-bottom: var(--space-4);
+}
+.scenario-chip-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: var(--space-3);
+}
+.scenario-chip {
+    display: grid;
+    gap: var(--space-1);
+    text-align: left;
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-2);
+    color: var(--color-fg);
+    cursor: pointer;
+    transition: border-color var(--duration-fast), background var(--duration-fast), transform var(--duration-fast), box-shadow var(--duration-fast);
+}
+.scenario-chip:hover {
+    border-color: var(--color-primary-soft);
+    transform: translateY(-1px);
+}
+.scenario-chip.is-active {
+    border-color: var(--color-primary);
+    background: var(--color-primary-soft);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 25%, transparent);
+}
+.scenario-chip span {
+    font-weight: var(--font-semibold);
+}
+.scenario-chip small {
+    color: var(--color-fg-muted);
+    line-height: var(--leading-snug);
+}
+.comparison-recommendation-card {
+    border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+}
+.recommendation-body {
+    display: grid;
+    gap: var(--space-3);
+}
+.recommendation-label {
+    margin: 0;
+    color: var(--color-fg-subtle);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+}
+.recommendation-body h2 {
+    margin: 0;
+    color: var(--color-fg);
+    font-size: var(--text-3xl);
+    line-height: var(--leading-tight);
+}
+.recommendation-body p {
+    margin: 0;
+    color: var(--color-fg-muted);
+    line-height: var(--leading-relaxed);
+}
+.recommendation-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+.comparison-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-full);
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    color: var(--color-fg);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+}
+.recommendation-note {
+    padding: var(--space-3);
+    border: 1px solid color-mix(in srgb, var(--color-warning) 45%, var(--color-border));
+    border-radius: var(--radius-md);
+    background: var(--color-warning-soft);
+    color: var(--color-fg);
+    line-height: var(--leading-snug);
+}
+.comparison-controls-card {
+    border-color: var(--color-border);
+}
+.benchmark-controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-4);
+}
+.benchmark-controls-grid label {
+    display: block;
+    margin-bottom: var(--space-2);
+    color: var(--color-fg-subtle);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+}
+.benchmark-controls-grid select,
+.benchmark-controls-grid input {
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-2);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+}
+.benchmark-controls-grid select:focus,
+.benchmark-controls-grid input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+.comparison-helper-text,
+.comparison-iteration-info {
+    color: var(--color-fg-muted);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+}
+.comparison-helper-text {
+    margin: var(--space-4) 0 0;
+}
+.comparison-iteration-info {
+    min-height: 1.4em;
+    margin-top: var(--space-2);
+    color: var(--color-primary);
+    font-weight: var(--font-medium);
+}
+.comparison-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+}
+.comparison-actions .btn {
+    justify-content: center;
+}
+.comparison-chart-card .benchmark-canvas-wrap {
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    background: var(--color-surface-2);
+    border-radius: var(--radius-md);
+}
+.benchmark-placeholder {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-3);
+    color: var(--color-fg-subtle);
+    text-align: center;
+}
+.benchmark-placeholder .icon {
+    width: 34px;
+    height: 34px;
+    color: var(--color-primary);
+}
+.comparison-heatmap {
+    display: grid;
+    gap: var(--space-2);
+    overflow-x: auto;
+}
+.heatmap-row {
+    display: grid;
+    grid-template-columns: minmax(170px, 1.2fr) repeat(5, minmax(96px, 1fr));
+    gap: var(--space-2);
+    align-items: stretch;
+}
+.heatmap-row > * {
+    min-width: 0;
+}
+.heatmap-row strong,
+.heatmap-row span {
+    display: flex;
+    align-items: center;
+    min-height: 42px;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-2);
+    color: var(--color-fg-muted);
+    font-size: var(--text-sm);
+}
+.heatmap-row--head span {
+    color: var(--color-fg-subtle);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    background: transparent;
+}
+.heatmap-row.is-recommended strong {
+    border: 1px solid var(--color-primary);
+    color: var(--color-fg);
+}
+.heat-cell {
+    justify-content: center;
+    border: 1px solid transparent;
+    font-weight: var(--font-semibold);
+}
+.heat-cell--3 {
+    background: var(--color-success-soft) !important;
+    color: var(--color-success) !important;
+    border-color: color-mix(in srgb, var(--color-success) 35%, transparent);
+}
+.heat-cell--2 {
+    background: var(--color-warning-soft) !important;
+    color: var(--color-warning) !important;
+    border-color: color-mix(in srgb, var(--color-warning) 35%, transparent);
+}
+.heat-cell--1 {
+    background: var(--color-danger-soft) !important;
+    color: var(--color-danger) !important;
+    border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+}
+.comparison-table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    background: var(--color-surface-2);
+}
+.comparison-table {
+    width: 100%;
+    min-width: 980px;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+}
+.comparison-table th {
+    text-align: left;
+    padding: var(--space-3);
+    color: var(--color-fg-muted);
+    background: var(--color-surface-1);
+    border-bottom: 1px solid var(--color-border);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+}
+.comparison-table td {
+    padding: var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-fg-muted);
+    vertical-align: top;
+    line-height: var(--leading-snug);
+}
+.comparison-table td strong {
+    display: block;
+    color: var(--color-fg);
+    margin-bottom: 3px;
+}
+.comparison-table td small,
+.comparison-table .muted {
+    display: block;
+    color: var(--color-fg-subtle);
+    font-size: var(--text-xs);
+}
+.comparison-table tr.is-recommended td {
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+.comparison-status {
+    display: inline-flex;
+    align-items: center;
+    margin-top: var(--space-1);
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-full);
+    background: var(--color-surface-2);
+    color: var(--color-fg-subtle);
+    border: 1px solid var(--color-border);
+    font-size: var(--text-xs);
+}
+.comparison-status--good {
+    background: var(--color-success-soft);
+    color: var(--color-success);
+    border-color: color-mix(in srgb, var(--color-success) 35%, transparent);
+}
+.comparison-status--bad {
+    background: var(--color-danger-soft);
+    color: var(--color-danger);
+    border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+}
+
+@media (max-width: 900px) {
+    .comparison-actions .btn {
+        flex: 1 1 180px;
+    }
+    .heatmap-row {
+        grid-template-columns: minmax(150px, 1fr) repeat(5, minmax(82px, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .scenario-chip-grid,
+    .benchmark-controls-grid {
+        grid-template-columns: 1fr;
+    }
+    .comparison-chart-card .benchmark-canvas-wrap {
+        min-height: 280px;
+    }
 }
 
 /* --- METHOD PAGE (metoda.php) --------------------------------------------- */
@@ -1969,6 +2331,142 @@ input[type="submit"]:active { transform: scale(0.98); }
     font-weight: var(--font-medium);
 }
 
+.lesson-bento,
+.lesson-bento > .card {
+    min-width: 0;
+}
+.lesson-content {
+    display: grid;
+    gap: var(--space-4);
+}
+.lesson-content p,
+.lesson-content ul,
+.lesson-content ol {
+    margin: 0;
+}
+.lesson-split {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+}
+.lesson-split h3,
+.lesson-example h3 {
+    margin: 0 0 var(--space-2);
+    color: var(--color-fg);
+    font-size: var(--text-sm);
+}
+.lesson-list,
+.lesson-steps {
+    display: grid;
+    gap: var(--space-2);
+    padding-left: var(--space-5);
+    color: var(--color-fg-muted);
+}
+.lesson-list li,
+.lesson-steps li {
+    padding-left: var(--space-1);
+}
+.lesson-example {
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-2);
+}
+.lesson-metrics {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+}
+.lesson-metrics div,
+.variable-row,
+.visualizer-stats div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-2);
+}
+.lesson-metrics dt,
+.variable-row span,
+.visualizer-stats span {
+    color: var(--color-fg-subtle);
+    font-size: var(--text-xs);
+}
+.lesson-metrics dd,
+.variable-row strong,
+.visualizer-stats strong {
+    margin: 0;
+    color: var(--color-fg);
+    font-weight: var(--font-semibold);
+    text-align: right;
+}
+.variable-list {
+    display: grid;
+    gap: var(--space-2);
+}
+.visualizer-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 320px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
+}
+.visualizer-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+}
+.visualizer-controls--compact label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-fg-muted);
+    font-size: var(--text-xs);
+}
+.visualizer-controls--compact select {
+    min-width: 88px;
+    margin: 0;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-2);
+    color: var(--color-fg);
+}
+.lesson-code--wide {
+    max-height: 560px;
+    overflow: auto;
+}
+.exercise-panel {
+    margin-bottom: var(--space-4);
+}
+.exercise-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+@media (max-width: 860px) {
+    .page-header,
+    .card__header {
+        flex-direction: column;
+    }
+    .actions,
+    .visualizer-controls {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    .lesson-split,
+    .visualizer-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
 [data-var-inspector] {
     position: sticky;
     top: var(--space-6);
@@ -2209,4 +2707,815 @@ input[type="submit"]:active { transform: scale(0.98); }
 }
 @media (max-width: 768px) {
     .toast-container { top: calc(var(--space-4) + 4rem) !important; }
+}
+
+/* ==========================================================================
+   FIX [LESSON]: stiluri pentru paginile de lectii sortare
+   ========================================================================== */
+
+/* btn--secondary — varianta intre primary si quiet */
+.btn--secondary {
+    background: var(--color-surface-2);
+    color: var(--color-fg);
+    border: 1px solid var(--color-border-strong);
+    box-shadow: var(--shadow-inset), var(--shadow-xs);
+}
+.btn--secondary:hover {
+    background: var(--color-surface-3);
+    border-color: var(--color-primary-soft);
+    color: var(--color-fg);
+}
+.btn--secondary:active { transform: scale(0.98); }
+
+/* Font Awesome fallback prin unicode — fara CDN extern */
+i.fa-solid,
+i.fa-regular,
+i.fa-brands {
+    font-style: normal;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    text-align: center;
+    line-height: 1;
+    margin-right: 0.4em;
+    color: inherit;
+    vertical-align: -0.05em;
+}
+i.fa-solid:empty::before { font-style: normal; font-weight: bold; }
+i.fa-arrow-left::before  { content: "\2190"; }   /* ← */
+i.fa-arrow-right::before { content: "\2192"; }   /* → */
+i.fa-flask::before       { content: "\2697"; }   /* ⚗ */
+i.fa-shuffle::before     { content: "\21C4"; }   /* ⇄ */
+i.fa-play::before        { content: "\25B6"; }   /* ▶ */
+i.fa-pause::before       { content: "\23F8"; }   /* ⏸ */
+i.fa-check::before       { content: "\2713"; }   /* ✓ */
+i.fa-xmark::before       { content: "\2715"; }   /* ✕ */
+i.fa-circle-question::before { content: "?"; font-weight: bold; }
+i.fa-lightbulb::before   { content: "\2737"; }   /* ✷ */
+i.fa-rotate::before      { content: "\21BB"; }   /* ↻ */
+i.fa-forward::before     { content: "\23E9"; }   /* ⏩ */
+
+/* Spatii mai mari intre cardurile lectiei pe ecrane mari */
+.lesson-bento {
+    gap: var(--space-6);
+}
+
+/* Bottom margin pentru page-header */
+.page-header .actions {
+    flex-shrink: 0;
+}
+
+/* Cardul "Pseudocod" / accent — fundal subtil ca sa iasa in evidenta */
+.lesson-bento .bento__card--accent {
+    background: linear-gradient(135deg, var(--color-surface-1), color-mix(in srgb, var(--color-primary) 4%, var(--color-surface-1)));
+    border-color: var(--color-primary-soft);
+}
+
+/* Pseudocod si cod C++ — typeface monospace clar */
+.lesson-code {
+    margin: 0;
+    padding: var(--space-4);
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--color-fg);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: keep-all;
+}
+.lesson-code--wide {
+    white-space: pre;
+}
+
+/* Pe mobile, split-ul "Cand merita / Cand il eviti" se aseaza vertical */
+@media (max-width: 640px) {
+    .lesson-split {
+        grid-template-columns: 1fr;
+    }
+    .visualizer-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .page-header .actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+}
+
+/* page-kicker — eyebrow deasupra titlului */
+.page-kicker {
+    margin: 0;
+    color: var(--color-primary);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+}
+
+/* Badge in cardurile lectiei */
+.lesson-bento .badge {
+    font-size: var(--text-xs);
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-sm);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    font-weight: var(--font-semibold);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+}
+
+/* ==========================================================================
+   FIX [LESSON-V2]: rework complet pentru paginile sort_* (lectii)
+   Plasat la finalul fisierului ca sa castige in cascada
+   ========================================================================== */
+
+/* ----- PAGE HEADER: aliniere titlu + butoane pe orizontala ----- */
+.lesson-bento ~ .page-header,
+[data-component="dashboard-modern"] > .page-header {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: var(--space-6);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-8);
+    padding-bottom: var(--space-5);
+    border-bottom: 1px solid var(--color-border);
+}
+.page-header > div:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.page-header .page-kicker {
+    margin: 0 0 var(--space-2) !important;
+    color: var(--color-primary) !important;
+    font-size: var(--text-xs) !important;
+    font-weight: var(--font-semibold);
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+.page-header h1 {
+    margin: 0 !important;
+    font-size: var(--text-3xl) !important;
+    line-height: var(--leading-tight);
+    color: var(--color-fg);
+    letter-spacing: var(--tracking-tight);
+}
+.page-header h1 span {
+    color: var(--color-primary);
+    font-weight: var(--font-semibold);
+}
+.page-header > div:first-child > p {
+    margin: var(--space-3) 0 0 !important;
+    max-width: 70ch;
+    color: var(--color-fg-muted);
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+}
+.page-header .actions {
+    display: flex !important;
+    align-items: center;
+    gap: var(--space-3);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+/* ----- BUTOANE: ambele variante sa arate ca BUTOANE reale ----- */
+.page-header .actions .btn,
+.lesson-bento .btn {
+    display: inline-flex !important;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4) !important;
+    min-height: 38px;
+    border-radius: var(--radius-md);
+    font-weight: var(--font-medium);
+    font-size: var(--text-sm);
+    line-height: 1;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+    white-space: nowrap;
+}
+.page-header .actions .btn--secondary,
+.lesson-bento .btn--secondary {
+    background: var(--color-surface-2) !important;
+    color: var(--color-fg) !important;
+    border: 1px solid var(--color-border-strong) !important;
+    box-shadow: var(--shadow-xs);
+}
+.page-header .actions .btn--secondary:hover,
+.lesson-bento .btn--secondary:hover {
+    background: var(--color-surface-3) !important;
+    border-color: var(--color-primary-soft) !important;
+    transform: translateY(-1px);
+}
+.page-header .actions .btn--primary,
+.lesson-bento .btn--primary {
+    background: var(--color-primary) !important;
+    color: var(--color-on-primary, #FFFFFF) !important;
+    border: 1px solid var(--color-primary) !important;
+    box-shadow: 0 4px 12px -2px color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+.page-header .actions .btn--primary:hover,
+.lesson-bento .btn--primary:hover {
+    background: var(--color-primary-strong, var(--color-primary)) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px -2px color-mix(in srgb, var(--color-primary) 50%, transparent);
+}
+
+/* ----- METRICS CARD: layout corect cu label stanga + valoare dreapta ----- */
+.lesson-metrics {
+    display: flex !important;
+    flex-direction: column;
+    gap: var(--space-2) !important;
+    margin: 0;
+    padding: 0;
+}
+.lesson-metrics > div {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: var(--space-4) !important;
+    padding: var(--space-3) var(--space-4) !important;
+    background: var(--color-surface-2) !important;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md) !important;
+    margin: 0;
+}
+.lesson-metrics dt {
+    margin: 0 !important;
+    color: var(--color-fg-muted) !important;
+    font-size: var(--text-sm) !important;
+    font-weight: var(--font-medium);
+    text-transform: none;
+    letter-spacing: 0;
+    flex: 0 0 auto;
+}
+.lesson-metrics dd {
+    margin: 0 !important;
+    color: var(--color-fg) !important;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm) !important;
+    font-weight: var(--font-semibold);
+    text-align: right;
+    flex: 1 1 auto;
+    min-width: 0;
+    word-break: break-word;
+}
+
+/* ----- VARIABILE & STATS: aceeasi structura ca metrics ----- */
+.variable-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: var(--space-3) !important;
+    padding: var(--space-3) var(--space-4) !important;
+    background: var(--color-surface-2) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-md) !important;
+}
+.variable-row span {
+    color: var(--color-fg-muted) !important;
+    font-size: var(--text-sm) !important;
+    font-family: var(--font-mono);
+}
+.variable-row strong {
+    color: var(--color-fg) !important;
+    font-size: var(--text-sm) !important;
+    text-align: right;
+}
+
+/* ----- VISUALIZER STATS: grid 4 colonne cu numere mari ----- */
+.visualizer-stats {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: var(--space-3) !important;
+    margin-top: var(--space-5) !important;
+}
+.visualizer-stats > div {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    padding: var(--space-3) !important;
+    background: var(--color-surface-2) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-md);
+    gap: var(--space-1) !important;
+}
+.visualizer-stats span {
+    color: var(--color-fg-subtle) !important;
+    font-size: var(--text-xs) !important;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+}
+.visualizer-stats strong {
+    color: var(--color-primary) !important;
+    font-size: var(--text-2xl) !important;
+    font-family: var(--font-mono);
+    text-align: left !important;
+}
+
+/* ----- BADGE in headerul cardurilor ----- */
+.lesson-bento .card__header .badge {
+    display: inline-block;
+    padding: 2px var(--space-2) !important;
+    background: color-mix(in srgb, var(--color-primary) 12%, transparent) !important;
+    color: var(--color-primary) !important;
+    font-size: var(--text-xs) !important;
+    font-weight: var(--font-semibold);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    border-radius: var(--radius-sm) !important;
+    margin-bottom: var(--space-1);
+}
+.lesson-bento .card__header h2 {
+    margin: var(--space-2) 0 0 !important;
+    font-size: var(--text-xl);
+    color: var(--color-fg);
+    letter-spacing: var(--tracking-tight);
+}
+
+/* ----- LESSON-CONTENT / liste mai aerisite ----- */
+.lesson-content {
+    color: var(--color-fg);
+    line-height: var(--leading-relaxed);
+}
+.lesson-content p {
+    color: var(--color-fg-muted);
+}
+.lesson-split h3 {
+    margin: 0 0 var(--space-3) !important;
+    color: var(--color-fg) !important;
+    font-size: var(--text-base) !important;
+    font-weight: var(--font-semibold);
+}
+.lesson-list,
+.lesson-steps {
+    padding-left: var(--space-5);
+    color: var(--color-fg);
+}
+.lesson-list li,
+.lesson-steps li {
+    margin-bottom: var(--space-2);
+    color: var(--color-fg);
+    line-height: var(--leading-relaxed);
+}
+.lesson-list li::marker,
+.lesson-steps li::marker {
+    color: var(--color-primary);
+}
+
+/* ----- LESSON-EXAMPLE: caseta highlight ----- */
+.lesson-example {
+    margin-top: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+    background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface-2));
+    border: 1px solid var(--color-primary-soft);
+    border-left: 3px solid var(--color-primary);
+    border-radius: var(--radius-md);
+}
+.lesson-example h3 {
+    margin: 0 0 var(--space-2) !important;
+    color: var(--color-primary);
+    font-size: var(--text-sm);
+}
+.lesson-example p {
+    margin: 0;
+    color: var(--color-fg);
+}
+
+/* ----- PSEUDOCOD CARD: fundal mai inchis si typeface mono ----- */
+.lesson-bento .bento__card--accent {
+    background: linear-gradient(135deg, var(--color-surface-1), color-mix(in srgb, var(--color-primary) 6%, var(--color-surface-1))) !important;
+    border-color: var(--color-primary-soft) !important;
+}
+.lesson-code {
+    margin: 0 !important;
+    padding: var(--space-4) !important;
+    background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface-2)) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-md) !important;
+    font-family: var(--font-mono) !important;
+    font-size: var(--text-sm) !important;
+    line-height: var(--leading-relaxed);
+    color: var(--color-fg) !important;
+    overflow-x: auto;
+    white-space: pre-wrap;
+}
+.lesson-code--wide {
+    background: var(--color-surface-2) !important;
+    white-space: pre;
+}
+.lesson-code .code-line {
+    display: block;
+    padding: 2px var(--space-3);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid transparent;
+    transition: background var(--duration-fast), border-color var(--duration-fast);
+}
+.lesson-code .code-line.is-active {
+    background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+    border-left-color: var(--color-primary);
+    color: var(--color-fg);
+    font-weight: var(--font-semibold);
+}
+
+/* ----- LABORATORUL: canvas cu fundal accent ----- */
+.visualizer-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 360px;
+    background: color-mix(in srgb, var(--color-primary) 3%, var(--color-bg)) !important;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+.visualizer-controls--compact {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+}
+.visualizer-controls--compact label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-fg-muted);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+}
+.visualizer-controls--compact select {
+    padding: 6px var(--space-3);
+    background: var(--color-surface-2);
+    color: var(--color-fg);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    cursor: pointer;
+}
+
+/* ----- GRESELI FRECVENTE: caseta warning ----- */
+.lesson-mistakes-card {
+    border-left: 3px solid var(--color-warning) !important;
+}
+.lesson-mistakes-card .badge {
+    background: color-mix(in srgb, var(--color-warning) 15%, transparent) !important;
+    color: var(--color-warning) !important;
+}
+.lesson-mistakes-card .lesson-list li::marker {
+    color: var(--color-warning);
+}
+
+/* ----- EXERCITIU CARD ----- */
+.exercise-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+}
+
+/* ----- RESPONSIVE ----- */
+@media (max-width: 960px) {
+    .page-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .page-header .actions {
+        width: 100%;
+    }
+    .page-header .actions .btn {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+    .visualizer-stats {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+@media (max-width: 640px) {
+    .lesson-split {
+        grid-template-columns: 1fr !important;
+    }
+    .visualizer-stats {
+        grid-template-columns: 1fr !important;
+    }
+    .page-header h1 {
+        font-size: var(--text-2xl) !important;
+    }
+    .lesson-metrics > div {
+        flex-wrap: wrap;
+    }
+}
+
+/* FIX [LESSON-ACTIONS]: butoane de header mai aerisite si simetrice */
+[data-component="dashboard-modern"] > .page-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: var(--space-4) !important;
+    margin-bottom: var(--space-10) !important;
+    padding-bottom: var(--space-7) !important;
+}
+
+[data-component="dashboard-modern"] > .page-header .actions {
+    display: inline-grid !important;
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+    align-items: stretch !important;
+    justify-content: start !important;
+    gap: var(--space-3) !important;
+    width: auto !important;
+    margin-top: var(--space-2);
+    padding: var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-1);
+    box-shadow: var(--shadow-inset), var(--shadow-xs);
+}
+
+[data-component="dashboard-modern"] > .page-header .actions .btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    justify-content: center;
+    padding: var(--space-3) var(--space-5) !important;
+    border-radius: var(--radius-md);
+}
+
+@media (max-width: 640px) {
+    [data-component="dashboard-modern"] > .page-header {
+        margin-bottom: var(--space-8) !important;
+        padding-bottom: var(--space-5) !important;
+    }
+
+    [data-component="dashboard-modern"] > .page-header .actions {
+        grid-template-columns: 1fr;
+        width: 100% !important;
+    }
+}
+
+/* ==========================================================================
+   PRESENTATION POLISH [2026-05-12]
+   ========================================================================== */
+
+.dashboard-focus-card,
+.profile-summary-card,
+.comparison-conclusion-card {
+    border-color: color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
+}
+
+.dashboard-focus-grid,
+.profile-summary-grid {
+    display: grid;
+    grid-template-columns: 1.4fr repeat(3, minmax(170px, 1fr));
+    gap: var(--space-4);
+}
+
+.dashboard-focus-grid section,
+.profile-summary-grid section {
+    min-width: 0;
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-2);
+}
+
+.dashboard-focus-grid h3,
+.dashboard-focus-grid strong,
+.profile-summary-grid strong {
+    display: block;
+    margin: 0 0 var(--space-2);
+    color: var(--color-fg);
+    font-size: var(--text-xl);
+    line-height: var(--leading-tight);
+}
+
+.dashboard-focus-grid p,
+.profile-summary-grid p {
+    margin: 0 0 var(--space-3);
+    color: var(--color-fg-muted);
+    line-height: var(--leading-relaxed);
+}
+
+.comparison-page .scenario-chip-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+    gap: var(--space-3) !important;
+}
+
+.comparison-page .scenario-chip {
+    appearance: none !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: var(--space-1) !important;
+    min-height: 76px !important;
+    padding: var(--space-4) !important;
+    border: 1px solid var(--color-border-strong) !important;
+    border-radius: var(--radius-md) !important;
+    background: var(--color-surface-2) !important;
+    color: var(--color-fg) !important;
+    font: inherit !important;
+    text-align: left !important;
+    white-space: normal !important;
+    overflow: visible !important;
+}
+
+.comparison-page .scenario-chip span,
+.comparison-page .scenario-chip small {
+    display: block !important;
+    overflow-wrap: anywhere;
+}
+
+.comparison-page .scenario-chip span {
+    font-weight: var(--font-semibold);
+}
+
+.comparison-page .scenario-chip small {
+    color: var(--color-fg-muted);
+}
+
+.comparison-page .scenario-chip.is-active {
+    border-color: var(--color-primary) !important;
+    background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface-2)) !important;
+}
+
+.comparison-conclusion-card {
+    grid-column: span 4;
+}
+
+.comparison-conclusion {
+    display: grid;
+    gap: var(--space-3);
+}
+
+.comparison-conclusion h2 {
+    margin: 0;
+    color: var(--color-fg);
+    font-size: var(--text-2xl);
+    line-height: var(--leading-tight);
+}
+
+.comparison-conclusion p {
+    margin: 0;
+    color: var(--color-fg-muted);
+    line-height: var(--leading-relaxed);
+}
+
+.comparison-conclusion-list {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+}
+
+.comparison-conclusion-list div {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-2);
+}
+
+.comparison-conclusion-list dt {
+    color: var(--color-fg-subtle);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+}
+
+.comparison-conclusion-list dd {
+    margin: 0;
+    color: var(--color-fg);
+}
+
+.ai-source-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-4);
+    color: var(--color-fg-subtle);
+    font-size: var(--text-xs);
+}
+
+.ai-source-list code {
+    padding: 3px var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-2);
+    color: var(--color-fg);
+    font-family: var(--font-mono);
+}
+
+.quiz-explain-card,
+#feedback-zone > div,
+#ai-quiz-feedback .alert {
+    border-radius: var(--radius-md) !important;
+    border: 1px solid var(--color-border) !important;
+    background: var(--color-surface-2) !important;
+    color: var(--color-fg) !important;
+}
+
+#feedback-zone h4,
+#feedback-zone strong,
+#ai-quiz-feedback strong {
+    color: var(--color-fg) !important;
+}
+
+.form-help {
+    margin: 0 0 var(--space-3);
+    color: var(--color-fg-subtle);
+    font-size: var(--text-xs);
+    line-height: var(--leading-relaxed);
+}
+
+.form-help a {
+    color: var(--color-primary);
+    font-weight: var(--font-semibold);
+}
+
+.visualizer-stats strong {
+    color: var(--color-accent) !important;
+}
+
+.visualizer-stats > div:last-child strong {
+    color: var(--color-fg) !important;
+}
+
+body[data-theme="light"] {
+    background: var(--color-bg) !important;
+}
+
+body[data-theme="light"] [data-component="dashboard-modern"],
+body[data-theme="light"] .card,
+body[data-theme="light"] .site-nav,
+body[data-theme="light"] .ai-widget-panel,
+body[data-theme="light"] .modal,
+body[data-theme="light"] .toast {
+    color: var(--color-fg);
+}
+
+body[data-theme="light"] .card,
+body[data-theme="light"] .comparison-table-wrapper,
+body[data-theme="light"] .benchmark-canvas-wrap,
+body[data-theme="light"] .visualizer-canvas,
+body[data-theme="light"] .lesson-code {
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+body[data-theme="light"] .btn--ghost,
+body[data-theme="light"] .btn--secondary,
+body[data-theme="light"] input,
+body[data-theme="light"] select,
+body[data-theme="light"] textarea {
+    background: #ffffff !important;
+    color: var(--color-fg) !important;
+    border-color: var(--color-border-strong) !important;
+}
+
+body[data-theme="light"] .btn--quiet:hover,
+body[data-theme="light"] .site-nav__menu .btn:hover {
+    background: var(--color-surface-2) !important;
+    color: var(--color-fg) !important;
+}
+
+body[data-theme="light"] .comparison-page .scenario-chip,
+body[data-theme="light"] .dashboard-focus-grid section,
+body[data-theme="light"] .profile-summary-grid section,
+body[data-theme="light"] .comparison-conclusion-list div {
+    background: #ffffff !important;
+}
+
+body[data-theme="light"] .comparison-page .scenario-chip.is-active {
+    background: color-mix(in srgb, var(--color-primary) 10%, #ffffff) !important;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-focus-grid,
+    .profile-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .comparison-conclusion-card {
+        grid-column: span 12;
+    }
+}
+
+@media (max-width: 640px) {
+    .dashboard-focus-grid,
+    .profile-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .comparison-conclusion-list div {
+        grid-template-columns: 1fr;
+    }
 }

@@ -142,6 +142,13 @@ $page_titles = [
     'algoritmi' => 'Algoritmi de sortare',
     'profesor_ai' => 'Profesor AI',
     'sortare' => 'Laborator Sortare',
+    'comparatii_sortare' => 'Comparații de performanță',
+    'sort_bubble' => 'Bubble Sort',
+    'sort_selection' => 'Selection Sort',
+    'sort_insertion' => 'Insertion Sort',
+    'sort_quick' => 'Quick Sort',
+    'sort_merge' => 'Merge Sort',
+    'sort_counting' => 'Counting Sort',
     'metode' => 'Administrare Metode',
     'compilator' => 'Compilator Online',
     'metoda' => 'Detalii Algoritm',
@@ -151,7 +158,9 @@ $page_titles = [
     'laborator_vizual' => 'Laborator Vizual',
     'lista_exercitii' => 'Laborator Vizual',
     'profil' => 'Profilul meu',
-    'admin' => 'Administrare Sistem'
+    'admin' => 'Administrare Sistem',
+    'forgot_password' => 'Recuperare parolă',
+    'reset_password' => 'Resetare parolă'
 ];
 $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_curenta] ?? 'Portal C++')) . ' – OffByOne Academy';
 ?>
@@ -180,7 +189,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="CSS/modern_vars.css?v=20260506-security-light-mail">
     <link rel="stylesheet" href="stil.css?v=20260506-security-light-mail">
-    <link rel="stylesheet" href="CSS/dashboard_modern.css?v=20260512-laborator-vizual-sync">
+    <link rel="stylesheet" href="CSS/dashboard_modern.css?v=20260512-no-demo">
     <?php if ($pagina_curenta === 'admin'): ?>
         <link rel="stylesheet" href="CSS/admin.css?v=20260506-security-light-mail">
     <?php endif; ?>
@@ -364,7 +373,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
     </div>
 </footer>
 
-<script src="JS/toast.js" defer nonce="<?= $nonce ?>"></script>
+<script src="JS/toast.js?v=20260512-presentation-polish" defer nonce="<?= $nonce ?>"></script>
 <script src="JS/sw_register.js" defer nonce="<?= $nonce ?>"></script>
 <?php if ($afiseaza_ai_widget): ?>
 <div id="ai-widget" class="ai-widget">
@@ -405,7 +414,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
         </form>
     </section>
 </div>
-<script src="JS/ai_widget.js" defer nonce="<?= $nonce ?>"></script>
+<script src="JS/ai_widget.js?v=20260512-presentation-polish" defer nonce="<?= $nonce ?>"></script>
 <?php endif; ?>
 
 <script nonce="<?= $nonce ?>"> // FIX [M2]: Adăugare nonce pentru CSP

@@ -59,7 +59,7 @@ $is_logged_in = is_logged_in();
                 <span class="card__eyebrow">Despre Profesorul AI</span>
             </div>
             <div class="prose" style="font-size: var(--text-sm);">
-                <p>Modeulul nostru AI (Llama 3.3) este antrenat special pe programa de informatică de liceu.</p>
+                <p>Modulul AI folosește documentația proiectului ca sursă principală pentru explicații și teste.</p>
                 <ul style="padding-left: var(--space-4); margin-top: var(--space-2); display: flex; flex-direction: column; gap: var(--space-2);">
                     <li><strong>Generare dinamică:</strong> Nu există două teste la fel.</li>
                     <li><strong>Explicații:</strong> Primești feedback detaliat pentru fiecare răspuns.</li>
@@ -87,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pathSlug = urlParams.get('path_exam') || 'general';
     
     let quizData = [];
+    let quizSources = [];
     let currentIdx = 0;
     let userSelections = []; // { qIndex: 0, selected: 0, isCorrect: bool }
 
@@ -120,6 +121,24 @@ document.addEventListener('DOMContentLoaded', () => {
         return html;
     }
 
+    function shortSourceName(source) {
+        const normalized = String(source || '').replace(/\\/g, '/');
+        const parts = normalized.split('/').filter(Boolean);
+        return parts.slice(-2).join('/');
+    }
+
+    function renderSources() {
+        if (!Array.isArray(quizSources) || quizSources.length === 0) {
+            return '';
+        }
+        return `
+            <div class="ai-source-list" aria-label="Surse folosite">
+                <span>Surse folosite:</span>
+                ${quizSources.slice(0, 4).map(source => `<code>${escapeHtml(shortSourceName(source))}</code>`).join('')}
+            </div>
+        `;
+    }
+
     startBtn.onclick = async () => {
         initView.style.display = 'none';
         loadingView.style.display = 'block';
@@ -138,6 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
             
             if (data && data.quiz && Array.isArray(data.quiz)) {
+                quizSources = Array.isArray(data.sources) ? data.sources : [];
                 // FIX [Q10]: Normalize all quiz data for UTF-8 issues
                 quizData = data.quiz.map(q => ({
                     question: normalizeUTF8Text(fixMojibake(q.question || '')),
@@ -182,6 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="card__eyebrow">Întrebarea ${currentIdx + 1} / ${quizData.length}</span>
                 <span class="badge badge--soft">${currentIdx + 1 > 5 ? 'Avansat' : 'Bazele'}</span>
             </div>
+            ${renderSources()}
             <div style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-6); line-height: 1.55;">${formattedQuestion}</div>
             ${formattedCodeExample}
             
@@ -275,6 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // FIX [Q8]: Ensure feedback text is properly UTF-8 encoded and fixed
             const rawFeedback = data.feedback || 'Analiză indisponibilă.';
             const normalizedFeedback = normalizeUTF8Text(fixMojibake(rawFeedback)).replace(/\*\*/g, '');
+            const formattedFeedback = formatQuizText(normalizedFeedback);
             
             resultsView.innerHTML = `
                 <div class="card__head" style="justify-content: center; margin-bottom: var(--space-6);">
@@ -285,12 +307,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 
                 <div style="max-width: 650px; margin: 0 auto;">
+                    ${renderSources()}
                     <div style="padding: var(--space-6); background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-xl); text-align: left; margin-bottom: var(--space-8);">
                         <div style="display: flex; gap: var(--space-3); align-items: flex-start;">
                             <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; font-size: 12px;">AI</div>
                             <div style="flex: 1;">
                                 <h4 style="font-size: var(--text-md); font-weight: 600; margin-bottom: var(--space-3); color: var(--color-primary);">Raport de Evaluare:</h4>
-                                <div style="font-size: var(--text-sm); color: var(--color-fg-muted); line-height: 1.6; white-space: pre-wrap;">${normalizedFeedback}</div>
+                                <div style="font-size: var(--text-sm); color: var(--color-fg-muted); line-height: 1.6; white-space: pre-wrap;">${formattedFeedback}</div>
                             </div>
                         </div>
                     </div>

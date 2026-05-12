@@ -2,212 +2,86 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-?>
 
-<div data-component="dashboard-modern">
-    <header class="dash__header">
-        <span class="dash__eyebrow">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-            </svg>
-            Metodă de sortare
-        </span>
-        <h1 class="dash__title">
-            Quick <span class="dash__title-accent">Sort</span>
-        </h1>
-        <p class="dash__lede">
-            Complexitate medie: O(n log n). Unul dintre cei mai eficienți algoritmi, bazat pe strategia Divide et Impera și alegerea unui element pivot pentru partiționare.
-        </p>
-        <div class="card__actions">
-            <a href="index.php?page=sortare" class="btn btn--ghost btn--sm">
-                <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="m15 18-6-6 6-6"/>
-                </svg>
-                Înapoi la metode
-            </a>
-        </div>
-    </header>
+require_once __DIR__ . '/partials/sort_lesson_template.php';
 
-    <div class="bento" style="gap: var(--space-6);">
-        <!-- CODE: C++ Implementation -->
-        <article class="card bento__card--accent" style="border: 1px solid rgba(168, 85, 247, 0.3); background: linear-gradient(135deg, rgba(168, 85, 247, 0.05) 0%, rgba(168, 85, 247, 0.02) 100%); position: relative; overflow: hidden;">
-            <div style="position: absolute; top: -30%; right: -20%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%); opacity: 0.05; z-index: 0;"></div>
-            <div class="card__head" style="position: relative; z-index: 1;">
-                <span class="card__eyebrow" style="color: #a855f7;">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>
-                    </svg>
-                    Pseudo-cod (Partition)
-                </span>
-            </div>
-            <pre class="lesson-code" data-lesson-code><code>
-<span class="code-line" data-line="1">pivot = v[high]</span>
-<span class="code-line" data-line="2">pivotIndex = low</span>
-<span class="code-line" data-line="3">for (int i = low; i < high; i++)</span>
-<span class="code-line" data-line="4">  if (v[i] < pivot) swap(v[i], v[pivotIndex++])</span>
-<span class="code-line" data-line="5">swap(v[pivotIndex], v[high])</span>
-<span class="code-line" data-line="6">return pivotIndex</span>
-            </code></pre>
-        </article>
+$lesson = [
+    'title' => 'Quick',
+    'accent' => 'Sort',
+    'algorithm' => 'quick',
+    'lesson_slug' => 'sort_quick',
+    'visualizer_title' => 'Partitionarea Quick Sort',
+    'lead' => 'Quick Sort imparte vectorul in jurul unui pivot, apoi sorteaza recursiv partile obtinute.',
+    'idea' => 'Elementul pivot este asezat pe pozitia lui finala: in stanga raman valori mai mici sau egale, iar in dreapta valori mai mari. Apoi acelasi proces se aplica separat pe cele doua subsecvente.',
+    'use_when' => [
+        'Vrei un algoritm foarte rapid in practica.',
+        'Datele pot fi impartite eficient in jurul unui pivot bun.',
+        'Vrei sa intelegi tehnica divide et impera prin partitionare.',
+    ],
+    'avoid_when' => [
+        'Ai nevoie de stabilitate fara structuri suplimentare.',
+        'Pivotul ales prost poate aparea des si poate duce la O(n^2).',
+        'Stiva recursiva este o problema pentru date foarte mari sau foarte dezechilibrate.',
+    ],
+    'metrics' => [
+        'Caz bun' => 'O(n log n)',
+        'Caz mediu' => 'O(n log n)',
+        'Caz rau' => 'O(n^2)',
+        'Memorie' => 'O(log n) mediu, din recursivitate',
+        'Stabil' => 'Nu, in varianta standard',
+    ],
+    'steps' => [
+        'Alege un pivot, de obicei ultimul element in varianta simpla.',
+        'Parcurge secventa si muta in stanga valorile mai mici sau egale cu pivotul.',
+        'La final pune pivotul intre cele doua zone.',
+        'Pivotul este acum pe pozitia finala.',
+        'Sorteaza recursiv partea din stanga si partea din dreapta.',
+    ],
+    'example' => 'Pentru [6, 2, 8, 4], pivotul 4 ajunge intre [2] si [8, 6], obtinand [2, 4, 8, 6]. Apoi se sorteaza separat zona din dreapta.',
+    'pseudocode' => [
+        ['line' => 1, 'text' => 'pivot = ultimul element'],
+        ['line' => 2, 'text' => 'i = low - 1'],
+        ['line' => 3, 'text' => 'pentru j de la low la high - 1'],
+        ['line' => 4, 'text' => '  daca v[j] <= pivot, creste i si interschimba'],
+        ['line' => 5, 'text' => 'pune pivotul pe pozitia i + 1'],
+        ['line' => 6, 'text' => 'sorteaza recursiv stanga si dreapta'],
+    ],
+    'variables' => [
+        'pivot' => 'valoarea care separa secventa',
+        'i' => 'ultima pozitie cu valoare <= pivot',
+        'j' => 'elementul analizat',
+        'range' => 'subsecventa curenta',
+    ],
+    'cpp' => [
+        'int partitionare(vector<int>& v, int low, int high) {',
+        '    int pivot = v[high];',
+        '    int i = low - 1;',
+        '',
+        '    for (int j = low; j < high; j++) {',
+        '        if (v[j] <= pivot) {',
+        '            i++;',
+        '            swap(v[i], v[j]);',
+        '        }',
+        '    }',
+        '',
+        '    swap(v[i + 1], v[high]);',
+        '    return i + 1;',
+        '}',
+        '',
+        'void quickSort(vector<int>& v, int low, int high) {',
+        '    if (low >= high) return;',
+        '',
+        '    int p = partitionare(v, low, high);',
+        '    quickSort(v, low, p - 1);',
+        '    quickSort(v, p + 1, high);',
+        '}',
+    ],
+    'mistakes' => [
+        'Nu include pivotul in apelurile recursive: foloseste p - 1 si p + 1.',
+        'Daca alegi mereu ultimul element ca pivot pe date deja sortate, poti ajunge la O(n^2).',
+        'Conditia de oprire este low >= high, pentru secvente cu zero sau un element.',
+        'Partitionarea nu sorteaza complet vectorul; doar pune pivotul pe pozitia finala.',
+    ],
+];
 
-        <!-- VARIABLE INSPECTOR -->
-        <article class="card bento__card--stat" data-var-inspector style="border: 1px solid var(--color-border); background: var(--color-surface-1);">
-            <div class="card__head">
-                <span class="card__eyebrow">
-                    <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 2v20M2 12h20"/></svg>
-                    Variable Inspector
-                </span>
-            </div>
-            <div style="display: grid; gap: var(--space-2); font-family: var(--font-mono); font-size: var(--text-sm); margin-top: var(--space-3);">
-                <div>pivot = <span data-watch="pivot" style="color: var(--color-warning); font-weight: bold;">—</span></div>
-                <div>low = <span data-watch="low" style="color: var(--color-primary);">—</span></div>
-                <div>high = <span data-watch="high" style="color: var(--color-primary);">—</span></div>
-                <div>i = <span data-watch="i" style="color: var(--color-fg); font-weight: bold;">—</span></div>
-                <div>comparații = <span data-watch="comparisons" style="color: var(--color-accent);">0</span></div>
-                <div>swap-uri = <span data-watch="swaps" style="color: var(--color-warning);">0</span></div>
-            </div>
-            <button class="btn btn--quiet btn--sm" style="margin-top: var(--space-3); width: 100%;" data-ask-ai="concept" data-context='{"intrebare":"Cum funcționează partiționarea în Quick Sort? Ce rol au low, high și pivot?"}'>
-                <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                Ce sunt astea?
-            </button>
-        </article>
-
-        <!-- VISUALIZER: Main interactive component -->
-        <article class="card bento__card--hero" style="border: 1px solid var(--color-border); background: var(--color-surface-1); min-height: 550px; display: flex; flex-direction: column;">
-            <div class="card__head">
-                <span class="card__eyebrow">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M2 12h4l3 9L9 3l-3 9H2"/>
-                    </svg>
-                    Vizualizator Interactiv
-                </span>
-            </div>
-
-            <!-- Control Panel -->
-            <div data-visualizer-controls="custom" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); padding: var(--space-4); background: var(--color-surface-2); border-radius: var(--radius-lg);">
-                <div>
-                    <label style="font-size: var(--text-xs); color: var(--color-fg-muted); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: var(--tracking-wide);">Dimensiune</label>
-                    <select data-control="size" style="width: 100%; padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-surface-1); color: var(--color-fg); font-size: var(--text-sm);">
-                        <option value="20">20 elemente</option>
-                        <option value="50">50 elemente</option>
-                        <option value="100" selected>100 elemente</option>
-                        <option value="200">200 elemente</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="font-size: var(--text-xs); color: var(--color-fg-muted); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: var(--tracking-wide);">Viteza</label>
-                    <select data-control="speed" style="width: 100%; padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-surface-1); color: var(--color-fg); font-size: var(--text-sm);">
-                        <option value="slow">Lent</option>
-                        <option value="medium" selected>Normal</option>
-                        <option value="fast">Rapid</option>
-                    </select>
-                </div>
-                <div style="display: flex; gap: var(--space-2); align-items: flex-end;">
-                    <button data-action="regenerate" class="btn btn--ghost btn--sm" style="flex: 1;">
-                        <span style="display: inline-flex; align-items: center; gap: var(--space-2);">
-                            <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M3 21v-5h5" />
-                            </svg>
-                            Regenerează
-                        </span>
-                    </button>
-                    <button data-action="start" class="btn btn--primary btn--sm" style="flex: 1;">
-                        <span style="display: inline-flex; align-items: center; gap: var(--space-2);">
-                            <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <polygon points="5 3 19 12 5 21 5 3" />
-                            </svg>
-                            Start
-                        </span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Canvas Container with Skeleton Loader -->
-            <div style="flex: 1; position: relative; background: var(--color-surface-2); border-radius: var(--radius-lg); overflow: hidden; min-height: 350px;">
-                <div id="skeleton-loader" style="position: absolute; inset: 0; background: var(--color-surface-2); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); z-index: 1;">
-                    <div style="height: 40px; background: linear-gradient(90deg, var(--color-surface-1), var(--color-surface-2), var(--color-surface-1)); background-size: 200% 100%; animation: shimmer 2s infinite; border-radius: var(--radius-sm);"></div>
-                    <div style="height: 40px; background: linear-gradient(90deg, var(--color-surface-1), var(--color-surface-2), var(--color-surface-1)); background-size: 200% 100%; animation: shimmer 2s infinite 0.1s; border-radius: var(--radius-sm);"></div>
-                    <div style="height: 40px; background: linear-gradient(90deg, var(--color-surface-1), var(--color-surface-2), var(--color-surface-1)); background-size: 200% 100%; animation: shimmer 2s infinite 0.2s; border-radius: var(--radius-sm);"></div>
-                </div>
-                <canvas id="sorting-visualizer" class="visualizer-container" data-algorithm="quick" style="position: absolute; inset: 0; display: block; width: 100%; height: 100%;"></canvas>
-            </div>
-
-            <!-- Stats Bar -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: var(--space-3); margin-top: var(--space-4); padding: var(--space-3); background: var(--color-surface-2); border-radius: var(--radius-lg);">
-                <div style="text-align: center;">
-                    <div style="font-size: var(--text-xs); color: var(--color-fg-muted); margin-bottom: 4px;">Comparații</div>
-                    <div id="comparisons" style="font-size: var(--text-lg); font-weight: 700; color: var(--color-primary);">0</div>
-                </div>
-                <div style="text-align: center;">
-                    <div style="font-size: var(--text-xs); color: var(--color-fg-muted); margin-bottom: 4px;">Swap-uri</div>
-                    <div id="swaps" style="font-size: var(--text-lg); font-weight: 700; color: var(--color-accent);">0</div>
-                </div>
-                <div style="text-align: center;">
-                    <div style="font-size: var(--text-xs); color: var(--color-fg-muted); margin-bottom: 4px;">Timp</div>
-                    <div id="sort-time" style="font-size: var(--text-lg); font-weight: 700; color: var(--color-success);">0 ms</div>
-                </div>
-                <div style="text-align: center;">
-                    <div style="font-size: var(--text-xs); color: var(--color-fg-muted); margin-bottom: 4px;">Status</div>
-                    <div id="sort-status" style="font-size: var(--text-sm); font-weight: 600; color: var(--color-fg);">Gata</div>
-                </div>
-            </div>
-        </article>
-
-        <!-- EXERCISES -->
-        <article class="card bento__card--timeline" style="grid-column: 1 / -1; border: 1px solid var(--color-border); background: var(--color-surface-1);">
-            <div class="card__head">
-                <span class="card__eyebrow">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/>
-                    </svg>
-                    Exerciții de verificare
-                </span>
-                <span id="lesson-progress-status" class="badge badge--soft">Se încarcă...</span>
-            </div>
-
-            <div id="exercitiu-container" data-lesson="sort_quick" class="card__body" style="background: var(--color-surface-2); padding: var(--space-5); border-radius: var(--radius-lg); margin-bottom: var(--space-4); min-height: 200px;"></div>
-
-            <div class="card__actions">
-                <button onclick="verificaExercitiu()" class="btn btn--primary">
-                    <span style="display: inline-flex; align-items: center; gap: var(--space-2);">
-                        <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                        Verifică răspunsul
-                    </span>
-                </button>
-                <button onclick="afiseazaAjutor()" class="btn btn--ghost">
-                    <span style="display: inline-flex; align-items: center; gap: var(--space-2);">
-                        <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M9 18h6" /><path d="M10 22h4" /><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14" />
-                        </svg>
-                        Indiciu
-                    </span>
-                </button>
-                <button onclick="urmatorulExercitiu()" class="btn btn--quiet">
-                    <span style="display: inline-flex; align-items: center; gap: var(--space-2);">
-                        Următorul
-                        <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-                        </svg>
-                    </span>
-                </button>
-            </div>
-
-            <p id="feedback" class="card__meta" style="margin-top: var(--space-3); font-weight: 600; display: none;"></p>
-            <p id="hint" class="card__body" style="display:none; padding: var(--space-3); background: var(--color-accent-soft); color: var(--color-accent); border-radius: var(--radius-md); margin-top: var(--space-2); font-style: italic;"></p>
-        </article>
-    </div>
-
-    <style>
-    @keyframes shimmer {
-        0% { background-position: -200% 0; }
-        100% { background-position: 200% 0; }
-    }
-    </style>
-</div>
-
-<div data-lesson-slug="sort_quick" hidden></div>
-<script nonce="<?= $nonce ?>" src="JS/visualizer.js"></script>
-<script nonce="<?= $nonce ?>" src="JS/exercitii.js"></script>
-<script nonce="<?= $nonce ?>" src="JS/lesson_tracker.js"></script>
+render_sort_lesson($lesson, $nonce ?? '');

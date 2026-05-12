@@ -17,9 +17,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Verificăm CSRF
 verify_csrf();
 
+$ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+if (!check_rate_limit($con, 'register', $ip, 5, 3600)) {
+    set_flash('error', 'Prea multe încercări de creare cont. Te rugăm să încerci mai târziu.');
+    header('Location: ../index.php?page=register');
+    exit;
+}
+
 // Prelucrăm datele din formular
 $username = trim($_POST['username'] ?? '');
-$email = trim($_POST['email'] ?? '');
+$email = mb_strtolower(trim($_POST['email'] ?? ''), 'UTF-8');
 // FIX [M9]: Validare lungime username (3-64 caractere)
 if (mb_strlen($username) > 64 || mb_strlen($username) < 3) {
     set_flash("error", "Username-ul trebuie să aibă între 3 și 64 de caractere.");

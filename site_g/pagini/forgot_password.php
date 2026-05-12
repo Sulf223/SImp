@@ -34,6 +34,9 @@ if (!empty($_SESSION['user_id'])) {
             </form>
             
             <div style="text-align: center; margin-top: var(--space-6); padding-top: var(--space-6); border-top: 1px solid var(--color-border);">
+                <p class="form-help">
+                    În Docker, emailurile de test se văd în Mailpit la <a href="http://localhost:8025" target="_blank" rel="noopener">localhost:8025</a>.
+                </p>
                 <p style="font-size: var(--text-sm); color: var(--color-fg-muted);">
                     Îți amintești parola? <a href="index.php?page=login" class="link-arrow" style="color: var(--color-primary); font-weight: 600;">Înapoi la login</a>
                 </p>

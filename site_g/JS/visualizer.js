@@ -45,6 +45,8 @@ class SortingVisualizer {
 
         this.comparisons = 0;
         this.swaps = 0;
+        this.sortStartedAt = null;
+        this.lastElapsedMs = 0;
         this.soundEnabled = false;
         this.audioContext = null;
 
@@ -116,11 +118,30 @@ class SortingVisualizer {
     }
 
     // Pixel Perfect Hook: Update external stats
-    updateStatsUI() {
+    updateStatsUI(message) {
         const compEl = document.getElementById('comparisons');
         const swapEl = document.getElementById('swaps');
-        if (compEl) compEl.innerText = this.comparisons;
-        if (swapEl) swapEl.innerText = this.swaps;
+        const timeEl = document.getElementById('sort-time');
+        const statusEl = document.getElementById('sort-status');
+
+        const elapsed = this.sortStartedAt
+            ? Math.max(0, Math.round(performance.now() - this.sortStartedAt))
+            : this.lastElapsedMs;
+
+        if (compEl) compEl.textContent = this.comparisons;
+        if (swapEl) swapEl.textContent = this.swaps;
+        if (timeEl) timeEl.textContent = elapsed + 'ms';
+        if (statusEl) statusEl.textContent = this.formatRunStatus(message);
+    }
+
+    formatRunStatus(message) {
+        const text = String(message || '').toLowerCase();
+        if (text.includes('finalizata')) return 'Finalizat';
+        if (text.includes('ruleaza')) return 'Ruleaza';
+        if (text.includes('quiz')) return 'Quiz';
+        if (text.includes('resetate') || text.includes('pregatit')) return 'Pregatit';
+        if (this.isSorting) return 'Ruleaza';
+        return 'Pregatit';
     }
 
     resolveAlgorithmName(name) {
@@ -164,6 +185,17 @@ class SortingVisualizer {
     }
 
     bindCustomControls() {
+        const initialSizeControl = document.querySelector('[data-control="size"]');
+        if (initialSizeControl) {
+            this.size = parseInt(initialSizeControl.value, 10) || this.size;
+        }
+
+        const initialSpeedControl = document.querySelector('[data-control="speed"]');
+        if (initialSpeedControl) {
+            const val = initialSpeedControl.value;
+            this.delay = val === 'slow' ? 80 : val === 'fast' ? 10 : 35;
+        }
+
         document.querySelectorAll('[data-action="start"]').forEach(btn => {
             btn.addEventListener('click', () => this.runSort());
         });
@@ -338,10 +370,13 @@ class SortingVisualizer {
     resetCounters() {
         this.comparisons = 0;
         this.swaps = 0;
+        this.sortStartedAt = null;
+        this.lastElapsedMs = 0;
         this.updateStats("Contoare resetate.");
     }
 
     updateStats(message) {
+        this.updateStatsUI(message);
         if (!this.statsEl) return;
         const algorithm = this.formatAlgorithmName(this.lastRunAlgorithm || this.algorithmName);
         this.statsEl.innerHTML = "<strong>Algoritm:</strong> " + algorithm +
@@ -536,6 +571,7 @@ class SortingVisualizer {
         const activeAlgorithm = this.resolveAlgorithmName(forcedAlgorithm || this.algorithmName);
         this.lastRunAlgorithm = activeAlgorithm;
         this.resetCounters();
+        this.sortStartedAt = performance.now();
         this.updateStats("Ruleaza animatia...");
 
         if (activeAlgorithm === "bubble") await this.bubbleSort();
@@ -548,6 +584,8 @@ class SortingVisualizer {
 
         this.draw([], -1, 0);
         this.isSorting = false;
+        this.lastElapsedMs = this.sortStartedAt ? Math.round(performance.now() - this.sortStartedAt) : this.lastElapsedMs;
+        this.sortStartedAt = null;
 
         if (quizMode) {
             this.updateStats("Quiz: ghiceste algoritmul si apasa Verifica raspuns.");

@@ -5,6 +5,9 @@ require_once __DIR__ . '/../PHP/conexiune.php';
 require_once __DIR__ . '/../PHP/progres_learning.php';
 
 $userId = (int)$_SESSION['user_id'];
+if (function_exists('ensure_learning_tables')) {
+    ensure_learning_tables($con);
+}
 
 // Fetch user info
 $columnExists = function (string $table, string $column) use ($con): bool {
@@ -72,6 +75,53 @@ $heatmap = get_activity_heatmap($con, $userId, 26);
 $totalActivities = array_sum($heatmap);
 $activeDays = count(array_filter($heatmap, static fn($count) => (int)$count > 0));
 
+$lessons = function_exists('get_fundamental_lessons') ? get_fundamental_lessons() : [];
+$totalLessons = max(1, count($lessons));
+$completedLessons = 0;
+$avgLessonProgress = 0;
+if ($stmt = $con->prepare("SELECT SUM(progress_percent >= 100) AS completed, AVG(progress_percent) AS avg_progress FROM learning_progress WHERE user_id = ?")) {
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc() ?: [];
+    $completedLessons = (int)($row['completed'] ?? 0);
+    $avgLessonProgress = (int)round((float)($row['avg_progress'] ?? 0));
+    $stmt->close();
+}
+
+$totalGrile = 0;
+$solvedGrile = 0;
+$quizAttempts = 0;
+$quizCorrect = 0;
+$quizAccuracy = 0;
+if ($res = $con->query("SELECT COUNT(*) AS c FROM grile_cpp")) {
+    $totalGrile = (int)($res->fetch_assoc()['c'] ?? 0);
+    $res->free();
+}
+if ($stmt = $con->prepare("SELECT COUNT(*) AS c FROM progres_grile WHERE id_utilizator = ?")) {
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $solvedGrile = (int)($stmt->get_result()->fetch_assoc()['c'] ?? 0);
+    $stmt->close();
+}
+if ($tableExists('quiz_attempts') && ($stmt = $con->prepare("SELECT COUNT(*) AS attempts, SUM(is_correct = 1) AS correct FROM quiz_attempts WHERE user_id = ?"))) {
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc() ?: [];
+    $quizAttempts = (int)($row['attempts'] ?? 0);
+    $quizCorrect = (int)($row['correct'] ?? 0);
+    $quizAccuracy = $quizAttempts > 0 ? (int)round(($quizCorrect / $quizAttempts) * 100) : 0;
+    $stmt->close();
+}
+
+$nextProfileRecommendation = 'Continuă lecțiile de sortare și rulează câteva grile după fiecare algoritm.';
+if ($completedLessons >= $totalLessons && $solvedGrile < $totalGrile) {
+    $nextProfileRecommendation = 'Ai parcurs lecțiile principale; merită să crești scorul la grile.';
+} elseif ($quizAttempts > 0 && $quizAccuracy < 70) {
+    $nextProfileRecommendation = 'Revino la grilele greșite și citește explicația după fiecare răspuns.';
+} elseif ($avgLessonProgress >= 70) {
+    $nextProfileRecommendation = 'Încearcă Laboratorul Vizual și Comparațiile ca să legi teoria de execuție.';
+}
+
 // FEATURE [F5]: Achievements
 $sql_ach = "SELECT a.*, ua.unlocked_at IS NOT NULL AS unlocked
             FROM achievements a
@@ -122,6 +172,34 @@ if ($tableExists('achievements') && $tableExists('user_achievements') && ($stmt 
       <span class="stat__label">ACTIVITATE TOTALĂ</span>
       <span class="stat__value"><?= $totalActivities ?></span>
       <span class="stat__sub">în <?= $activeDays ?> zile active</span>
+    </article>
+
+    <article class="card bento__card--timeline profile-summary-card">
+      <header class="card__head">
+        <span class="card__eyebrow">Rezumat progres</span>
+      </header>
+      <div class="profile-summary-grid">
+        <section>
+          <span class="stat__label">Algoritmi parcurși</span>
+          <strong><?= $completedLessons ?> / <?= $totalLessons ?></strong>
+          <p>Media lecțiilor: <?= $avgLessonProgress ?>%</p>
+        </section>
+        <section>
+          <span class="stat__label">Grile rezolvate</span>
+          <strong><?= $solvedGrile ?> / <?= $totalGrile ?></strong>
+          <p>Banca oficială de întrebări.</p>
+        </section>
+        <section>
+          <span class="stat__label">Acuratețe</span>
+          <strong><?= $quizAttempts > 0 ? $quizAccuracy . '%' : '—' ?></strong>
+          <p><?= $quizAttempts > 0 ? $quizCorrect . ' corecte din ' . $quizAttempts . ' încercări.' : 'Apare după primele grile.' ?></p>
+        </section>
+        <section>
+          <span class="stat__label">Recomandare</span>
+          <strong>Următorul pas</strong>
+          <p><?= htmlspecialchars($nextProfileRecommendation, ENT_QUOTES, 'UTF-8') ?></p>
+        </section>
+      </div>
     </article>
     
     <!-- Heatmap (col-span-12) -->

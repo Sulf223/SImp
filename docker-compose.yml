@@ -118,6 +118,7 @@ services:
       - ./migrations/20260505_add_doc_link_to_grile_cpp.sql:/docker-entrypoint-initdb.d/10_add_doc_link_to_grile_cpp.sql:ro
       - ./migrations/20260512_audit_grile_questions.sql:/docker-entrypoint-initdb.d/11_audit_grile_questions.sql:ro
       - ./migrations/20260512_fix_achievement_encoding.sql:/docker-entrypoint-initdb.d/12_fix_achievement_encoding.sql:ro
+      - ./migrations/20260512_quiz_attempts.sql:/docker-entrypoint-initdb.d/13_quiz_attempts.sql:ro
     
     networks:
       - offbyone_academy_network

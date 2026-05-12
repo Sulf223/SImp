@@ -51,6 +51,85 @@ $algoritm_zilei_desc  = 'Azi aprofundăm o tehnică eficientă (Divide et Impera
 $exDone   = (int)($stats['done']  ?? 0);
 $exTotal  = (int)($stats['total'] ?? 0);
 $nrRecent = is_array($recentItems) ? count($recentItems) : 0;
+
+$tableExists = function (string $table) use ($con): bool {
+    $safeTable = $con->real_escape_string($table);
+    $result = $con->query("SHOW TABLES LIKE '{$safeTable}'");
+    if (!$result) return false;
+    $exists = $result->num_rows > 0;
+    $result->free();
+    return $exists;
+};
+
+$lessons = function_exists('get_fundamental_lessons') ? get_fundamental_lessons() : [];
+$totalLessons = max(1, count($lessons));
+$completedLessons = 0;
+$avgProgress = 0;
+if ($stmt = $con->prepare("SELECT COUNT(*) AS total_started, SUM(progress_percent >= 100) AS completed, AVG(progress_percent) AS avg_progress FROM learning_progress WHERE user_id = ?")) {
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc() ?: [];
+    $completedLessons = (int)($row['completed'] ?? 0);
+    $avgProgress = (int)round((float)($row['avg_progress'] ?? 0));
+    $stmt->close();
+}
+
+$totalGrile = 0;
+$solvedGrile = 0;
+$quizAttempts = 0;
+$quizCorrect = 0;
+$quizAccuracy = 0;
+$lastWrongQuiz = null;
+
+if ($res = $con->query("SELECT COUNT(*) AS c FROM grile_cpp")) {
+    $totalGrile = (int)($res->fetch_assoc()['c'] ?? 0);
+    $res->free();
+}
+if ($stmt = $con->prepare("SELECT COUNT(*) AS c FROM progres_grile WHERE id_utilizator = ?")) {
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $solvedGrile = (int)($stmt->get_result()->fetch_assoc()['c'] ?? 0);
+    $stmt->close();
+}
+if ($tableExists('quiz_attempts')) {
+    if ($stmt = $con->prepare("SELECT COUNT(*) AS attempts, SUM(is_correct = 1) AS correct FROM quiz_attempts WHERE user_id = ?")) {
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc() ?: [];
+        $quizAttempts = (int)($row['attempts'] ?? 0);
+        $quizCorrect = (int)($row['correct'] ?? 0);
+        $quizAccuracy = $quizAttempts > 0 ? (int)round(($quizCorrect / $quizAttempts) * 100) : 0;
+        $stmt->close();
+    }
+    if ($stmt = $con->prepare("SELECT g.id, g.intrebare, g.nume_metoda FROM quiz_attempts qa JOIN grile_cpp g ON g.id = qa.grila_id WHERE qa.user_id = ? AND qa.is_correct = 0 ORDER BY qa.attempted_at DESC LIMIT 1")) {
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $lastWrongQuiz = $stmt->get_result()->fetch_assoc() ?: null;
+        $stmt->close();
+    }
+}
+
+$nextAction = [
+    'title' => 'Continuă lecția curentă',
+    'description' => $lectie_curenta_titlu,
+    'link' => $lectie_curenta_link,
+    'label' => 'Reia lecția',
+];
+if ($lastWrongQuiz) {
+    $nextAction = [
+        'title' => 'Reia ultima grilă greșită',
+        'description' => $lastWrongQuiz['nume_metoda'] . ' · ' . mb_strimwidth((string)$lastWrongQuiz['intrebare'], 0, 90, '...', 'UTF-8'),
+        'link' => 'index.php?page=grila_interactiva&id=' . (int)$lastWrongQuiz['id'],
+        'label' => 'Repară greșeala',
+    ];
+} elseif ($progres_curent >= 100 && $solvedGrile < $totalGrile) {
+    $nextAction = [
+        'title' => 'Testează ce ai învățat',
+        'description' => 'Ai lecția curentă completă; următorul pas bun este o grilă.',
+        'link' => 'index.php?page=grile',
+        'label' => 'Mergi la grile',
+    ];
+}
 ?>
 
 <div data-component="dashboard-modern">
@@ -145,6 +224,40 @@ $nrRecent = is_array($recentItems) ? count($recentItems) : 0;
                 <a href="index.php?page=sortare" class="btn btn--ghost">
                     Vezi toate metodele
                 </a>
+            </div>
+        </article>
+
+        <article class="card bento__card--timeline dashboard-focus-card">
+            <header class="card__head">
+                <span class="card__eyebrow">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>
+                    </svg>
+                    Focus pentru azi
+                </span>
+            </header>
+            <div class="dashboard-focus-grid">
+                <section>
+                    <span class="stat__label">Următorul pas</span>
+                    <h3><?php echo htmlspecialchars($nextAction['title'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                    <p><?php echo htmlspecialchars($nextAction['description'], ENT_QUOTES, 'UTF-8'); ?></p>
+                    <a href="<?php echo htmlspecialchars($nextAction['link'], ENT_QUOTES, 'UTF-8'); ?>" class="btn btn--primary btn--sm"><?php echo htmlspecialchars($nextAction['label'], ENT_QUOTES, 'UTF-8'); ?></a>
+                </section>
+                <section>
+                    <span class="stat__label">Progres total lecții</span>
+                    <strong><?php echo $completedLessons; ?> / <?php echo $totalLessons; ?></strong>
+                    <p>Media progresului: <?php echo $avgProgress; ?>%</p>
+                </section>
+                <section>
+                    <span class="stat__label">Grile</span>
+                    <strong><?php echo $solvedGrile; ?> / <?php echo $totalGrile; ?></strong>
+                    <p>Rezolvate corect în banca oficială.</p>
+                </section>
+                <section>
+                    <span class="stat__label">Acuratețe</span>
+                    <strong><?php echo $quizAttempts > 0 ? $quizAccuracy . '%' : '—'; ?></strong>
+                    <p><?php echo $quizAttempts > 0 ? $quizCorrect . ' corecte din ' . $quizAttempts . ' încercări.' : 'Apare după primele încercări.'; ?></p>
+                </section>
             </div>
         </article>
 

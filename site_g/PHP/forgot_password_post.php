@@ -27,6 +27,13 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
+$normalizedEmail = mb_strtolower($email, 'UTF-8');
+if (!check_rate_limit($con, 'pwd_reset_email', $normalizedEmail, 3, 3600)) {
+    set_flash('error', 'Prea multe cereri pentru această adresă. Te rugăm să încerci din nou mai târziu.');
+    header('Location: ../index.php?page=forgot_password');
+    exit;
+}
+
 // FEATURE [F1]: Anti-enumeration
 $success_msg = 'Dacă adresa există în sistem, vei primi un link pentru resetarea parolei.';
 
@@ -36,7 +43,7 @@ $row = null;
 if (!$stmt) {
     error_log('forgot_password_post prepare user lookup failed: ' . $con->error);
 } else {
-    $stmt->bind_param('s', $email);
+    $stmt->bind_param('s', $normalizedEmail);
     $stmt->execute();
     $res = $stmt->get_result();
     $row = $res ? $res->fetch_assoc() : null;
@@ -77,7 +84,7 @@ if ($row) {
         $html = '<p>Ai cerut resetarea parolei pentru contul tău <strong>OffByOne Academy</strong>.</p>'
               . '<p><a href="' . htmlspecialchars($link, ENT_QUOTES, 'UTF-8') . '">Resetează parola</a></p>'
               . '<p>Linkul este valabil 1 oră. Dacă nu ai cerut tu resetarea, ignoră acest mesaj.</p>';
-        send_app_mail($email, $subject, $html, $text);
+        send_app_mail($normalizedEmail, $subject, $html, $text);
     } catch (Throwable $e) {
         $con->rollback();
         error_log('forgot_password_post token/email failed: ' . $e->getMessage());

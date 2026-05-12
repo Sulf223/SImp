@@ -162,11 +162,11 @@ if (session_status() === PHP_SESSION_NONE) {
                                 </svg>
                                 Comparații Sortare
                             </a>
-                            <a href="index.php?page=lista_exercitii" class="link-arrow" style="font-size: var(--text-sm);">
+                            <a href="index.php?page=laborator_vizual" class="link-arrow" style="font-size: var(--text-sm);">
                                 <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: inline; vertical-align: middle; margin-right: 4px;">
                                     <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>
                                 </svg>
-                                Exerciții
+                                Laborator Vizual
                             </a>
                             <a href="index.php?page=profesor_ai" class="link-arrow" style="font-size: var(--text-sm);">
                                 <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: inline; vertical-align: middle; margin-right: 4px;">

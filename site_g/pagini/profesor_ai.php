@@ -141,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // FIX [Q10]: Normalize all quiz data for UTF-8 issues
                 quizData = data.quiz.map(q => ({
                     question: normalizeUTF8Text(fixMojibake(q.question || '')),
+                    codeExample: normalizeUTF8Text(fixMojibake(q.code_example || '')),
                     options: (q.options || []).map(opt => normalizeUTF8Text(fixMojibake(opt || ''))),
                     correct: q.correct,
                     explanation: normalizeUTF8Text(fixMojibake(q.explanation || ''))
@@ -166,9 +167,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // FIX [Q6]: Ensure proper UTF-8 character encoding when rendering
         // Use both normalization and mojibake fixing for safety
         const normalizedQuestion = normalizeUTF8Text(fixMojibake(q.question || ''));
+        const normalizedCodeExample = normalizeUTF8Text(fixMojibake(q.codeExample || ''));
         const normalizedExplanation = normalizeUTF8Text(fixMojibake(q.explanation || ''));
         const normalizedOptions = (q.options || []).map(opt => normalizeUTF8Text(fixMojibake(opt || '')));
         const formattedQuestion = formatQuizText(normalizedQuestion);
+        const formattedCodeExample = normalizedCodeExample
+            ? `<pre class="lesson-code" style="margin: 0 0 var(--space-6); white-space: pre-wrap;"><code>${escapeHtml(normalizedCodeExample)}</code></pre>`
+            : '';
         const formattedExplanation = formatQuizText(normalizedExplanation);
         const formattedOptions = normalizedOptions.map(opt => formatQuizText(opt));
         
@@ -178,6 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="badge badge--soft">${currentIdx + 1 > 5 ? 'Avansat' : 'Bazele'}</span>
             </div>
             <div style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-6); line-height: 1.55;">${formattedQuestion}</div>
+            ${formattedCodeExample}
             
             <div id="ai-options" style="display: flex; flex-direction: column; gap: var(--space-3); flex: 1;">
                 ${formattedOptions.map((opt, i) => `

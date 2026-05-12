@@ -1,4 +1,4 @@
-const CACHE = 'offbyone-academy-v3';
+const CACHE = 'offbyone-academy-v6';
 const ASSETS = [
     './',
     'index.php',

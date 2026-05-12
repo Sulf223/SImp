@@ -66,11 +66,46 @@ function ai_quiz_has_code_context(string $question): bool {
     return (bool)preg_match('/```|#include|for\s*\(|while\s*\(|if\s*\(|int\s+\w+\s*\(|void\s+\w+\s*\(|\w+\s*=\s*\w+/iu', $question);
 }
 
+function ai_quiz_extract_code_example(string $question): array {
+    $code = '';
+    $cleanQuestion = preg_replace_callback('/```(?:cpp|c\+\+|c)?\s*([\s\S]*?)```/iu', static function ($matches) use (&$code) {
+        if ($code === '') {
+            $code = trim((string)($matches[1] ?? ''));
+        }
+        return ' ';
+    }, $question);
+
+    $cleanQuestion = trim((string)$cleanQuestion);
+    if ($cleanQuestion === '') {
+        $cleanQuestion = 'Analizează fragmentul de cod și alege răspunsul corect.';
+    }
+
+    return [$cleanQuestion, $code];
+}
+
+function ai_quiz_has_real_code_context(string $question): bool {
+    [, $code] = ai_quiz_extract_code_example($question);
+    if ($code === '') {
+        return ai_quiz_has_code_context($question);
+    }
+
+    if (preg_match('/\.\.\./u', $code) && !preg_match('/\b(if|for|while|return)\b|strcmp|swap|=|<|>|\+\+|--/iu', $code)) {
+        return false;
+    }
+
+    return (bool)preg_match('/\b(if|for|while|return)\b|strcmp|swap|=|<|>|\+\+|--/iu', $code);
+}
+
 function ai_quiz_is_memory_question(string $question): bool {
     $q = mb_strtolower($question, 'UTF-8');
     $ascii = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $q);
     if ($ascii !== false) {
         $q = $ascii;
+    }
+    $hasRealCode = ai_quiz_has_real_code_context($question);
+
+    if (preg_match('/ce\s+(face|rol|scop).*functi|care\s+este\s+scopul\s+functiei|ce\s+functie\s+este\s+utilizata|ce\s+tip\s+de\s+sortare\s+este\s+utilizat/iu', $q)) {
+        return true;
     }
 
     if (preg_match('/ce\s+(metoda|algoritm).*functia/iu', $q)) {
@@ -81,11 +116,24 @@ function ai_quiz_is_memory_question(string $question): bool {
         return true;
     }
 
-    if (!ai_quiz_has_code_context($question) && preg_match('/functia|aplicatia|fisierul|programul\s+(din|numit)|codul|variabila|variabilei|instructiunea|linia|`[^`]+`|ordonare[a-z0-9_]*|[a-z0-9]+_[a-z0-9_]+/iu', $q)) {
+    if (!$hasRealCode && preg_match('/functia|aplicatia|fisierul|programul\s+(din|numit)|codul|variabila|variabilei|instructiunea|linia|`[^`]+`|ordonare[a-z0-9_]*|[a-z0-9]+_[a-z0-9_]+/iu', $q)) {
         return true;
     }
 
     return false;
+}
+
+function ai_quiz_prepare_db_question(array $question): array {
+    [$cleanQuestion, $codeFromQuestion] = ai_quiz_extract_code_example((string)($question['question'] ?? ''));
+    $codeExample = trim((string)($question['code_example'] ?? ''));
+    if ($codeExample === '') {
+        $codeExample = $codeFromQuestion;
+    }
+
+    return [
+        'question' => $cleanQuestion,
+        'code_example' => $codeExample !== '' ? $codeExample : null,
+    ];
 }
 
 function ai_quiz_fallback_questions(string $pathSlug): array {
@@ -178,7 +226,7 @@ CERINȚE STRICTE:
 7. Evită întrebări triviale sau prea evidente
 8. Include în explicații termeni și exemple compatibile cu sursele
 9. NU întreba niciodată „ce metodă/algoritm este folosit în funcția X”, „ce face aplicația Y”, „din ce fișier provine X” sau alte întrebări de memorare a numelor din exemple
-10. Dacă folosești o aplicație sau un exemplu de cod din documentație, include în câmpul question un fragment scurt de cod (4-10 linii) și întreabă ceva rezolvabil din acel fragment
+10. Dacă folosești o aplicație sau un exemplu de cod din documentație, pune fragmentul scurt de cod (4-10 linii) în câmpul code_example și întreabă ceva rezolvabil din acel fragment
 11. Preferă întrebări de tip: completează expresia lipsă, ce variabilă trebuie înlocuită, ce condiție oprește bucla, ce efect are schimbarea unei variabile, ce complexitate rezultă din cod
 12. Întrebarea trebuie să poată fi rezolvată fără ca elevul să știe pe dinafară numele funcțiilor din aplicațiile scrise
 13. Dacă menționezi o variabilă concretă (`aux`, `vf`, `i`, `j`, `pivot` etc.), include obligatoriu fragmentul de cod în care apare variabila
@@ -190,6 +238,7 @@ FORMATUL RĂSPUNSULUI - STRICT JSON (fără coduri HTML, fără escape-uri erona
   \"quiz\": [
     {
       \"question\": \"Text clar al întrebării. Poate include un fragment de cod între ```cpp și ``` dacă întrebarea se bazează pe cod.\",
+      \"code_example\": \"Fragment C++ scurt sau null dacă nu este nevoie de cod.\",
       \"options\": [\"Varianta A\", \"Varianta B\", \"Varianta C\", \"Varianta D\"],
       \"correct\": 0,
       \"explanation\": \"Explicație concisă de ce e corect\"
@@ -276,14 +325,25 @@ Răspunde DOAR cu JSON-ul valid, fără alt text, comentarii sau markdown.";
             continue; // Valid correct index
         }
 
-        if (ai_quiz_is_memory_question((string)$q['question'])) {
+        $questionWithOptionalCode = (string)$q['question'];
+        if (!empty($q['code_example'])) {
+            $questionWithOptionalCode .= "\n```cpp\n" . (string)$q['code_example'] . "\n```";
+        }
+
+        if (ai_quiz_is_memory_question($questionWithOptionalCode)) {
             error_log('ai_quiz_api: skipped memory-based question: ' . mb_substr((string)$q['question'], 0, 180, 'UTF-8'));
             continue;
         }
         
         // Ensure UTF-8 encoding for all strings
+        [$cleanQuestion, $codeExample] = ai_quiz_extract_code_example((string)$q['question']);
+        if (!empty($q['code_example'])) {
+            $codeExample = trim((string)$q['code_example']);
+        }
+
         $sanitizedQuestion = [
-            'question' => mb_convert_encoding($q['question'], 'UTF-8', 'UTF-8'),
+            'question' => mb_convert_encoding($cleanQuestion, 'UTF-8', 'UTF-8'),
+            'code_example' => $codeExample !== '' ? mb_convert_encoding($codeExample, 'UTF-8', 'UTF-8') : null,
             'options' => array_map(function($opt) { 
                 return mb_convert_encoding($opt, 'UTF-8', 'UTF-8'); 
             }, $q['options']),
@@ -344,12 +404,12 @@ Răspunde DOAR cu JSON-ul valid, fără alt text, comentarii sau markdown.";
         if ($hasDocLink) {
             $insStmt = $con->prepare(
                 "INSERT INTO grile_cpp (nume_metoda, dificultate, intrebare, cod_exemplu, varianta_1, varianta_2, varianta_3, varianta_4, raspuns_corect, explicatie, doc_link)
-                 VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?)"
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
         } else {
             $insStmt = $con->prepare(
                 "INSERT INTO grile_cpp (nume_metoda, dificultate, intrebare, cod_exemplu, varianta_1, varianta_2, varianta_3, varianta_4, raspuns_corect, explicatie)
-                 VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?, ?)"
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
         }
 
@@ -358,7 +418,9 @@ Răspunde DOAR cu JSON-ul valid, fără alt text, comentarii sau markdown.";
                 error_log('ai_quiz_api DB prepare failed: ' . $con->error);
                 break;
             }
-            $qtext = $sq['question'];
+            $dbQuestion = ai_quiz_prepare_db_question($sq);
+            $qtext = $dbQuestion['question'];
+            $codeExample = $dbQuestion['code_example'];
             // Skip duplicate by text
             $checkStmt->bind_param('s', $qtext);
             $checkStmt->execute();
@@ -375,13 +437,13 @@ Răspunde DOAR cu JSON-ul valid, fără alt text, comentarii sau markdown.";
             $opt2 = $sq['options'][1] ?? null;
             $opt3 = $sq['options'][2] ?? null;
             $opt4 = $sq['options'][3] ?? null;
-            $correct = $sq['correct'];
+            $correct = ((int)$sq['correct']) + 1;
             $exp = $sq['explanation'];
 
             if ($hasDocLink) {
-                $insStmt->bind_param('sssssssiss', $nume_metoda, $dificultate, $qtext, $opt1, $opt2, $opt3, $opt4, $correct, $exp, $docLink);
+                $insStmt->bind_param('ssssssssiss', $nume_metoda, $dificultate, $qtext, $codeExample, $opt1, $opt2, $opt3, $opt4, $correct, $exp, $docLink);
             } else {
-                $insStmt->bind_param('sssssssis', $nume_metoda, $dificultate, $qtext, $opt1, $opt2, $opt3, $opt4, $correct, $exp);
+                $insStmt->bind_param('ssssssssis', $nume_metoda, $dificultate, $qtext, $codeExample, $opt1, $opt2, $opt3, $opt4, $correct, $exp);
             }
             // Note: bind_param types must match: s=string, i=integer. We'll attempt with fallback
             // Use an execution attempt; ignore failures but log them

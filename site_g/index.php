@@ -62,7 +62,8 @@ $pagini_permise = [
     'grile' => 'PHP/grile.php',
     'grila_interactiva' => 'PHP/grila_interactiva.php',
     'register' => 'PHP/register.php',
-    'lista_exercitii' => 'PHP/lista_exercitii.php',
+    'laborator_vizual' => 'pagini/laborator_vizual.php',
+    'lista_exercitii' => 'pagini/laborator_vizual.php',
     'changelog' => 'pagini/changelog.php',
     'profil' => 'pagini/profil.php',
     'invatare' => 'pagini/invatare.php',
@@ -147,7 +148,8 @@ $page_titles = [
     'login' => 'Autentificare',
     'register' => 'Cont Nou',
     'grile' => 'Grile interactive',
-    'lista_exercitii' => 'Exerciții practice',
+    'laborator_vizual' => 'Laborator Vizual',
+    'lista_exercitii' => 'Laborator Vizual',
     'profil' => 'Profilul meu',
     'admin' => 'Administrare Sistem'
 ];
@@ -164,7 +166,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta name="description" content="OffByOne Academy – platformă educațională pentru învățarea algoritmilor de sortare cu vizualizări interactive în C++.">
     <meta property="og:title" content="OffByOne Academy – C++ Learning Hub">
-    <meta property="og:description" content="Învață algoritmi de sortare cu vizualizări interactive, exerciții practice și asistent AI.">
+    <meta property="og:description" content="Învață algoritmi cu vizualizări interactive, laborator pas-cu-pas și asistent AI.">
     <meta property="og:type" content="website">
 
     <!-- FEATURE [F4]: PWA Manifest & Meta -->
@@ -178,7 +180,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="CSS/modern_vars.css?v=20260506-security-light-mail">
     <link rel="stylesheet" href="stil.css?v=20260506-security-light-mail">
-    <link rel="stylesheet" href="CSS/dashboard_modern.css?v=20260506-security-light-mail">
+    <link rel="stylesheet" href="CSS/dashboard_modern.css?v=20260512-laborator-vizual-sync">
     <?php if ($pagina_curenta === 'admin'): ?>
         <link rel="stylesheet" href="CSS/admin.css?v=20260506-security-light-mail">
     <?php endif; ?>
@@ -196,6 +198,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
         main {
             position: relative;
             z-index: 10;
+            box-sizing: border-box;
         }
 
         /* Widget AI: Când este închis, panelul nu trebuie să ocupe spațiu sau să blocheze click-urile */
@@ -251,7 +254,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
         <li><a href="index.php?page=invatare" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm); color: var(--color-accent); font-weight: 600;">Drumuri de Învățare</a></li>
         <li><a href="index.php?page=comparatii_sortare" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Comparații</a></li>
         <li><a href="index.php?page=profesor_ai" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Profesor AI</a></li>
-        <li><a href="index.php?page=lista_exercitii" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Exerciții</a></li>
+        <li><a href="index.php?page=laborator_vizual" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Laborator Vizual</a></li>
         <li><a href="index.php?page=compilator" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Compilator</a></li>
         <li><a href="index.php?page=grile" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Grile</a></li>
         <li><a href="index.php?page=profil" class="btn btn--quiet btn--sm" style="font-size: var(--text-sm);">Profil</a></li>
@@ -303,7 +306,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
             echo '<div class="toast toast--info" role="alert" style="border-left-color: var(--color-warning); animation: toastIn 0.5s ease; align-items: center;">';
             echo '<div class="toast__icon" style="color: var(--color-warning);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></div>';
             echo '<div class="toast__content" style="flex: 1;">';
-            echo '<strong style="display: block; font-size: var(--text-sm); color: var(--color-fg);">Achievement Deblocat!</strong>';
+            echo '<strong style="display: block; font-size: var(--text-sm); color: var(--color-fg);">Realizare deblocată!</strong>';
             echo '<span style="font-size: var(--text-xs); color: var(--color-fg-muted);">' . htmlspecialchars($ach['title']) . '</span>';
             echo '</div>';
             echo '<button type="button" class="toast__close" aria-label="Închide" onclick="this.parentElement.remove()">&times;</button>';

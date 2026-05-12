@@ -143,8 +143,8 @@ if (session_status() === PHP_SESSION_NONE) {
                     </svg>
                     Comparații de performanță
                 </a>
-                <a href="index.php?page=lista_exercitii" class="btn btn--ghost">
-                    Mergi la exerciții
+                <a href="index.php?page=laborator_vizual" class="btn btn--ghost">
+                    Laborator Vizual
                 </a>
             </div>
         </article>

@@ -116,6 +116,8 @@ services:
       - ./site_g/database/upgrade_admin_audit_log.sql:/docker-entrypoint-initdb.d/08_upgrade_admin_audit_log.sql:ro
       - ./site_g/database/upgrade_achievements.sql:/docker-entrypoint-initdb.d/09_upgrade_achievements.sql:ro
       - ./migrations/20260505_add_doc_link_to_grile_cpp.sql:/docker-entrypoint-initdb.d/10_add_doc_link_to_grile_cpp.sql:ro
+      - ./migrations/20260512_audit_grile_questions.sql:/docker-entrypoint-initdb.d/11_audit_grile_questions.sql:ro
+      - ./migrations/20260512_fix_achievement_encoding.sql:/docker-entrypoint-initdb.d/12_fix_achievement_encoding.sql:ro
     
     networks:
       - offbyone_academy_network

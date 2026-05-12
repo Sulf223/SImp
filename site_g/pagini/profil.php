@@ -139,7 +139,7 @@ if ($tableExists('achievements') && $tableExists('user_achievements') && ($stmt 
       <header class="card__head">
         <span class="card__eyebrow">
           <svg class="icon"><path d="M12 15l-2 5-9-5 9-5 2 5Z"/><path d="M12 15l2 5 9-5-9-5-2 5Z"/></svg>
-          Realizări (Achievements)
+          Realizări
         </span>
       </header>
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-4); margin-top: var(--space-4);">

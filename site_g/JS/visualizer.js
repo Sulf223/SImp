@@ -836,6 +836,38 @@ class AlgorithmLab {
         this.stepIndex = 0;
         this.timer = null;
         this.running = false;
+        this.algorithmLabels = {
+            bubble: "Bubble Sort",
+            selection: "Selection Sort",
+            insertion: "Insertion Sort",
+            quick: "Quick Sort",
+            merge: "Merge Sort",
+            counting: "Counting Sort",
+            factorial: "Recursivitate: Factorial",
+            fibonacci: "Recursivitate: Fibonacci",
+            permutari: "Backtracking: Permutări"
+        };
+        this.actionLabels = {
+            init: "Se inițializează",
+            compare: "Se compară",
+            swap: "Se interschimbă",
+            scan: "Se caută",
+            insert: "Se inserează",
+            pivot: "Se alege pivotul",
+            partition: "Se partiționează",
+            split: "Se împarte",
+            merge: "Se interclasează",
+            count: "Se numără",
+            place: "Se plasează",
+            call: "Se apelează funcția",
+            base: "Caz de bază",
+            returns: "Se întoarce rezultatul",
+            choose: "Se alege o valoare",
+            prune: "Se elimină o variantă",
+            backtrack: "Se revine",
+            solution: "Soluție găsită",
+            done: "Final"
+        };
 
         this.buildLayout();
         this.generateScenario();
@@ -851,23 +883,34 @@ class AlgorithmLab {
         return sans + ', system-ui, sans-serif';
     }
 
+    getAlgorithmLabel(key) {
+        return this.algorithmLabels[key] || key;
+    }
+
+    getActionLabel(key) {
+        return this.actionLabels[key] || "Pas";
+    }
+
+    escapeHTML(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
     buildLayout() {
         this.controls = document.createElement("div");
         this.controls.className = "visualizer-controls";
 
         this.algorithmSelect = document.createElement("select");
         this.algorithmSelect.className = "viz-select";
-        this.algorithmSelect.innerHTML = [
-            "<option value='bubble'>Bubble Sort</option>",
-            "<option value='selection'>Selection Sort</option>",
-            "<option value='insertion'>Insertion Sort</option>",
-            "<option value='quick'>Quick Sort</option>",
-            "<option value='merge'>Merge Sort</option>",
-            "<option value='counting'>Counting Sort</option>",
-            "<option value='factorial'>Recursivitate: Factorial</option>",
-            "<option value='fibonacci'>Recursivitate: Fibonacci</option>",
-            "<option value='permutari'>Backtracking: Permutari</option>"
-        ].join("");
+        this.algorithmSelect.setAttribute("aria-label", "Alege algoritmul");
+        this.algorithmSelect.innerHTML = Object.entries(this.algorithmLabels)
+            .map(([value, label]) => `<option value="${value}">${label}</option>`)
+            .join("");
+        this.algorithmSelect.value = this.container.getAttribute("data-default") || "bubble";
 
         this.inputN = document.createElement("input");
         this.inputN.type = "number";
@@ -876,46 +919,122 @@ class AlgorithmLab {
         this.inputN.value = "6";
         this.inputN.className = "viz-input";
         this.inputN.style.width = "60px";
+        this.inputN.setAttribute("aria-label", "Dimensiunea scenariului");
+
+        this.presetSelect = document.createElement("select");
+        this.presetSelect.className = "viz-select";
+        this.presetSelect.setAttribute("aria-label", "Preset pentru date");
+        this.presetSelect.innerHTML = [
+            "<option value='random'>Preset: aleator</option>",
+            "<option value='nearly'>Preset: aproape sortat</option>",
+            "<option value='reverse'>Preset: invers sortat</option>",
+            "<option value='duplicates'>Preset: cu duplicate</option>",
+            "<option value='sorted'>Preset: deja sortat</option>"
+        ].join("");
+        this.presetSelect.addEventListener("change", () => this.generateScenario());
 
         this.btnGenerate = document.createElement("button");
         this.btnGenerate.className = "btn btn--ghost btn--sm";
-        this.btnGenerate.textContent = "Genereaza scenariu";
+        this.btnGenerate.textContent = "Generează scenariu";
         this.btnGenerate.onclick = () => this.generateScenario();
+
+        this.btnPrev = document.createElement("button");
+        this.btnPrev.className = "btn btn--ghost btn--sm";
+        this.btnPrev.textContent = "Pas anterior";
+        this.btnPrev.onclick = () => this.stepBack();
 
         this.btnStep = document.createElement("button");
         this.btnStep.className = "btn btn--sm";
-        this.btnStep.textContent = "Pas urmator";
+        this.btnStep.textContent = "Pas următor";
         this.btnStep.onclick = () => this.stepForward();
 
         this.btnPlay = document.createElement("button");
         this.btnPlay.className = "btn btn--primary btn--sm";
-        this.btnPlay.textContent = "Ruleaza";
+        this.btnPlay.textContent = "Rulează";
         this.btnPlay.onclick = () => this.togglePlay();
+
+        this.btnReset = document.createElement("button");
+        this.btnReset.className = "btn btn--quiet btn--sm";
+        this.btnReset.textContent = "Reset";
+        this.btnReset.onclick = () => this.resetScenario();
 
         this.speedSelect = document.createElement("select");
         this.speedSelect.className = "viz-select";
-        this.speedSelect.innerHTML = "<option value='700'>Viteza: lent</option><option value='380' selected>Viteza: mediu</option><option value='180'>Viteza: rapid</option>";
+        this.speedSelect.setAttribute("aria-label", "Viteza redării");
+        this.speedSelect.innerHTML = "<option value='700'>Viteză: lent</option><option value='380' selected>Viteză: mediu</option><option value='180'>Viteză: rapid</option>";
 
-        this.controls.appendChild(this.algorithmSelect);
-        this.controls.appendChild(this.inputN);
+        const algorithmLabel = document.createElement("label");
+        algorithmLabel.className = "viz-inline-label";
+        algorithmLabel.append("Algoritm", this.algorithmSelect);
+
+        const sizeLabel = document.createElement("label");
+        sizeLabel.className = "viz-inline-label";
+        sizeLabel.append("Dimensiune", this.inputN);
+
+        this.controls.appendChild(algorithmLabel);
+        this.controls.appendChild(sizeLabel);
+        this.controls.appendChild(this.presetSelect);
         this.controls.appendChild(this.btnGenerate);
+        this.controls.appendChild(this.btnPrev);
         this.controls.appendChild(this.btnStep);
         this.controls.appendChild(this.btnPlay);
+        this.controls.appendChild(this.btnReset);
         this.controls.appendChild(this.speedSelect);
 
         this.meta = document.createElement("div");
         this.meta.className = "viz-meta";
 
+        this.legend = document.createElement("div");
+        this.legend.className = "viz-legend";
+        this.legend.innerHTML = [
+            ["normal", "Element normal"],
+            ["active", "Comparație / mutare"],
+            ["pivot", "Pivot / apel activ"],
+            ["solution", "Soluție găsită"]
+        ].map(([key, label]) => (
+            `<span class="viz-legend__item"><span class="viz-legend__swatch viz-legend__swatch--${key}"></span>${label}</span>`
+        )).join("");
+
+        this.explain = document.createElement("section");
+        this.explain.className = "viz-current-explain";
+
         this.canvas = document.createElement("canvas");
         this.canvas.height = 320;
         this.ctx = this.canvas.getContext("2d");
+
+        this.pseudocodePanel = document.createElement("aside");
+        this.pseudocodePanel.className = "viz-pseudocode";
+
+        this.quizPanel = document.createElement("aside");
+        this.quizPanel.className = "viz-guess";
+        this.quizPanel.addEventListener("click", e => {
+            const btn = e.target.closest("[data-guess-action]");
+            if (!btn) return;
+            this.handleGuess(btn.getAttribute("data-guess-action"));
+        });
+
+        this.stage = document.createElement("div");
+        this.stage.className = "viz-stage";
+        this.stage.appendChild(this.canvas);
+
+        this.sidePanel = document.createElement("div");
+        this.sidePanel.className = "viz-side-panel";
+        this.sidePanel.appendChild(this.pseudocodePanel);
+        this.sidePanel.appendChild(this.quizPanel);
+
+        this.mainGrid = document.createElement("div");
+        this.mainGrid.className = "viz-main-grid";
+        this.mainGrid.appendChild(this.stage);
+        this.mainGrid.appendChild(this.sidePanel);
 
         this.panel = document.createElement("div");
         this.panel.className = "viz-panel";
 
         this.container.appendChild(this.controls);
+        this.container.appendChild(this.legend);
         this.container.appendChild(this.meta);
-        this.container.appendChild(this.canvas);
+        this.container.appendChild(this.explain);
+        this.container.appendChild(this.mainGrid);
         this.container.appendChild(this.panel);
 
         this.algorithmSelect.addEventListener("change", () => this.generateScenario());
@@ -936,20 +1055,30 @@ class AlgorithmLab {
         const nRaw = Number(this.inputN.value || 6);
         const n = Math.max(3, Math.min(9, nRaw));
         this.inputN.value = String(n);
+        const isSorting = ["bubble", "selection", "insertion", "quick", "merge", "counting"].includes(algo);
+        this.presetSelect.disabled = !isSorting;
 
-        if (["bubble", "selection", "insertion", "quick", "merge", "counting"].includes(algo)) {
+        if (isSorting) {
             const size = Math.max(5, Math.min(24, n * 2));
-            const arr = this.makeRandomArray(size);
+            const arr = this.makeScenarioArray(size, this.presetSelect.value);
             this.steps = this.buildSortingSteps(algo, arr);
         } else if (algo === "factorial") {
             this.steps = this.buildFactorialSteps(Math.min(n, 8));
         } else if (algo === "fibonacci") {
             this.steps = this.buildFibonacciSteps(Math.min(n, 8));
         } else {
-            this.steps = this.buildPermutationSteps(Math.min(n, 6));
+            const backtrackingSize = Math.min(n, 3);
+            this.inputN.value = String(backtrackingSize);
+            this.steps = this.buildPermutationSteps(backtrackingSize);
         }
 
         this.onResize();
+        this.render();
+    }
+
+    resetScenario() {
+        this.stop();
+        this.stepIndex = 0;
         this.render();
     }
 
@@ -961,29 +1090,62 @@ class AlgorithmLab {
         return arr;
     }
 
+    makeScenarioArray(size, preset) {
+        const random = this.makeRandomArray(size);
+        const sorted = [...random].sort((a, b) => a - b);
+
+        if (preset === "sorted") {
+            return sorted;
+        }
+
+        if (preset === "reverse") {
+            return [...sorted].reverse();
+        }
+
+        if (preset === "nearly") {
+            const arr = [...sorted];
+            if (arr.length > 3) {
+                const a = Math.floor(arr.length / 3);
+                const b = Math.min(arr.length - 1, a + 2);
+                [arr[a], arr[b]] = [arr[b], arr[a]];
+            }
+            return arr;
+        }
+
+        if (preset === "duplicates") {
+            const values = [18, 24, 24, 36, 36, 48, 60, 60, 72];
+            return Array.from({ length: size }, (_, i) => values[i % values.length]);
+        }
+
+        return random;
+    }
+
     buildSortingSteps(algo, source) {
         const arr = [...source];
         const steps = [];
-        const push = (message, highlight = [], pivot = -1) => {
+        const push = (message, highlight = [], pivot = -1, line = 0, action = "scan") => {
             steps.push({
                 kind: "sorting",
                 algo,
+                title: this.getActionLabel(action),
                 message,
                 array: [...arr],
                 highlight,
-                pivot
+                pivot,
+                line,
+                action
             });
         };
 
-        push("Stare initiala");
+        push("Stare inițială", [], -1, 1, "init");
 
         if (algo === "bubble") {
             for (let i = 0; i < arr.length; i++) {
                 for (let j = 0; j < arr.length - i - 1; j++) {
-                    push(`Comparam ${arr[j]} si ${arr[j + 1]}`, [j, j + 1]);
+                    push(`Comparăm ${arr[j]} și ${arr[j + 1]}. Dacă primul este mai mare, le interschimbăm.`, [j, j + 1], -1, 3, "compare");
                     if (arr[j] > arr[j + 1]) {
                         [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
-                        push("Interschimbare", [j, j + 1]);
+                        push(`Interschimbăm elementele de pe pozițiile ${j} și ${j + 1}.`, [j, j + 1], -1, 5, "swap");
                     }
                 }
             }
@@ -991,43 +1153,46 @@ class AlgorithmLab {
             for (let i = 0; i < arr.length; i++) {
                 let min = i;
                 for (let j = i + 1; j < arr.length; j++) {
-                    push(`Cautam minim: i=${i}, j=${j}`, [i, j], min);
-                    if (arr[j] < arr[min]) min = j;
+                    push(`Căutăm minimul pentru poziția ${i}: comparăm v[${j}] cu minimul curent.`, [i, j], min, 4, "compare");
+                    if (arr[j] < arr[min]) {
+                        min = j;
+                        push(`Actualizăm poziția minimului: min devine ${j}.`, [j], min, 5, "scan");
+                    }
                 }
                 if (min !== i) {
                     [arr[i], arr[min]] = [arr[min], arr[i]];
-                    push("Mutam minimul pe pozitia curenta", [i, min], min);
+                    push(`Mutăm minimul găsit pe poziția ${i}.`, [i, min], min, 7, "swap");
                 }
             }
         } else if (algo === "insertion") {
             for (let i = 1; i < arr.length; i++) {
                 const key = arr[i];
                 let j = i - 1;
-                push(`Cheia este ${key}`, [i]);
+                push(`Alegem cheia ${key} și o inserăm în partea deja sortată.`, [i], -1, 2, "scan");
                 while (j >= 0 && arr[j] > key) {
                     arr[j + 1] = arr[j];
-                    push(`Mutam ${arr[j]} spre dreapta`, [j, j + 1]);
+                    push(`Mutăm ${arr[j]} spre dreapta pentru a face loc cheii.`, [j, j + 1], -1, 5, "swap");
                     j--;
                 }
                 arr[j + 1] = key;
-                push(`Inseram cheia ${key}`, [j + 1]);
+                push(`Inserăm cheia ${key} pe poziția ${j + 1}.`, [j + 1], -1, 7, "insert");
             }
         } else if (algo === "quick") {
             const quick = (lo, hi) => {
                 if (lo >= hi) return;
                 const pivot = arr[hi];
                 let p = lo;
-                push(`Pivot ${pivot} pe segment [${lo}, ${hi}]`, [hi], hi);
+                push(`Alegem pivotul ${pivot} pentru segmentul [${lo}, ${hi}].`, [hi], hi, 2, "pivot");
                 for (let i = lo; i < hi; i++) {
-                    push(`Comparam ${arr[i]} cu pivot ${pivot}`, [i, hi], p);
+                    push(`Comparăm ${arr[i]} cu pivotul ${pivot}. Elementele mai mici merg în stânga.`, [i, hi], p, 5, "compare");
                     if (arr[i] < pivot) {
                         [arr[i], arr[p]] = [arr[p], arr[i]];
-                        push("Mutam element in stanga pivotului", [i, p], p);
+                        push(`Mutăm elementul ${arr[p]} în zona mai mică decât pivotul.`, [i, p], p, 6, "partition");
                         p++;
                     }
                 }
                 [arr[p], arr[hi]] = [arr[hi], arr[p]];
-                push("Fixam pivotul pe pozitia finala", [p, hi], p);
+                push(`Fixăm pivotul pe poziția finală ${p}.`, [p, hi], p, 8, "swap");
                 quick(lo, p - 1);
                 quick(p + 1, hi);
             };
@@ -1042,20 +1207,21 @@ class AlgorithmLab {
                 while (i < left.length && j < right.length) {
                     if (left[i] <= right[j]) arr[k++] = left[i++];
                     else arr[k++] = right[j++];
-                    push(`Interclasare pe pozitia ${k - 1}`, [k - 1]);
+                    push(`Alegem cel mai mic element dintre cele două jumătăți și îl punem pe poziția ${k - 1}.`, [k - 1], -1, 6, "merge");
                 }
                 while (i < left.length) {
                     arr[k++] = left[i++];
-                    push(`Copiem rest stanga pe ${k - 1}`, [k - 1]);
+                    push(`Copiem restul din jumătatea stângă pe poziția ${k - 1}.`, [k - 1], -1, 7, "place");
                 }
                 while (j < right.length) {
                     arr[k++] = right[j++];
-                    push(`Copiem rest dreapta pe ${k - 1}`, [k - 1]);
+                    push(`Copiem restul din jumătatea dreaptă pe poziția ${k - 1}.`, [k - 1], -1, 8, "place");
                 }
             };
             const rec = (lo, hi) => {
                 if (lo >= hi) return;
                 const mid = Math.floor((lo + hi) / 2);
+                push(`Împărțim segmentul [${lo}, ${hi}] în [${lo}, ${mid}] și [${mid + 1}, ${hi}].`, [], -1, 2, "split");
                 rec(lo, mid);
                 rec(mid + 1, hi);
                 merge(lo, mid, hi);
@@ -1066,20 +1232,20 @@ class AlgorithmLab {
             const freq = new Array(max + 1).fill(0);
             for (let i = 0; i < arr.length; i++) {
                 freq[arr[i]]++;
-                push(`Frecventa pentru ${arr[i]} creste`, [i]);
+                push(`Creștem frecvența valorii ${arr[i]}.`, [i], -1, 3, "count");
             }
             let pos = 0;
             for (let value = 0; value < freq.length; value++) {
                 while (freq[value] > 0) {
                     arr[pos] = value;
-                    push(`Plasam ${value} pe pozitia ${pos}`, [pos]);
+                    push(`Plasăm valoarea ${value} pe poziția ${pos}.`, [pos], -1, 6, "place");
                     pos++;
                     freq[value]--;
                 }
             }
         }
 
-        push("Sortare finalizata");
+        push("Sortare finalizată", [], -1, 0, "done");
         return steps;
     }
 
@@ -1091,19 +1257,25 @@ class AlgorithmLab {
             stack.push(`fact(${x})`);
             steps.push({
                 kind: "stack",
+                algo: "factorial",
                 title: `Apel fact(${x})`,
-                message: `Intram in apelul fact(${x})`,
+                message: `Intrăm în apelul fact(${x})`,
                 stack: [...stack],
-                output: null
+                output: null,
+                line: 1,
+                action: "call"
             });
 
             if (x === 0) {
                 steps.push({
                     kind: "stack",
-                    title: "Caz de baza",
-                    message: "n == 0, returnam 1",
+                    algo: "factorial",
+                    title: "Caz de bază",
+                    message: "n == 0, returnăm 1",
                     stack: [...stack],
-                    output: "return 1"
+                    output: "return 1",
+                    line: 3,
+                    action: "base"
                 });
                 stack.pop();
                 return 1;
@@ -1112,10 +1284,13 @@ class AlgorithmLab {
             const result = x * rec(x - 1);
             steps.push({
                 kind: "stack",
-                title: `Intoarcere din fact(${x})`,
-                message: `Calculam ${x} * fact(${x - 1}) = ${result}`,
+                algo: "factorial",
+                title: `Întoarcere din fact(${x})`,
+                message: `Calculăm ${x} * fact(${x - 1}) = ${result}`,
                 stack: [...stack],
-                output: `return ${result}`
+                output: `return ${result}`,
+                line: 5,
+                action: "returns"
             });
             stack.pop();
             return result;
@@ -1124,10 +1299,13 @@ class AlgorithmLab {
         const finalValue = rec(n);
         steps.push({
             kind: "stack",
+            algo: "factorial",
             title: "Rezultat final",
             message: `factorial(${n}) = ${finalValue}`,
             stack: [],
-            output: String(finalValue)
+            output: String(finalValue),
+            line: 0,
+            action: "done"
         });
         return steps;
     }
@@ -1140,19 +1318,25 @@ class AlgorithmLab {
             stack.push(`fib(${x})`);
             steps.push({
                 kind: "stack",
+                algo: "fibonacci",
                 title: `Apel fib(${x})`,
-                message: `Intram in fib(${x})`,
+                message: `Intrăm în fib(${x})`,
                 stack: [...stack],
-                output: null
+                output: null,
+                line: 1,
+                action: "call"
             });
 
             if (x <= 1) {
                 steps.push({
                     kind: "stack",
-                    title: "Caz de baza",
+                    algo: "fibonacci",
+                    title: "Caz de bază",
                     message: `fib(${x}) = ${x}`,
                     stack: [...stack],
-                    output: `return ${x}`
+                    output: `return ${x}`,
+                    line: 3,
+                    action: "base"
                 });
                 stack.pop();
                 return x;
@@ -1164,10 +1348,13 @@ class AlgorithmLab {
 
             steps.push({
                 kind: "stack",
-                title: `Combinam rezultate`,
+                algo: "fibonacci",
+                title: `Combinăm rezultatele`,
                 message: `fib(${x - 1}) + fib(${x - 2}) = ${a} + ${b} = ${sum}`,
                 stack: [...stack],
-                output: `return ${sum}`
+                output: `return ${sum}`,
+                line: 6,
+                action: "returns"
             });
             stack.pop();
             return sum;
@@ -1176,10 +1363,13 @@ class AlgorithmLab {
         const finalValue = rec(n);
         steps.push({
             kind: "stack",
+            algo: "fibonacci",
             title: "Rezultat final",
             message: `fib(${n}) = ${finalValue}`,
             stack: [],
-            output: String(finalValue)
+            output: String(finalValue),
+            line: 0,
+            action: "done"
         });
 
         return steps;
@@ -1191,45 +1381,56 @@ class AlgorithmLab {
         const current = [];
         const solutions = [];
 
-        const snapshot = (title, message) => {
+        const snapshot = (title, message, line = 0, action = "scan") => {
             steps.push({
                 kind: "backtracking",
+                algo: "permutari",
                 title,
                 message,
                 current: [...current],
-                solutions: solutions.map(item => [...item])
+                solutions: solutions.map(item => [...item]),
+                line,
+                action
             });
         };
 
         const back = k => {
             if (k > n) {
                 solutions.push([...current]);
-                snapshot("Solutie finala", `Permutare gasita: ${current.join(" ")}`);
+                snapshot("Soluție finală", `Permutare găsită: ${current.join(" ")}`, 3, "solution");
                 return;
             }
 
             for (let v = 1; v <= n; v++) {
                 if (used[v]) {
-                    snapshot("Pruning", `Valoarea ${v} este deja folosita, o sarim`);
+                    snapshot("Pruning", `Valoarea ${v} este deja folosită, o sărim`, 5, "prune");
                     continue;
                 }
 
                 current.push(v);
                 used[v] = true;
-                snapshot("Pas inainte", `Punem ${v} pe pozitia ${k}`);
+                snapshot("Pas înainte", `Punem ${v} pe poziția ${k}`, 7, "choose");
 
                 back(k + 1);
 
                 used[v] = false;
                 current.pop();
-                snapshot("Pas inapoi", `Revenim dupa explorarea lui ${v}`);
+                snapshot("Pas înapoi", `Revenim după explorarea lui ${v}`, 9, "backtrack");
             }
         };
 
-        snapshot("Pornire", `Generam permutarile multimii {1..${n}}`);
+        snapshot("Pornire", `Generăm permutările mulțimii {1..${n}}`, 1, "init");
         back(1);
-        snapshot("Final", `Total solutii: ${solutions.length}`);
+        snapshot("Final", `Total soluții: ${solutions.length}`, 0, "done");
         return steps;
+    }
+
+    stepBack() {
+        if (!this.steps.length) return;
+        if (this.stepIndex > 0) {
+            this.stepIndex--;
+            this.render();
+        }
     }
 
     stepForward() {
@@ -1248,7 +1449,7 @@ class AlgorithmLab {
             return;
         }
         this.running = true;
-        this.btnPlay.textContent = "Pauza";
+        this.btnPlay.textContent = "Pauză";
         const run = () => {
             if (!this.running) return;
             this.stepForward();
@@ -1263,11 +1464,197 @@ class AlgorithmLab {
 
     stop() {
         this.running = false;
-        this.btnPlay.textContent = "Ruleaza";
+        this.btnPlay.textContent = "Rulează";
         if (this.timer) {
             clearTimeout(this.timer);
             this.timer = null;
         }
+    }
+
+    getCurrentAlgorithm(step = null) {
+        return (step && step.algo) || this.algorithmSelect.value || "bubble";
+    }
+
+    getPseudocode(algo) {
+        const code = {
+            bubble: [
+                "pentru i = 0 .. n - 2",
+                "  pentru j = 0 .. n - i - 2",
+                "    compară v[j] cu v[j + 1]",
+                "    dacă v[j] > v[j + 1]",
+                "      interschimbă v[j] cu v[j + 1]"
+            ],
+            selection: [
+                "pentru i = 0 .. n - 1",
+                "  min = i",
+                "  pentru j = i + 1 .. n - 1",
+                "    compară v[j] cu v[min]",
+                "    dacă v[j] < v[min], min = j",
+                "  dacă min != i",
+                "    interschimbă v[i] cu v[min]"
+            ],
+            insertion: [
+                "pentru i = 1 .. n - 1",
+                "  key = v[i]",
+                "  j = i - 1",
+                "  cât timp j >= 0 și v[j] > key",
+                "    mută v[j] la dreapta",
+                "    j--",
+                "  pune key pe poziția j + 1"
+            ],
+            quick: [
+                "quickSort(stânga, dreapta)",
+                "  pivot = v[dreapta]",
+                "  p = stânga",
+                "  pentru i = stânga .. dreapta - 1",
+                "    compară v[i] cu pivotul",
+                "    dacă v[i] < pivot, mută v[i] la stânga",
+                "    p++",
+                "  pune pivotul pe poziția p",
+                "  sortează recursiv stânga și dreapta"
+            ],
+            merge: [
+                "mergeSort(stânga, dreapta)",
+                "  împarte vectorul în două jumătăți",
+                "  sortează recursiv jumătatea stângă",
+                "  sortează recursiv jumătatea dreaptă",
+                "  compară capetele celor două jumătăți",
+                "  copiază elementul mai mic",
+                "  copiază restul din stânga",
+                "  copiază restul din dreapta"
+            ],
+            counting: [
+                "inițializează vectorul de frecvență",
+                "pentru fiecare element x din v",
+                "  frecvență[x]++",
+                "pentru fiecare valoare posibilă",
+                "  cât timp frecvență[valoare] > 0",
+                "    pune valoarea în vectorul rezultat"
+            ],
+            factorial: [
+                "fact(n)",
+                "  dacă n == 0",
+                "    return 1",
+                "  calculează fact(n - 1)",
+                "  return n * fact(n - 1)"
+            ],
+            fibonacci: [
+                "fib(n)",
+                "  dacă n <= 1",
+                "    return n",
+                "  a = fib(n - 1)",
+                "  b = fib(n - 2)",
+                "  return a + b"
+            ],
+            permutari: [
+                "back(k)",
+                "  dacă k > n",
+                "    afișează soluția",
+                "  pentru fiecare valoare v",
+                "    dacă v este folosită",
+                "      continuă",
+                "    adaugă v în soluție",
+                "    back(k + 1)",
+                "    șterge v din soluție",
+                "    revino și încearcă altă valoare"
+            ]
+        };
+
+        return code[algo] || code.bubble;
+    }
+
+    renderPseudocode(step) {
+        const algo = this.getCurrentAlgorithm(step);
+        const activeLine = Number(step.line || 0);
+        const lines = this.getPseudocode(algo);
+        const htmlLines = lines.map((text, index) => {
+            const lineNo = index + 1;
+            const isActive = lineNo === activeLine ? " is-active" : "";
+            return `
+                <div class="viz-code-line${isActive}">
+                    <span class="viz-code-line__no">${lineNo}</span>
+                    <code>${this.escapeHTML(text)}</code>
+                </div>
+            `;
+        }).join("");
+
+        this.pseudocodePanel.innerHTML = `
+            <h3>Pseudocod sincronizat</h3>
+            <div class="viz-code-block">${htmlLines}</div>
+        `;
+    }
+
+    renderExplanation(step) {
+        const action = this.getActionLabel(step.action);
+        this.explain.innerHTML = `
+            <span class="viz-current-explain__label">Ce se întâmplă acum?</span>
+            <strong>${this.escapeHTML(action)}</strong>
+            <p>${this.escapeHTML(step.message || "Urmărește pasul curent în animație.")}</p>
+        `;
+    }
+
+    getGuessOptions(correctAction, stepKind) {
+        const pools = {
+            sorting: ["compare", "swap", "scan", "insert", "pivot", "partition", "split", "merge", "count", "place", "done"],
+            stack: ["call", "base", "returns", "done"],
+            backtracking: ["choose", "prune", "solution", "backtrack", "done"]
+        };
+        const pool = pools[stepKind] || pools.sorting;
+        const options = [correctAction];
+        for (const action of pool) {
+            if (options.length >= 3) break;
+            if (action !== correctAction) options.push(action);
+        }
+
+        return options
+            .map((action, index) => ({ action, sort: (action.charCodeAt(0) + index * 17) % 7 }))
+            .sort((a, b) => a.sort - b.sort)
+            .map(item => item.action);
+    }
+
+    renderGuess() {
+        const next = this.steps[this.stepIndex + 1];
+        if (!next) {
+            this.quizPanel.innerHTML = `
+                <h3>Ghicește următorul pas</h3>
+                <p class="viz-guess__muted">Algoritmul a ajuns la final. Generează un scenariu nou sau apasă Reset.</p>
+            `;
+            return;
+        }
+
+        const options = this.getGuessOptions(next.action, next.kind);
+        const buttons = options.map(action => `
+            <button type="button" class="btn btn--quiet btn--sm" data-guess-action="${this.escapeHTML(action)}">
+                ${this.escapeHTML(this.getActionLabel(action))}
+            </button>
+        `).join("");
+
+        this.quizPanel.innerHTML = `
+            <h3>Ghicește următorul pas</h3>
+            <p class="viz-guess__muted">Înainte să apeși „Pas următor”, alege ce crezi că se va întâmpla.</p>
+            <div class="viz-guess__options">${buttons}</div>
+            <p class="viz-guess__feedback" data-guess-feedback></p>
+        `;
+    }
+
+    handleGuess(action) {
+        const next = this.steps[this.stepIndex + 1];
+        const feedback = this.quizPanel.querySelector("[data-guess-feedback]");
+        if (!next || !feedback) return;
+
+        const isCorrect = action === next.action;
+        feedback.className = `viz-guess__feedback ${isCorrect ? "is-correct" : "is-wrong"}`;
+        feedback.textContent = isCorrect
+            ? `Corect: urmează „${this.getActionLabel(next.action)}”.`
+            : `Aproape. Urmează „${this.getActionLabel(next.action)}”, pentru că pasul următor este: ${next.message}`;
+    }
+
+    updateButtonStates() {
+        const atStart = this.stepIndex <= 0;
+        const atEnd = this.stepIndex >= this.steps.length - 1;
+        this.btnPrev.disabled = atStart;
+        this.btnStep.disabled = atEnd;
+        this.btnPlay.disabled = atEnd;
     }
 
     render() {
@@ -1279,6 +1666,11 @@ class AlgorithmLab {
             <span>${step.title || ""}</span>
             <span>${step.message || ""}</span>
         `;
+
+        this.renderExplanation(step);
+        this.renderPseudocode(step);
+        this.renderGuess();
+        this.updateButtonStates();
 
         if (step.kind === "sorting") {
             this.renderSortingStep(step);
@@ -1312,7 +1704,13 @@ class AlgorithmLab {
             this.ctx.fillRect(i * barW, this.canvas.height - h, Math.max(1, barW - 2), h);
         }
 
-        this.panel.innerHTML = `<div class='step-log'>Algoritm: ${step.algo}</div>`;
+        this.panel.innerHTML = `
+            <div class='step-log'>
+                <div>Algoritm: <strong>${this.escapeHTML(this.getAlgorithmLabel(step.algo))}</strong></div>
+                <div>Acțiune: <strong>${this.escapeHTML(this.getActionLabel(step.action))}</strong></div>
+                <div>Vector curent: ${this.escapeHTML(arr.join(" "))}</div>
+            </div>
+        `;
     }
 
     renderStackStep(step) {
@@ -1345,8 +1743,9 @@ class AlgorithmLab {
 
         this.panel.innerHTML = `
             <div class='step-log'>
-                <div>${step.message || ""}</div>
-                <div><strong>${step.output ? "Output: " + step.output : ""}</strong></div>
+                <div>Acțiune: <strong>${this.escapeHTML(this.getActionLabel(step.action))}</strong></div>
+                <div>${this.escapeHTML(step.message || "")}</div>
+                <div><strong>${step.output ? this.escapeHTML("Output: " + step.output) : ""}</strong></div>
             </div>
         `;
     }
@@ -1363,7 +1762,7 @@ class AlgorithmLab {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.font = `16px ${this.getFontFamily()}`;
         this.ctx.fillStyle = colors.fg;
-        this.ctx.fillText("Solutie partiala", 20, 30);
+        this.ctx.fillText("Soluție parțială", 20, 30);
         this.ctx.font = `24px ${this.getFontFamily()}`;
         this.ctx.fillStyle = colors.primary;
         this.ctx.fillText((step.current || []).join(" ") || "-", 20, 70);
@@ -1371,7 +1770,7 @@ class AlgorithmLab {
         const solutions = step.solutions || [];
         this.ctx.font = `14px ${this.getFontFamily()}`;
         this.ctx.fillStyle = colors.fgMuted;
-        this.ctx.fillText(`Solutii gasite: ${solutions.length}`, 20, 100);
+        this.ctx.fillText(`Soluții găsite: ${solutions.length}`, 20, 100);
 
         const preview = solutions.slice(-6);
         let y = 130;
@@ -1383,9 +1782,10 @@ class AlgorithmLab {
 
         this.panel.innerHTML = `
             <div class='step-log'>
-                <div>${step.message || ""}</div>
-                <div>Prefix curent: <strong>${(step.current || []).join(" ") || "-"}</strong></div>
-                <div>Total solutii: <strong>${solutions.length}</strong></div>
+                <div>Acțiune: <strong>${this.escapeHTML(this.getActionLabel(step.action))}</strong></div>
+                <div>${this.escapeHTML(step.message || "")}</div>
+                <div>Prefix curent: <strong>${this.escapeHTML((step.current || []).join(" ") || "-")}</strong></div>
+                <div>Total soluții: <strong>${solutions.length}</strong></div>
             </div>
         `;
     }

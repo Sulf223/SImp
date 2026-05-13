@@ -40,6 +40,10 @@ function documentation_normalize_text(string $text): string {
     return trim((string)$text);
 }
 
+function documentation_contains(string $haystack, string $needle): bool {
+    return $needle === '' || strpos($haystack, $needle) !== false;
+}
+
 function documentation_query_terms(string $query): array {
     $normalized = documentation_normalize_text($query);
     preg_match_all('/[a-z0-9_+#]{3,}/', $normalized, $matches);
@@ -63,9 +67,42 @@ function documentation_query_terms(string $query): array {
         'counting' => ['numarare', 'frecventa'],
         'cautare' => ['search', 'binara', 'binary'],
         'binara' => ['cautare', 'binary'],
+        'fundamental' => ['elementar', 'baza', 'cmmdc', 'divizori', 'primalitate'],
+        'fundamentali' => ['elementari', 'baza', 'cifre', 'divizori', 'frecventa'],
+        'elementar' => ['fundamental', 'baza'],
+        'baza' => ['fundamental', 'elementar', 'numeratie'],
+        'cifre' => ['cifra', 'numar', 'modulo'],
+        'cifra' => ['cifre', 'modulo'],
+        'divizori' => ['divizibilitate', 'factorizare', 'prim'],
+        'divizibilitate' => ['divizori', 'factorizare'],
+        'cmmdc' => ['euclid', 'cmmmc', 'divizori'],
+        'cmmmc' => ['cmmdc', 'euclid'],
+        'euclid' => ['cmmdc', 'cmmmc'],
+        'prim' => ['prime', 'primalitate', 'factorizare', 'ciur'],
+        'prime' => ['prim', 'primalitate', 'ciur'],
+        'primalitate' => ['prim', 'prime', 'factorizare'],
+        'factorizare' => ['divizori', 'prim', 'prime'],
+        'frecventa' => ['frecvente', 'numarare', 'counting'],
+        'frecvente' => ['frecventa', 'numarare'],
+        'ciur' => ['eratostene', 'prime', 'primalitate'],
+        'eratostene' => ['ciur', 'prime'],
+        'fibonacci' => ['recurenta', 'sir'],
         'divide' => ['impera', 'recursivitate', 'interclasare'],
         'impera' => ['divide', 'recursivitate'],
         'recursivitate' => ['recursiv', 'divide', 'quick', 'merge'],
+        'recursiv' => ['recursivitate', 'autoapel', 'stiva'],
+        'autoapel' => ['recursivitate', 'stiva'],
+        'tehnici' => ['recursivitate', 'backtracking', 'greedy', 'divide'],
+        'algoritmice' => ['recursivitate', 'backtracking', 'greedy', 'divide'],
+        'backtracking' => ['permutari', 'aranjamente', 'combinari', 'submultimi', 'valid', 'solutie'],
+        'permutari' => ['backtracking', 'aranjamente', 'combinari'],
+        'aranjamente' => ['backtracking', 'permutari', 'combinari'],
+        'combinari' => ['backtracking', 'permutari', 'submultimi'],
+        'submultimi' => ['backtracking', 'combinari'],
+        'valid' => ['backtracking', 'solutie'],
+        'greedy' => ['lacom', 'optim', 'local', 'candidati'],
+        'lacom' => ['greedy', 'optim'],
+        'optim' => ['greedy', 'local', 'global'],
         'struct' => ['structura', 'produs', 'campuri'],
         'vector' => ['stl', 'tablou'],
     ];
@@ -110,7 +147,7 @@ function documentation_context_for_query(string $query, int $maxChars = 6500, in
             if ($term === '') {
                 continue;
             }
-            if (str_contains($titleHaystack, $term)) {
+            if (documentation_contains($titleHaystack, $term)) {
                 $score += 10;
             }
             $count = substr_count($haystack, $term);
@@ -184,10 +221,15 @@ function documentation_context_for_slug(string $slug, int $maxChars = 7500, int 
     $slug = trim($slug);
     $queries = [
         'sorting-basics' => 'metode de sortare bubble selection insertion quick merge counting interclasare numarare ordonare',
+        'algoritmi-fundamentali' => 'algoritmi fundamentali elementari parcurgere cifre divizori cmmdc cmmmc euclid primalitate factorizare fibonacci baza numeratie cautare binara frecventa ciur eratostene',
+        'fundamentals' => 'algoritmi fundamentali elementari parcurgere cifre divizori cmmdc primalitate frecventa ciur',
+        'tehnici-algoritmice' => 'recursivitate autoapel stiva divide et impera backtracking valid solutie greedy optim local global permutari combinari aranjamente submultimi',
+        'algoritmi-avansati' => 'recursivitate autoapel divide et impera backtracking greedy tehnici algoritmice C++',
         'recursion-pro' => 'recursivitate divide et impera quick merge cautare binara interclasare',
-        'backtracking' => 'algoritmi probleme aplicatii ordonare cautare',
+        'backtracking' => 'backtracking vector solutie valid solutie permutari aranjamente combinari submultimi dame',
+        'greedy' => 'greedy lacom optim local global candidati sortare criteriu contraexemplu',
         'divide-et-impera' => 'divide et impera quick merge interclasare cautare binara recursivitate',
-        'general' => 'metode de sortare algoritmi ordonare cautare C++',
+        'general' => 'metode de sortare algoritmi fundamentali parcurgere cifre divizori cmmdc primalitate frecventa cautare C++',
     ];
 
     return documentation_context_for_query($queries[$slug] ?? ($slug . ' metode sortare algoritmi C++'), $maxChars, $maxChunks);

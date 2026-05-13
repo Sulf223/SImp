@@ -3415,6 +3415,115 @@ i.fa-forward::before     { content: "\23E9"; }   /* ⏩ */
     font-family: var(--font-mono);
 }
 
+.ai-progress-card {
+    border-color: color-mix(in srgb, var(--color-accent) 20%, var(--color-border));
+}
+
+.ai-progress-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-3);
+}
+
+.ai-progress-summary section {
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-2);
+}
+
+.ai-progress-summary strong {
+    display: block;
+    margin-top: var(--space-2);
+    color: var(--color-fg);
+    font-family: var(--font-mono);
+    font-size: var(--text-2xl);
+    line-height: var(--leading-tight);
+}
+
+.ai-progress-chart {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(34px, 1fr);
+    align-items: end;
+    gap: var(--space-3);
+    min-height: 180px;
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background:
+        linear-gradient(to top, var(--color-border) 1px, transparent 1px) 0 0 / 100% 25%,
+        var(--color-surface-2);
+    overflow-x: auto;
+}
+
+.ai-progress-chart--wide {
+    grid-auto-columns: minmax(46px, 1fr);
+}
+
+.ai-progress-bar {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    align-items: end;
+    justify-items: center;
+    gap: var(--space-2);
+    height: 150px;
+    min-width: 34px;
+}
+
+.ai-progress-bar span {
+    width: 100%;
+    min-height: 4px;
+    border-radius: var(--radius-sm) var(--radius-sm) 3px 3px;
+    background: linear-gradient(180deg, var(--color-accent), var(--color-primary));
+    box-shadow: 0 10px 24px -12px var(--color-accent);
+}
+
+.ai-progress-bar small {
+    color: var(--color-fg-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+}
+
+.ai-score-saved {
+    margin-top: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid color-mix(in srgb, var(--color-success) 35%, var(--color-border));
+    border-radius: var(--radius-md);
+    background: var(--color-success-soft);
+    color: var(--color-success);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+}
+
+.ai-score-saved--muted {
+    border-color: var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-fg-muted);
+}
+
+.ai-login-required {
+    display: grid;
+    gap: var(--space-3);
+    max-width: 430px;
+    margin: 0 auto;
+    padding: var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-2);
+}
+
+.ai-login-required strong {
+    color: var(--color-fg);
+    font-size: var(--text-lg);
+}
+
+.ai-login-required p {
+    margin: 0;
+    color: var(--color-fg-muted);
+    line-height: var(--leading-relaxed);
+}
+
 .quiz-explain-card,
 #feedback-zone > div,
 #ai-quiz-feedback .alert {
@@ -3448,6 +3557,390 @@ i.fa-forward::before     { content: "\23E9"; }   /* ⏩ */
 
 .visualizer-stats > div:last-child strong {
     color: var(--color-fg) !important;
+}
+
+/* ============ ALGORITMI FUNDAMENTALI ============ */
+.fundamentals-page {
+    --fundamental-card-border: color-mix(in srgb, var(--color-accent) 18%, var(--color-border));
+}
+
+.fundamentals-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.75fr);
+    gap: var(--space-5);
+    margin-bottom: var(--space-6);
+}
+
+.fundamentals-intro-card {
+    border-color: color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 10%, transparent), transparent 70%),
+        var(--color-surface-1);
+}
+
+.fundamentals-practice-card {
+    border-color: color-mix(in srgb, var(--color-success) 22%, var(--color-border));
+}
+
+.fundamentals-flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.fundamentals-flow span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background: var(--color-surface-2);
+    color: var(--color-fg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+}
+
+.fundamentals-checklist {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding-left: 1.2rem;
+    color: var(--color-fg-muted);
+    line-height: var(--leading-relaxed);
+}
+
+.fundamental-topic-grid {
+    display: grid;
+    gap: var(--space-5);
+    margin-bottom: var(--space-6);
+}
+
+.fundamental-topic-card {
+    display: grid;
+    gap: var(--space-5);
+    padding: var(--space-6);
+    border: 1px solid var(--fundamental-card-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface-1);
+    box-shadow: var(--shadow-inset), var(--shadow-sm);
+}
+
+.fundamental-topic-card__head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-4);
+}
+
+.fundamental-topic-card h2,
+.fundamental-topic-card h3 {
+    margin: 0;
+    color: var(--color-fg);
+    line-height: var(--leading-tight);
+}
+
+.fundamental-topic-card h2 {
+    font-size: var(--text-2xl);
+}
+
+.fundamental-topic-card h3 {
+    margin-top: var(--space-4);
+    margin-bottom: var(--space-2);
+    font-size: var(--text-base);
+}
+
+.fundamental-topic-card h3:first-child {
+    margin-top: 0;
+}
+
+.fundamental-topic-card p,
+.fundamental-topic-card li {
+    color: var(--color-fg-muted);
+    line-height: var(--leading-relaxed);
+}
+
+.fundamental-topic-card p,
+.fundamental-topic-card ul {
+    margin: var(--space-2) 0 0;
+}
+
+.fundamental-topic-card :not(pre) > code,
+.fundamentals-decision-table code {
+    padding: 2px 6px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-2);
+    color: var(--color-fg);
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+}
+
+.fundamental-number {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-2));
+    color: var(--color-accent);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: var(--font-bold);
+}
+
+.fundamental-split {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(320px, 1.05fr);
+    gap: var(--space-5);
+    align-items: stretch;
+}
+
+.fundamental-code {
+    margin: 0;
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: #07090f;
+    color: #d8e2ff;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    line-height: 1.65;
+    overflow-x: auto;
+    white-space: pre;
+}
+
+.fundamentals-decision-card {
+    border-color: color-mix(in srgb, var(--color-warning) 24%, var(--color-border));
+}
+
+.fundamentals-table-wrap {
+    overflow-x: auto;
+}
+
+.fundamentals-decision-table {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+}
+
+.fundamentals-decision-table th,
+.fundamentals-decision-table td {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+    vertical-align: top;
+}
+
+.fundamentals-decision-table th {
+    background: var(--color-surface-2);
+    color: var(--color-fg);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+}
+
+.fundamentals-decision-table td {
+    color: var(--color-fg-muted);
+    line-height: var(--leading-relaxed);
+}
+
+.fundamentals-decision-table tr:last-child td {
+    border-bottom: 0;
+}
+
+/* ============ TEHNICI ALGORITMICE ============ */
+.techniques-page {
+    --technique-card-border: color-mix(in srgb, var(--color-primary) 18%, var(--color-border));
+}
+
+.techniques-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.8fr);
+    gap: var(--space-5);
+    margin-bottom: var(--space-6);
+}
+
+.techniques-map-card {
+    border-color: color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 70%),
+        var(--color-surface-1);
+}
+
+.techniques-practice-card {
+    border-color: color-mix(in srgb, var(--color-warning) 26%, var(--color-border));
+}
+
+.technique-flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.technique-flow span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background: var(--color-surface-2);
+    color: var(--color-fg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+}
+
+.technique-topic-grid {
+    display: grid;
+    gap: var(--space-5);
+    margin-bottom: var(--space-6);
+}
+
+.technique-topic-card {
+    display: grid;
+    gap: var(--space-5);
+    padding: var(--space-6);
+    border: 1px solid var(--technique-card-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface-1);
+    box-shadow: var(--shadow-inset), var(--shadow-sm);
+}
+
+.technique-topic-card--orange { --technique-accent: #f97316; }
+.technique-topic-card--blue { --technique-accent: #0ea5e9; }
+.technique-topic-card--violet { --technique-accent: #8b5cf6; }
+.technique-topic-card--green { --technique-accent: #10b981; }
+
+.technique-topic-card__head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-4);
+    align-items: start;
+}
+
+.technique-topic-card h2,
+.technique-topic-card h3 {
+    margin: 0;
+    color: var(--color-fg);
+    line-height: var(--leading-tight);
+}
+
+.technique-topic-card h2 {
+    font-size: var(--text-2xl);
+}
+
+.technique-topic-card h3 {
+    margin-top: var(--space-4);
+    margin-bottom: var(--space-2);
+    font-size: var(--text-base);
+}
+
+.technique-topic-card h3:first-child {
+    margin-top: 0;
+}
+
+.technique-topic-card p,
+.technique-topic-card li {
+    color: var(--color-fg-muted);
+    line-height: var(--leading-relaxed);
+}
+
+.technique-topic-card p,
+.technique-topic-card ul {
+    margin: var(--space-2) 0 0;
+}
+
+.technique-topic-card :not(pre) > code,
+.technique-decision-table code {
+    padding: 2px 6px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-2);
+    color: var(--color-fg);
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+}
+
+.technique-number {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid color-mix(in srgb, var(--technique-accent) 42%, var(--color-border));
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--technique-accent) 14%, var(--color-surface-2));
+    color: var(--technique-accent);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: var(--font-bold);
+}
+
+.technique-split {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(320px, 1.05fr);
+    gap: var(--space-5);
+    align-items: stretch;
+}
+
+.technique-code {
+    margin: 0;
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: #07090f;
+    color: #d8e2ff;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    line-height: 1.65;
+    overflow-x: auto;
+    white-space: pre;
+}
+
+.technique-decision-card {
+    border-color: color-mix(in srgb, var(--color-accent) 24%, var(--color-border));
+}
+
+.technique-table-wrap {
+    overflow-x: auto;
+}
+
+.technique-decision-table {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+}
+
+.technique-decision-table th,
+.technique-decision-table td {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+    vertical-align: top;
+}
+
+.technique-decision-table th {
+    background: var(--color-surface-2);
+    color: var(--color-fg);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+}
+
+.technique-decision-table td {
+    color: var(--color-fg-muted);
+    line-height: var(--leading-relaxed);
+}
+
+.technique-decision-table tr:last-child td {
+    border-bottom: 0;
 }
 
 body[data-theme="light"] {
@@ -3490,8 +3983,22 @@ body[data-theme="light"] .site-nav__menu .btn:hover {
 body[data-theme="light"] .comparison-page .scenario-chip,
 body[data-theme="light"] .dashboard-focus-grid section,
 body[data-theme="light"] .profile-summary-grid section,
-body[data-theme="light"] .comparison-conclusion-list div {
+body[data-theme="light"] .ai-progress-summary section,
+body[data-theme="light"] .ai-progress-chart,
+body[data-theme="light"] .comparison-conclusion-list div,
+body[data-theme="light"] .fundamentals-flow span,
+body[data-theme="light"] .fundamental-topic-card,
+body[data-theme="light"] .fundamentals-decision-table th,
+body[data-theme="light"] .technique-flow span,
+body[data-theme="light"] .technique-topic-card,
+body[data-theme="light"] .technique-decision-table th {
     background: #ffffff !important;
+}
+
+body[data-theme="light"] .fundamental-code,
+body[data-theme="light"] .technique-code {
+    background: #0f172a;
+    color: #e2e8f0;
 }
 
 body[data-theme="light"] .comparison-page .scenario-chip.is-active {
@@ -3502,6 +4009,13 @@ body[data-theme="light"] .comparison-page .scenario-chip.is-active {
     .dashboard-focus-grid,
     .profile-summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .fundamentals-hero-grid,
+    .fundamental-split,
+    .techniques-hero-grid,
+    .technique-split {
+        grid-template-columns: 1fr;
     }
 
     .comparison-conclusion-card {
@@ -3517,5 +4031,23 @@ body[data-theme="light"] .comparison-page .scenario-chip.is-active {
 
     .comparison-conclusion-list div {
         grid-template-columns: 1fr;
+    }
+
+    .fundamental-topic-card {
+        padding: var(--space-4);
+    }
+
+    .fundamental-topic-card__head,
+    .technique-topic-card__head {
+        grid-template-columns: 1fr;
+    }
+
+    .technique-topic-card {
+        padding: var(--space-4);
+    }
+
+    .fundamental-code,
+    .technique-code {
+        font-size: var(--text-xs);
     }
 }

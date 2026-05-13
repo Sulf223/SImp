@@ -1,7 +1,50 @@
 <?php
 // pagini/profesor_ai.php - Extins cu funcționalitate de Quiz AI
 require_once 'PHP/auth.php';
+require_once 'PHP/conexiune.php';
 $is_logged_in = is_logged_in();
+
+$aiQuizStats = [
+    'total' => 0,
+    'avg_percent' => 0,
+    'best_percent' => 0,
+    'latest_percent' => null,
+];
+$aiQuizHistory = [];
+
+$tableExists = function (string $table) use ($con): bool {
+    $safeTable = $con->real_escape_string($table);
+    $result = $con->query("SHOW TABLES LIKE '{$safeTable}'");
+    if (!$result) return false;
+    $exists = $result->num_rows > 0;
+    $result->free();
+    return $exists;
+};
+
+if ($is_logged_in && $tableExists('ai_quiz_attempts')) {
+    $userId = (int)$_SESSION['user_id'];
+    if ($stmt = $con->prepare("SELECT COUNT(*) AS total, AVG(percent) AS avg_percent, MAX(percent) AS best_percent FROM ai_quiz_attempts WHERE user_id = ?")) {
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc() ?: [];
+        $aiQuizStats['total'] = (int)($row['total'] ?? 0);
+        $aiQuizStats['avg_percent'] = (int)round((float)($row['avg_percent'] ?? 0));
+        $aiQuizStats['best_percent'] = (int)round((float)($row['best_percent'] ?? 0));
+        $stmt->close();
+    }
+    if ($stmt = $con->prepare("SELECT path_slug, score, total, percent, created_at FROM ai_quiz_attempts WHERE user_id = ? ORDER BY created_at DESC LIMIT 8")) {
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        while ($row = $res->fetch_assoc()) {
+            $aiQuizHistory[] = $row;
+        }
+        $stmt->close();
+    }
+    if (!empty($aiQuizHistory)) {
+        $aiQuizStats['latest_percent'] = (int)round((float)$aiQuizHistory[0]['percent']);
+    }
+}
 ?>
 
 <div data-component="dashboard-modern">
@@ -33,9 +76,20 @@ $is_logged_in = is_logged_in();
                     <p style="color: var(--color-fg-muted); margin-bottom: var(--space-6); max-width: 400px; margin-left: auto; margin-right: auto;">
                         Voi genera un set de 10 întrebări unice despre algoritmi C++, adaptate nivelului tău.
                     </p>
-                    <button id="start-ai-quiz" class="btn btn--primary" style="padding: var(--space-3) var(--space-8);">
-                        Generează Test (10 Întrebări)
-                    </button>
+                    <?php if ($is_logged_in): ?>
+                        <button id="start-ai-quiz" class="btn btn--primary" style="padding: var(--space-3) var(--space-8);">
+                            Generează Test (10 Întrebări)
+                        </button>
+                    <?php else: ?>
+                        <div class="ai-login-required">
+                            <strong>Autentificare necesară</strong>
+                            <p>Trebuie să fii logat ca să dai testul AI și ca scorul să fie salvat în evoluția ta.</p>
+                            <div class="card__actions" style="justify-content: center;">
+                                <a href="index.php?page=login&required_auth=true" class="btn btn--primary">Login</a>
+                                <a href="index.php?page=register" class="btn btn--ghost">Cont nou</a>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -70,6 +124,45 @@ $is_logged_in = is_logged_in();
                 <button onclick="document.getElementById('ai-widget-toggle').click()" class="btn btn--ghost btn--sm" style="width: 100%;">Deschide Chat Direct</button>
             </div>
         </article>
+
+        <article class="card bento__card--timeline ai-progress-card">
+            <header class="card__head">
+                <span class="card__eyebrow">Evoluție teste AI</span>
+                <?php if ($is_logged_in): ?>
+                    <span class="badge badge--soft"><?= (int)$aiQuizStats['total'] ?> teste</span>
+                <?php endif; ?>
+            </header>
+            <?php if (!$is_logged_in): ?>
+                <p class="card__body">Autentifică-te ca să păstrăm scorurile testelor AI și să vezi evoluția în timp.</p>
+            <?php elseif (empty($aiQuizHistory)): ?>
+                <p class="card__body">După primul test AI finalizat, aici apare istoricul scorurilor tale.</p>
+            <?php else: ?>
+                <div class="ai-progress-summary">
+                    <section>
+                        <span class="stat__label">Ultimul scor</span>
+                        <strong><?= (int)$aiQuizStats['latest_percent'] ?>%</strong>
+                    </section>
+                    <section>
+                        <span class="stat__label">Media</span>
+                        <strong><?= (int)$aiQuizStats['avg_percent'] ?>%</strong>
+                    </section>
+                    <section>
+                        <span class="stat__label">Cel mai bun</span>
+                        <strong><?= (int)$aiQuizStats['best_percent'] ?>%</strong>
+                    </section>
+                </div>
+                <div class="ai-progress-chart" aria-label="Evoluția ultimelor teste AI">
+                    <?php foreach (array_reverse($aiQuizHistory) as $attempt): 
+                        $percent = max(3, min(100, (int)round((float)$attempt['percent'])));
+                    ?>
+                        <div class="ai-progress-bar" title="<?= htmlspecialchars($attempt['score'] . '/' . $attempt['total'] . ' · ' . date('d.m H:i', strtotime($attempt['created_at'])), ENT_QUOTES, 'UTF-8') ?>">
+                            <span style="height: <?= $percent ?>%;"></span>
+                            <small><?= $percent ?>%</small>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </article>
     </div>
 </div>
 
@@ -82,6 +175,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingView = document.getElementById('quiz-loading');
     const activeView = document.getElementById('quiz-active');
     const resultsView = document.getElementById('quiz-results');
+
+    if (!startBtn) {
+        return;
+    }
     
     const urlParams = new URLSearchParams(window.location.search);
     const pathSlug = urlParams.get('path_exam') || 'general';
@@ -297,12 +394,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const rawFeedback = data.feedback || 'Analiză indisponibilă.';
             const normalizedFeedback = normalizeUTF8Text(fixMojibake(rawFeedback)).replace(/\*\*/g, '');
             const formattedFeedback = formatQuizText(normalizedFeedback);
+            const savedHtml = data.attempt_saved
+                ? `<div class="ai-score-saved">Scor salvat în profil: ${score}/${quizData.length} (${Math.round(data.attempt?.percent ?? percent)}%).</div>`
+                : `<div class="ai-score-saved ai-score-saved--muted">Scorul nu a fost salvat pe cont. Autentifică-te pentru istoric și evoluție.</div>`;
             
             resultsView.innerHTML = `
                 <div class="card__head" style="justify-content: center; margin-bottom: var(--space-6);">
                     <div style="text-align: center;">
                         <h2 style="font-size: var(--text-5xl); font-weight: 700; color: ${percent >= 50 ? 'var(--color-success)' : 'var(--color-danger)'};">${score} / ${quizData.length}</h2>
                         <p class="stat__sub">Scor Final</p>
+                        ${savedHtml}
                     </div>
                 </div>
                 

@@ -10,7 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M20 7h-9l-3 3H2"/><path d="M2 17h6l3-3h9"/>
             </svg>
-            Algoritm fundamental
+            Tehnică algoritmică
         </span>
         <h1 class="dash__title">
             Divide <span class="dash__title-accent">et Impera</span>

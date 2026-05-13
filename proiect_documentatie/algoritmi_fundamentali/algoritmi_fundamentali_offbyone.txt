@@ -1,0 +1,132 @@
+Algoritmi fundamentali pentru OffByOne Academy
+
+Acest material este scris pentru a oferi Profesorului AI context de baza despre algoritmii elementari folositi frecvent in probleme de C++. Explicatiile sunt originale si trebuie folosite pentru raspunsuri clare, fara intrebari care cer elevului sa memoreze cod din aplicatie.
+
+1. Parcurgere liniara
+Parcurgerea liniara inseamna inspectarea elementelor pe rand, de la stanga la dreapta. Se foloseste pentru suma elementelor, numarari, maxim, minim, cautarea unei valori sau verificarea unei proprietati.
+Schelet:
+int suma = 0, maxim = v[0];
+for (int i = 0; i < n; i++) {
+    suma += v[i];
+    if (v[i] > maxim) maxim = v[i];
+}
+Greseala frecventa: initializarea maximului cu 0 atunci cand valorile pot fi negative.
+
+2. Cifrele unui numar
+Ultima cifra a lui n se obtine cu n % 10, iar eliminarea ultimei cifre se face cu n / 10. Metoda se foloseste pentru suma cifrelor, numarul de cifre, cifra maxima, inversarea unui numar, palindrom sau frecventa cifrelor.
+Schelet:
+while (n > 0) {
+    int cifra = n % 10;
+    n /= 10;
+}
+Greseala frecventa: cazul n = 0 trebuie tratat separat atunci cand conteaza numarul de cifre.
+
+3. Divizori si divizibilitate
+Pentru a gasi divizorii lui n nu este necesar sa mergem pana la n. Este suficient sa verificam d pana cand d * d <= n. Daca d divide n, atunci n / d este divizorul pereche.
+Schelet:
+for (int d = 1; d * d <= n; d++) {
+    if (n % d == 0) {
+        // d este divizor
+        // n / d este divizor, daca este diferit de d
+    }
+}
+Greseala frecventa: numararea de doua ori a radicalului atunci cand n este patrat perfect.
+
+4. CMMDC si CMMMC
+Algoritmul lui Euclid calculeaza CMMDC prin resturi succesive. CMMMC se poate calcula cu formula a / cmmdc(a, b) * b.
+Schelet:
+int cmmdc(int a, int b) {
+    while (b != 0) {
+        int r = a % b;
+        a = b;
+        b = r;
+    }
+    return a;
+}
+Greseala frecventa: calculul a * b / cmmdc poate produce overflow mai repede decat a / cmmdc * b.
+
+5. Numere prime si factorizare
+Un numar este prim daca are exact doi divizori pozitivi: 1 si el insusi. Pentru verificare, se testeaza divizorii de la 2 pana la radical. Pentru factorizare, se imparte repetat la fiecare divizor gasit.
+Schelet:
+for (int d = 2; d * d <= n; d++) {
+    int putere = 0;
+    while (n % d == 0) {
+        putere++;
+        n /= d;
+    }
+    if (putere > 0) {
+        // d apare la puterea "putere"
+    }
+}
+if (n > 1) {
+    // n ramas este factor prim
+}
+Greseala frecventa: 0 si 1 nu sunt numere prime.
+
+6. Fibonacci si recurente simple
+Sirul Fibonacci are fiecare termen egal cu suma celor doi termeni anteriori. Pentru calculul unui termen, varianta iterativa este de obicei mai buna decat recursivitatea simpla, deoarece nu recalculeaza aceleasi valori.
+Schelet:
+int a = 0, b = 1;
+for (int i = 2; i <= n; i++) {
+    int c = a + b;
+    a = b;
+    b = c;
+}
+Greseala frecventa: folosirea recursivitatii naive pentru n mare.
+
+7. Baze de numeratie
+Pentru conversia din baza 10 in baza b, se imparte repetat la b si se pastreaza resturile. Resturile se afiseaza invers fata de ordinea in care au fost obtinute.
+Schelet:
+int cifre[64], k = 0;
+while (n > 0) {
+    cifre[k++] = n % baza;
+    n /= baza;
+}
+for (int i = k - 1; i >= 0; i--) {
+    cout << cifre[i];
+}
+Greseala frecventa: uitarea cazului n = 0 sau a cifrelor A-F pentru baze mai mari decat 10.
+
+8. Cautare liniara si cautare binara
+Cautarea liniara merge pe orice vector si are complexitate O(n). Cautarea binara are complexitate O(log n), dar functioneaza doar pe date sortate.
+Schelet cautare binara:
+int st = 0, dr = n - 1, poz = -1;
+while (st <= dr) {
+    int mid = st + (dr - st) / 2;
+    if (v[mid] == x) {
+        poz = mid;
+        break;
+    }
+    if (v[mid] < x) st = mid + 1;
+    else dr = mid - 1;
+}
+Greseala frecventa: aplicarea cautarii binare pe un vector nesortat.
+
+9. Vectori de frecventa
+Vectorul de frecventa numara aparitiile valorilor atunci cand intervalul de valori este mic si cunoscut. Este util pentru duplicate, aparitii, sortare prin numarare, litere si cifre.
+Schelet:
+int fr[1001] = {0};
+for (int i = 0; i < n; i++) {
+    fr[v[i]]++;
+}
+Greseala frecventa: folosirea directa a unui vector de frecventa pentru valori negative sau foarte mari.
+
+10. Ciurul lui Eratostene
+Ciurul precalculeaza numerele prime pana la N. Initial presupunem ca toate numerele sunt prime, apoi marcam multiplii fiecarui prim.
+Schelet:
+vector<bool> prim(N + 1, true);
+prim[0] = prim[1] = false;
+for (int p = 2; p * p <= N; p++) {
+    if (prim[p]) {
+        for (int m = p * p; m <= N; m += p) {
+            prim[m] = false;
+        }
+    }
+}
+Greseala frecventa: pornirea marcarii de la 2 * p, desi multiplii mai mici au fost deja acoperiti.
+
+Cum trebuie sa raspunda Profesorul AI
+- Explica intai ideea in limbaj simplu.
+- Ofera un exemplu mic numeric, nu doar cod.
+- Cere elevului sa modifice o variabila, o conditie sau o valoare de intrare, nu sa recunoasca o functie din aplicatie dupa nume.
+- Pune intrebari de tip: "Ce se schimba daca vectorul este deja sortat?", "De ce oprim la radical?", "Ce valoare are contorul dupa acest pas?".

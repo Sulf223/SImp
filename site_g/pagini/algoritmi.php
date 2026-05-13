@@ -22,7 +22,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
     <div class="bento" style="gap: var(--space-6);">
         <!-- HERO: Sorting Methods -->
-        <article class="card card--hero bento__card--hero" style="border: 1px solid var(--color-primary-soft); background: linear-gradient(135deg, rgba(110, 86, 207, 0.08) 0%, rgba(110, 86, 207, 0.02) 100%); position: relative; overflow: hidden;">
+        <article class="card card--hero bento__card--stat" style="border: 1px solid var(--color-primary-soft); background: linear-gradient(135deg, rgba(110, 86, 207, 0.08) 0%, rgba(110, 86, 207, 0.02) 100%); position: relative; overflow: hidden;">
             <div style="position: absolute; top: -40%; right: -30%; width: 400px; height: 400px; background: radial-gradient(circle, var(--color-primary-glow) 0%, transparent 70%); opacity: 0.08; z-index: 0;"></div>
             <div class="card__head" style="position: relative; z-index: 1;">
                 <span class="card__eyebrow" style="color: var(--color-primary);">
@@ -47,8 +47,8 @@ if (session_status() === PHP_SESSION_NONE) {
             </div>
         </article>
 
-        <!-- ACCENT: Advanced Algorithms -->
-        <article class="card card--accent bento__card--accent" style="border: 1px solid var(--color-accent-soft); background: linear-gradient(135deg, rgba(6, 182, 212, 0.08) 0%, rgba(6, 182, 212, 0.02) 100%); position: relative; overflow: hidden;">
+        <!-- ACCENT: Fundamental Algorithms -->
+        <article class="card card--accent bento__card--stat" style="border: 1px solid var(--color-accent-soft); background: linear-gradient(135deg, rgba(6, 182, 212, 0.08) 0%, rgba(6, 182, 212, 0.02) 100%); position: relative; overflow: hidden;">
             <div style="position: absolute; top: 0; right: 0; width: 200px; height: 200px; background: repeating-linear-gradient(90deg, transparent, transparent 10px, rgba(6, 182, 212, 0.1) 10px, rgba(6, 182, 212, 0.1) 20px); opacity: 0.5; z-index: 0;"></div>
             <span class="card__eyebrow" style="position: relative; z-index: 1; color: var(--color-accent);">
                 <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -57,13 +57,36 @@ if (session_status() === PHP_SESSION_NONE) {
                 </svg>
                 Algoritmi fundamentali
             </span>
-            <h3 class="card__title-sm" style="position: relative; z-index: 1;">Tehnici avansate</h3>
+            <h3 class="card__title-sm" style="position: relative; z-index: 1;">Noțiuni de bază</h3>
             <p class="card__body" style="position: relative; z-index: 1; color: var(--color-fg-muted);">
-                Recursivitate, Backtracking, Greedy, Divide et Impera. Exploatează aceste metode pentru a rezolva probleme complexe.
+                Maxim, minim, cifre, divizori, CMMDC, primalitate, frecvențe, căutare binară și ciur. Baza pentru problemele de tip PBInfo.
             </p>
             <div class="card__actions" style="position: relative; z-index: 1;">
-                <a href="index.php?page=algoritmi_avansati" class="link-arrow" style="color: var(--color-accent);">
-                    Explorează acum
+                <a href="index.php?page=algoritmi_fundamentali" class="link-arrow" style="color: var(--color-accent);">
+                    Deschide fișele
+                    <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+        </article>
+
+        <!-- ACCENT: Algorithmic Techniques -->
+        <article class="card card--accent bento__card--stat" style="border: 1px solid var(--color-primary-soft); background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(14, 165, 233, 0.03) 100%); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; width: 220px; height: 220px; background: radial-gradient(circle, rgba(139, 92, 246, 0.18) 0%, transparent 70%); opacity: 0.7; z-index: 0;"></div>
+            <span class="card__eyebrow" style="position: relative; z-index: 1; color: var(--color-primary);">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                </svg>
+                Tehnici algoritmice
+            </span>
+            <h3 class="card__title-sm" style="position: relative; z-index: 1;">Recursivitate, Backtracking, Greedy și Divide et Impera</h3>
+            <p class="card__body" style="position: relative; z-index: 1; color: var(--color-fg-muted);">
+                Fișe complete, schelete C++, greșeli frecvente și tabel de alegere rapidă pentru metodele mai avansate.
+            </p>
+            <div class="card__actions" style="position: relative; z-index: 1;">
+                <a href="index.php?page=algoritmi_avansati" class="link-arrow" style="color: var(--color-primary);">
+                    Deschide tehnicile
                     <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
                     </svg>
@@ -91,8 +114,8 @@ if (session_status() === PHP_SESSION_NONE) {
                 </svg>
                 Fundamentali
             </span>
-            <div class="stat__value">5 lectii</div>
-            <p class="stat__sub">Recursivitate, Backtracking, Greedy, Divide&Impera, Dinamica</p>
+            <div class="stat__value">10 teme</div>
+            <p class="stat__sub">Parcurgeri, cifre, divizori, CMMDC, prime, frecvențe</p>
         </div>
 
         <div class="card card--stat bento__card--stat" style="border: 1px solid var(--color-danger-soft);">
@@ -103,10 +126,10 @@ if (session_status() === PHP_SESSION_NONE) {
                     <path d="M9 12H4s.5-1 1-4c2 0 3 0 3 0"/>
                     <path d="M15 3v5s1 .5 4 1c0-2 0-3 0-3"/>
                 </svg>
-                Avansati
+                Tehnici
             </span>
             <div class="stat__value">Bonus+</div>
-            <p class="stat__sub">Algoritmi de competiție și optimizări avansate</p>
+            <p class="stat__sub">Recursivitate, Backtracking, Greedy și Divide et Impera</p>
         </div>
 
         <!-- QUICK LINKS: Full-width -->
@@ -136,13 +159,14 @@ if (session_status() === PHP_SESSION_NONE) {
                     
                     <!-- FUNDAMENTAL -->
                     <div style="border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3); background: var(--color-surface-2);">
-                        <h4 style="font-size: var(--text-sm); font-weight: 600; margin: 0 0 var(--space-2) 0; color: var(--color-accent);">Algoritmi Fundamentali</h4>
+                        <h4 style="font-size: var(--text-sm); font-weight: 600; margin: 0 0 var(--space-2) 0; color: var(--color-accent);">Fundamente & Tehnici</h4>
                         <div style="display: flex; flex-direction: column; gap: var(--space-1);">
+                            <a href="index.php?page=algoritmi_fundamentali" class="link-arrow" style="font-size: var(--text-sm);">Algoritmi fundamentali</a>
                             <a href="index.php?page=recursivitate" class="link-arrow" style="font-size: var(--text-sm);">Recursivitate</a>
                             <a href="index.php?page=backtracking" class="link-arrow" style="font-size: var(--text-sm);">Backtracking</a>
                             <a href="index.php?page=greedy" class="link-arrow" style="font-size: var(--text-sm);">Algoritmi Greedy</a>
                             <a href="index.php?page=divide_et_impera" class="link-arrow" style="font-size: var(--text-sm);">Divide et Impera</a>
-                            <a href="index.php?page=algoritmi_avansati" class="link-arrow" style="font-size: var(--text-sm);">Programare Dinamică</a>
+                            <a href="index.php?page=algoritmi_avansati" class="link-arrow" style="font-size: var(--text-sm);">Tehnici algoritmice</a>
                         </div>
                     </div>
 

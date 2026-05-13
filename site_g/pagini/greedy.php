@@ -10,7 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M20.91 8.84 8.56 2.23a1.93 1.93 0 0 0-1.81 0L3.1 4.13a2.12 2.12 0 0 0-.05 3.69l12.22 6.93a2 2 0 0 1 .67 2.25 2 2 0 0 0 1.28 2.59l2.39.86a2.12 2.12 0 0 0 2.82-1.49l1.45-5.83a2.1 2.1 0 0 0-1.05-2.31l-1.91-1a2.1 2.1 0 0 1-1.05-2.31Z"/>
             </svg>
-            Algoritm fundamental
+            Tehnică algoritmică
         </span>
         <h1 class="dash__title">
             Tehnica <span class="dash__title-accent">Greedy</span>

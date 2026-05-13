@@ -1,8 +1,36 @@
 {
-  "generated_at": "2026-05-06T21:50:40.835990+00:00",
+  "generated_at": "2026-05-13T09:15:06.719400+00:00",
   "source_root": "proiect_documentatie",
-  "chunk_count": 62,
+  "chunk_count": 70,
   "chunks": [
+    {
+      "source": "proiect_documentatie/algoritmi_fundamentali/algoritmi_fundamentali_offbyone.txt",
+      "title": "algoritmi fundamentali offbyone (algoritmi fundamentali)",
+      "type": "txt",
+      "chunk": 0,
+      "text": "Algoritmi fundamentali pentru OffByOne Academy\n\nAcest material este scris pentru a oferi Profesorului AI context de baza despre algoritmii elementari folositi frecvent in probleme de C++. Explicatiile sunt originale si trebuie folosite pentru raspunsuri clare, fara intrebari care cer elevului sa memoreze cod din aplicatie.\n\n1. Parcurgere liniara\nParcurgerea liniara inseamna inspectarea elementelor pe rand, de la stanga la dreapta. Se foloseste pentru suma elementelor, numarari, maxim, minim, cautarea unei valori sau verificarea unei proprietati.\nSchelet:\nint suma = 0, maxim = v[0];\nfor (int i = 0; i < n; i++) {\n suma += v[i];\n if (v[i] > maxim) maxim = v[i];\n}\nGreseala frecventa: initializarea maximului cu 0 atunci cand valorile pot fi negative.\n\n2. Cifrele unui numar\nUltima cifra a lui n se obtine cu n % 10, iar eliminarea ultimei cifre se face cu n / 10. Metoda se foloseste pentru suma cifrelor, numarul de cifre, cifra maxima, inversarea unui numar, palindrom sau frecventa cifrelor.\nSchelet:\nwhile (n > 0) {\n int cifra = n % 10;\n n /= 10;\n}\nGreseala frecventa: cazul n = 0 trebuie tratat separat atunci cand conteaza numarul de cifre.\n\n3. Divizori si divizibilitate\nPentru a gasi divizorii lui n nu este necesar sa mergem pana la n. Este suficient sa verificam d pana cand d * d <= n. Daca d divide n, atunci n / d este divizorul pereche.\nSchelet:\nfor (int d = 1; d * d <= n; d++) {\n if (n % d == 0) {\n // d este divizor\n // n / d este divizor, daca este diferit de d\n }\n}\nGreseala frecventa: numararea de doua ori a radicalului atunci cand n este patrat perfect.\n\n4. CMMDC si CMMMC\nAlgoritmul lui Euclid calculeaza CMMDC prin resturi succesive. CMMMC se poate calcula cu formula a / cmmdc(a, b) * b.\nSchelet:\nint cmmdc(int a, int b) {\n while (b != 0) {\n int r = a % b;\n a = b;"
+    },
+    {
+      "source": "proiect_documentatie/algoritmi_fundamentali/algoritmi_fundamentali_offbyone.txt",
+      "title": "algoritmi fundamentali offbyone (algoritmi fundamentali)",
+      "type": "txt",
+      "chunk": 1,
+      "text": "fect.\n\n4. CMMDC si CMMMC\nAlgoritmul lui Euclid calculeaza CMMDC prin resturi succesive. CMMMC se poate calcula cu formula a / cmmdc(a, b) * b.\nSchelet:\nint cmmdc(int a, int b) {\n while (b != 0) {\n int r = a % b;\n a = b;\n b = r;\n }\n return a;\n}\nGreseala frecventa: calculul a * b / cmmdc poate produce overflow mai repede decat a / cmmdc * b.\n\n5. Numere prime si factorizare\nUn numar este prim daca are exact doi divizori pozitivi: 1 si el insusi. Pentru verificare, se testeaza divizorii de la 2 pana la radical. Pentru factorizare, se imparte repetat la fiecare divizor gasit.\nSchelet:\nfor (int d = 2; d * d <= n; d++) {\n int putere = 0;\n while (n % d == 0) {\n putere++;\n n /= d;\n }\n if (putere > 0) {\n // d apare la puterea \"putere\"\n }\n}\nif (n > 1) {\n // n ramas este factor prim\n}\nGreseala frecventa: 0 si 1 nu sunt numere prime.\n\n6. Fibonacci si recurente simple\nSirul Fibonacci are fiecare termen egal cu suma celor doi termeni anteriori. Pentru calculul unui termen, varianta iterativa este de obicei mai buna decat recursivitatea simpla, deoarece nu recalculeaza aceleasi valori.\nSchelet:\nint a = 0, b = 1;\nfor (int i = 2; i <= n; i++) {\n int c = a + b;\n a = b;\n b = c;\n}\nGreseala frecventa: folosirea recursivitatii naive pentru n mare.\n\n7. Baze de numeratie\nPentru conversia din baza 10 in baza b, se imparte repetat la b si se pastreaza resturile. Resturile se afiseaza invers fata de ordinea in care au fost obtinute.\nSchelet:\nint cifre[64], k = 0;\nwhile (n > 0) {\n cifre[k++] = n % baza;\n n /= baza;\n}\nfor (int i = k - 1; i >= 0; i--) {\n cout << cifre[i];\n}\nGreseala frecventa: uitarea cazului n = 0 sau a cifrelor A-F pentru baze mai mari decat 10.\n\n8. Cautare liniara si cautare binara\nCautarea liniara merge pe orice vector si are complexitate O(n)."
+    },
+    {
+      "source": "proiect_documentatie/algoritmi_fundamentali/algoritmi_fundamentali_offbyone.txt",
+      "title": "algoritmi fundamentali offbyone (algoritmi fundamentali)",
+      "type": "txt",
+      "chunk": 2,
+      "text": "-) {\n cout << cifre[i];\n}\nGreseala frecventa: uitarea cazului n = 0 sau a cifrelor A-F pentru baze mai mari decat 10.\n\n8. Cautare liniara si cautare binara\nCautarea liniara merge pe orice vector si are complexitate O(n). Cautarea binara are complexitate O(log n), dar functioneaza doar pe date sortate.\nSchelet cautare binara:\nint st = 0, dr = n - 1, poz = -1;\nwhile (st <= dr) {\n int mid = st + (dr - st) / 2;\n if (v[mid] == x) {\n poz = mid;\n break;\n }\n if (v[mid] < x) st = mid + 1;\n else dr = mid - 1;\n}\nGreseala frecventa: aplicarea cautarii binare pe un vector nesortat.\n\n9. Vectori de frecventa\nVectorul de frecventa numara aparitiile valorilor atunci cand intervalul de valori este mic si cunoscut. Este util pentru duplicate, aparitii, sortare prin numarare, litere si cifre.\nSchelet:\nint fr[1001] = {0};\nfor (int i = 0; i < n; i++) {\n fr[v[i]]++;\n}\nGreseala frecventa: folosirea directa a unui vector de frecventa pentru valori negative sau foarte mari.\n\n10. Ciurul lui Eratostene\nCiurul precalculeaza numerele prime pana la N. Initial presupunem ca toate numerele sunt prime, apoi marcam multiplii fiecarui prim.\nSchelet:\nvector<bool> prim(N + 1, true);\nprim[0] = prim[1] = false;\nfor (int p = 2; p * p <= N; p++) {\n if (prim[p]) {\n for (int m = p * p; m <= N; m += p) {\n prim[m] = false;\n }\n }\n}\nGreseala frecventa: pornirea marcarii de la 2 * p, desi multiplii mai mici au fost deja acoperiti.\n\nCum trebuie sa raspunda Profesorul AI\n- Explica intai ideea in limbaj simplu.\n- Ofera un exemplu mic numeric, nu doar cod.\n- Cere elevului sa modifice o variabila, o conditie sau o valoare de intrare, nu sa recunoasca o functie din aplicatie dupa nume."
+    },
+    {
+      "source": "proiect_documentatie/algoritmi_fundamentali/algoritmi_fundamentali_offbyone.txt",
+      "title": "algoritmi fundamentali offbyone (algoritmi fundamentali)",
+      "type": "txt",
+      "chunk": 3,
+      "text": "l AI\n- Explica intai ideea in limbaj simplu.\n- Ofera un exemplu mic numeric, nu doar cod.\n- Cere elevului sa modifice o variabila, o conditie sau o valoare de intrare, nu sa recunoasca o functie din aplicatie dupa nume.\n- Pune intrebari de tip: \"Ce se schimba daca vectorul este deja sortat?\", \"De ce oprim la radical?\", \"Ce valoare are contorul dupa acest pas?\"."
+    },
     {
       "source": "proiect_documentatie/metode_de_sortare/alg2011_cap4.pdf",
       "title": "alg2011 cap4 (metode de sortare)",
@@ -436,6 +464,34 @@
       "type": "cpp",
       "chunk": 1,
       "text": "he 3th element\nx.erase (x.begin()+2);\ncout <<endl<<\"vect dupa stergere :\";\n for(i =0; i<x.size() ;i++)\n cout << x[i] << ' ';\n//curatire vector\n x.clear();\n cout <<endl<<\"vect dupa curatire:\";\n for(i =0; i<x.size() ;i++)\n cout << x[i] << ' ';\n sort(t, t+n);\n for(i =0; i<n ;i++)\n cout << t[i] << ' ';\n cout <<endl;\n return 0;\n\n\n}"
+    },
+    {
+      "source": "proiect_documentatie/tehnici_algoritmice/recursivitate_backtracking_greedy_divide_offbyone.txt",
+      "title": "recursivitate backtracking greedy divide offbyone (tehnici algoritmice)",
+      "type": "txt",
+      "chunk": 0,
+      "text": "Tehnici algoritmice pentru OffByOne Academy\n\nAcest material este scris pentru Profesorul AI si pentru paginile despre Recursivitate, Divide et Impera, Backtracking si Greedy. Explicatiile sunt originale, in stil didactic, inspirate ca structura de subiectele uzuale din liceu. AI-ul trebuie sa foloseasca aceste idei pentru intrebari aplicate, nu pentru memorarea numelor de functii din aplicatie.\n\n1. Recursivitate\nRecursivitatea apare atunci cand o functie se autoapeleaza pentru o forma mai mica a aceleiasi probleme. Orice solutie recursiva corecta are:\n- caz de baza: situatia in care functia raspunde direct si nu se mai autoapeleaza;\n- pas recursiv: apelul catre o problema mai mica;\n- progres: parametrii se apropie de cazul de baza.\n\nExemplu factorial:\nint fact(int n) {\n if (n == 0) return 1;\n return n * fact(n - 1);\n}\n\nCum se explica elevului:\n- La fact(3), se coboara pana la fact(0), apoi rezultatele se intorc: 1, 1, 2, 6.\n- Fiecare apel sta pe stiva cu propriile variabile locale.\n- Daca lipseste cazul de baza sau n nu se apropie de 0, apare recursivitate infinita si consum de stiva.\n\nIntrebari bune:\n- Ce se intampla daca in loc de fact(n - 1) scriem fact(n)?\n- Care este primul apel care nu mai face autoapel?\n- Ce valoare se intoarce din fact(0)?\n\n2. Divide et Impera\nDivide et Impera este o strategie in care problema initiala se sparge in subprobleme de acelasi tip, mai mici si independente. Dupa rezolvarea subproblemelor, raspunsurile se combina.\n\nStructura:\n- divide: alegi mijlocul sau criteriul de impartire;\n- impera: rezolvi subproblemele, de obicei recursiv;\n- combina: obtii raspunsul problemei mari.\n\nSchelet:\nint solve(int st, int dr) {\n if (st == dr) return v[st];\n int m = st + (dr - st) / 2;\n int left = solve(st, m);\n int right = solve(m + 1, dr);"
+    },
+    {
+      "source": "proiect_documentatie/tehnici_algoritmice/recursivitate_backtracking_greedy_divide_offbyone.txt",
+      "title": "recursivitate backtracking greedy divide offbyone (tehnici algoritmice)",
+      "type": "txt",
+      "chunk": 1,
+      "text": "le, de obicei recursiv;\n- combina: obtii raspunsul problemei mari.\n\nSchelet:\nint solve(int st, int dr) {\n if (st == dr) return v[st];\n int m = st + (dr - st) / 2;\n int left = solve(st, m);\n int right = solve(m + 1, dr);\n return combina(left, right);\n}\n\nExemple:\n- cautare binara: la fiecare pas pastrezi doar jumatatea unde poate fi raspunsul;\n- Merge Sort: imparti vectorul, sortezi jumatatile si le interclasezi;\n- Quick Sort: alegi pivot, partitionezi si sortezi recursiv zonele.\n\nIntrebari bune:\n- Ce reprezinta cazul de baza pentru intervalul [st, dr]?\n- De ce folosim st + (dr - st) / 2?\n- Cum combinam raspunsurile dupa ce rezolvam stanga si dreapta?\n\n3. Backtracking\nBacktracking construieste solutia pas cu pas. La pasul k alegem o valoare pentru x[k], verificam daca solutia partiala ramane valida si continuam. Daca nu mai putem continua, revenim la pasul anterior.\n\nSemne ca problema este de backtracking:\n- se cer toate solutiile sau o solutie care respecta multe restrictii;\n- solutia poate fi memorata intr-un vector x[];\n- la fiecare pozitie exista un numar finit de valori posibile;\n- trebuie evitate duplicate, incalcari de conditii sau combinatii imposibile.\n\nSchelet:\nvoid back(int k) {\n for (int val = 1; val <= n; val++) {\n x[k] = val;\n if (valid(k)) {\n if (solutie(k)) afiseaza();\n else back(k + 1);\n }\n }\n}\n\nExemple:\n- permutari: alegi valori distincte;\n- aranjamente si combinari: controlezi lungimea si ordinea;\n- submultimi: decizi pentru fiecare element daca apare sau nu;\n- problema damelor: verifici coloane si diagonale.\n\nGreseala frecventa:\nValidarea doar la final face algoritmul foarte lent. Validarea trebuie sa taie ramurile gresite cat mai devreme.\n\nIntrebari bune:\n- Ce reprezinta x[k] in problema?\n- Ce conditie trebuie sa verifice valid(k)?"
+    },
+    {
+      "source": "proiect_documentatie/tehnici_algoritmice/recursivitate_backtracking_greedy_divide_offbyone.txt",
+      "title": "recursivitate backtracking greedy divide offbyone (tehnici algoritmice)",
+      "type": "txt",
+      "chunk": 2,
+      "text": "frecventa:\nValidarea doar la final face algoritmul foarte lent. Validarea trebuie sa taie ramurile gresite cat mai devreme.\n\nIntrebari bune:\n- Ce reprezinta x[k] in problema?\n- Ce conditie trebuie sa verifice valid(k)?\n- De ce se revine la pasul anterior dupa epuizarea valorilor?\n\n4. Greedy\nGreedy construieste o solutie alegand la fiecare pas candidatul local cel mai bun. Spre deosebire de backtracking, nu revine asupra deciziilor luate.\n\nStructura:\n- definesti candidatii;\n- alegi un criteriu local, de multe ori prin sortare;\n- adaugi candidatul daca respecta restrictiile;\n- continui pana cand solutia este completa sau nu mai poti adauga.\n\nSchelet:\nsort(candidati, candidati + n, criteriu);\nfor (int i = 0; i < n; i++) {\n if (potAdauga(candidati[i])) {\n adauga(candidati[i]);\n }\n}\n\nCand este potrivit:\n- problema cere minim sau maxim;\n- exista un criteriu natural de alegere;\n- poti demonstra ca alegerea locala nu impiedica optimul global.\n\nCand este periculos:\n- daca o alegere buna acum poate bloca o solutie mai buna mai tarziu;\n- daca nu poti construi un argument de corectitudine;\n- daca apar contraexemple mici.\n\nIntrebari bune:\n- Care este criteriul local de alegere?\n- Dupa ce adaug un candidat, mai pot reveni asupra lui?\n- Gaseste un exemplu mic in care o alegere lacoma gresita da raspuns suboptim.\n\nComparatie rapida\nRecursivitate: mecanism de autoapel. Intrebarea cheie: am caz de baza?\nDivide et Impera: subprobleme independente. Intrebarea cheie: pot combina raspunsurile?\nBacktracking: cautare completa cu revenire. Intrebarea cheie: pot taia ramuri imposibile?\nGreedy: alegere locala fara revenire. Intrebarea cheie: pot demonstra corectitudinea alegerii?\n\nReguli pentru Profesorul AI\n- Pune intrebari pe fragmente de cod scurte si clare."
+    },
+    {
+      "source": "proiect_documentatie/tehnici_algoritmice/recursivitate_backtracking_greedy_divide_offbyone.txt",
+      "title": "recursivitate backtracking greedy divide offbyone (tehnici algoritmice)",
+      "type": "txt",
+      "chunk": 3,
+      "text": "ebarea cheie: pot taia ramuri imposibile?\nGreedy: alegere locala fara revenire. Intrebarea cheie: pot demonstra corectitudinea alegerii?\n\nReguli pentru Profesorul AI\n- Pune intrebari pe fragmente de cod scurte si clare.\n- Cere elevului sa modifice o conditie sau sa prezica urmatorul pas.\n- Evita intrebari de forma \"ce metoda foloseste functia X din aplicatie?\".\n- Pentru Greedy, include contraexemple mici cand explici de ce metoda nu este mereu corecta.\n- Pentru Backtracking, intreaba mereu despre sensul lui x[k], valid(k) si solutie(k)."
     }
   ],
   "errors": []

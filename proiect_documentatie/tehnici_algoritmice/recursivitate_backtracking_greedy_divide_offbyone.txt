@@ -1,0 +1,131 @@
+Tehnici algoritmice pentru OffByOne Academy
+
+Acest material este scris pentru Profesorul AI si pentru paginile despre Recursivitate, Divide et Impera, Backtracking si Greedy. Explicatiile sunt originale, in stil didactic, inspirate ca structura de subiectele uzuale din liceu. AI-ul trebuie sa foloseasca aceste idei pentru intrebari aplicate, nu pentru memorarea numelor de functii din aplicatie.
+
+1. Recursivitate
+Recursivitatea apare atunci cand o functie se autoapeleaza pentru o forma mai mica a aceleiasi probleme. Orice solutie recursiva corecta are:
+- caz de baza: situatia in care functia raspunde direct si nu se mai autoapeleaza;
+- pas recursiv: apelul catre o problema mai mica;
+- progres: parametrii se apropie de cazul de baza.
+
+Exemplu factorial:
+int fact(int n) {
+    if (n == 0) return 1;
+    return n * fact(n - 1);
+}
+
+Cum se explica elevului:
+- La fact(3), se coboara pana la fact(0), apoi rezultatele se intorc: 1, 1, 2, 6.
+- Fiecare apel sta pe stiva cu propriile variabile locale.
+- Daca lipseste cazul de baza sau n nu se apropie de 0, apare recursivitate infinita si consum de stiva.
+
+Intrebari bune:
+- Ce se intampla daca in loc de fact(n - 1) scriem fact(n)?
+- Care este primul apel care nu mai face autoapel?
+- Ce valoare se intoarce din fact(0)?
+
+2. Divide et Impera
+Divide et Impera este o strategie in care problema initiala se sparge in subprobleme de acelasi tip, mai mici si independente. Dupa rezolvarea subproblemelor, raspunsurile se combina.
+
+Structura:
+- divide: alegi mijlocul sau criteriul de impartire;
+- impera: rezolvi subproblemele, de obicei recursiv;
+- combina: obtii raspunsul problemei mari.
+
+Schelet:
+int solve(int st, int dr) {
+    if (st == dr) return v[st];
+    int m = st + (dr - st) / 2;
+    int left = solve(st, m);
+    int right = solve(m + 1, dr);
+    return combina(left, right);
+}
+
+Exemple:
+- cautare binara: la fiecare pas pastrezi doar jumatatea unde poate fi raspunsul;
+- Merge Sort: imparti vectorul, sortezi jumatatile si le interclasezi;
+- Quick Sort: alegi pivot, partitionezi si sortezi recursiv zonele.
+
+Intrebari bune:
+- Ce reprezinta cazul de baza pentru intervalul [st, dr]?
+- De ce folosim st + (dr - st) / 2?
+- Cum combinam raspunsurile dupa ce rezolvam stanga si dreapta?
+
+3. Backtracking
+Backtracking construieste solutia pas cu pas. La pasul k alegem o valoare pentru x[k], verificam daca solutia partiala ramane valida si continuam. Daca nu mai putem continua, revenim la pasul anterior.
+
+Semne ca problema este de backtracking:
+- se cer toate solutiile sau o solutie care respecta multe restrictii;
+- solutia poate fi memorata intr-un vector x[];
+- la fiecare pozitie exista un numar finit de valori posibile;
+- trebuie evitate duplicate, incalcari de conditii sau combinatii imposibile.
+
+Schelet:
+void back(int k) {
+    for (int val = 1; val <= n; val++) {
+        x[k] = val;
+        if (valid(k)) {
+            if (solutie(k)) afiseaza();
+            else back(k + 1);
+        }
+    }
+}
+
+Exemple:
+- permutari: alegi valori distincte;
+- aranjamente si combinari: controlezi lungimea si ordinea;
+- submultimi: decizi pentru fiecare element daca apare sau nu;
+- problema damelor: verifici coloane si diagonale.
+
+Greseala frecventa:
+Validarea doar la final face algoritmul foarte lent. Validarea trebuie sa taie ramurile gresite cat mai devreme.
+
+Intrebari bune:
+- Ce reprezinta x[k] in problema?
+- Ce conditie trebuie sa verifice valid(k)?
+- De ce se revine la pasul anterior dupa epuizarea valorilor?
+
+4. Greedy
+Greedy construieste o solutie alegand la fiecare pas candidatul local cel mai bun. Spre deosebire de backtracking, nu revine asupra deciziilor luate.
+
+Structura:
+- definesti candidatii;
+- alegi un criteriu local, de multe ori prin sortare;
+- adaugi candidatul daca respecta restrictiile;
+- continui pana cand solutia este completa sau nu mai poti adauga.
+
+Schelet:
+sort(candidati, candidati + n, criteriu);
+for (int i = 0; i < n; i++) {
+    if (potAdauga(candidati[i])) {
+        adauga(candidati[i]);
+    }
+}
+
+Cand este potrivit:
+- problema cere minim sau maxim;
+- exista un criteriu natural de alegere;
+- poti demonstra ca alegerea locala nu impiedica optimul global.
+
+Cand este periculos:
+- daca o alegere buna acum poate bloca o solutie mai buna mai tarziu;
+- daca nu poti construi un argument de corectitudine;
+- daca apar contraexemple mici.
+
+Intrebari bune:
+- Care este criteriul local de alegere?
+- Dupa ce adaug un candidat, mai pot reveni asupra lui?
+- Gaseste un exemplu mic in care o alegere lacoma gresita da raspuns suboptim.
+
+Comparatie rapida
+Recursivitate: mecanism de autoapel. Intrebarea cheie: am caz de baza?
+Divide et Impera: subprobleme independente. Intrebarea cheie: pot combina raspunsurile?
+Backtracking: cautare completa cu revenire. Intrebarea cheie: pot taia ramuri imposibile?
+Greedy: alegere locala fara revenire. Intrebarea cheie: pot demonstra corectitudinea alegerii?
+
+Reguli pentru Profesorul AI
+- Pune intrebari pe fragmente de cod scurte si clare.
+- Cere elevului sa modifice o conditie sau sa prezica urmatorul pas.
+- Evita intrebari de forma "ce metoda foloseste functia X din aplicatie?".
+- Pentru Greedy, include contraexemple mici cand explici de ce metoda nu este mereu corecta.
+- Pentru Backtracking, intreaba mereu despre sensul lui x[k], valid(k) si solutie(k).

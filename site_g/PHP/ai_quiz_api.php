@@ -15,6 +15,7 @@ header('Pragma: no-cache');
 require_once 'helpers.php';
 require_once 'documentation_context.php';
 require_once 'conexiune.php';
+require_once 'auth.php';
 
 // FIX [A2]: Session timeout pentru AJAX
 enforce_session_timeout_ajax();
@@ -22,6 +23,12 @@ enforce_session_timeout_ajax();
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['ok' => false, 'error' => 'Metoda nepermisă.'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+if (!is_logged_in()) {
+    http_response_code(401);
+    echo json_encode(['ok' => false, 'error' => 'Trebuie să fii autentificat ca să dai testul AI.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -134,6 +141,53 @@ function ai_quiz_prepare_db_question(array $question): array {
         'question' => $cleanQuestion,
         'code_example' => $codeExample !== '' ? $codeExample : null,
     ];
+}
+
+function ai_quiz_ensure_attempts_table(mysqli $con): void {
+    $sql = "CREATE TABLE IF NOT EXISTS ai_quiz_attempts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        path_slug VARCHAR(80) NOT NULL DEFAULT 'general',
+        score INT NOT NULL,
+        total INT NOT NULL,
+        percent DECIMAL(5,2) NOT NULL DEFAULT 0,
+        feedback_summary TEXT NULL,
+        sources_json TEXT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_ai_quiz_user_time (user_id, created_at),
+        INDEX idx_ai_quiz_user_path (user_id, path_slug)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    if (!$con->query($sql)) {
+        error_log('ai_quiz_ensure_attempts_table failed: ' . $con->error);
+    }
+}
+
+function ai_quiz_save_attempt(mysqli $con, int $userId, string $pathSlug, int $score, int $total, string $feedback, array $sources): array {
+    if ($userId <= 0 || $total <= 0) {
+        return ['saved' => false, 'id' => null, 'percent' => 0];
+    }
+
+    ai_quiz_ensure_attempts_table($con);
+    $percent = round(($score / $total) * 100, 2);
+    $safePath = mb_substr($pathSlug !== '' ? $pathSlug : 'general', 0, 80, 'UTF-8');
+    $summary = mb_substr(trim($feedback), 0, 1200, 'UTF-8');
+    $sourcesJson = json_encode(array_values($sources), JSON_UNESCAPED_UNICODE) ?: '[]';
+
+    $stmt = $con->prepare("INSERT INTO ai_quiz_attempts (user_id, path_slug, score, total, percent, feedback_summary, sources_json) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    if (!$stmt) {
+        error_log('ai_quiz_save_attempt prepare failed: ' . $con->error);
+        return ['saved' => false, 'id' => null, 'percent' => $percent];
+    }
+
+    $stmt->bind_param('isiidss', $userId, $safePath, $score, $total, $percent, $summary, $sourcesJson);
+    $ok = $stmt->execute();
+    $id = $ok ? $stmt->insert_id : null;
+    if (!$ok) {
+        error_log('ai_quiz_save_attempt execute failed: ' . $stmt->error);
+    }
+    $stmt->close();
+
+    return ['saved' => (bool)$ok, 'id' => $id, 'percent' => $percent];
 }
 
 function ai_quiz_fallback_questions(string $pathSlug): array {
@@ -542,7 +596,22 @@ STIL: Pedagogic, prietenos, motivator, concis.";
     $feedbackRaw = $data['choices'][0]['message']['content'];
     // Ensure proper UTF-8 encoding
     $feedback = mb_convert_encoding($feedbackRaw, 'UTF-8', 'UTF-8');
+    $saveResult = ['saved' => false, 'id' => null, 'percent' => $total > 0 ? round(($score / $total) * 100, 2) : 0];
+    if (!empty($_SESSION['user_id'])) {
+        $saveResult = ai_quiz_save_attempt($con, (int)$_SESSION['user_id'], (string)$pathSlug, $score, $total, $feedback, $docContext['sources']);
+    }
     
-    echo json_encode(['ok' => true, 'feedback' => $feedback, 'sources' => $docContext['sources']], JSON_UNESCAPED_UNICODE);
+    echo json_encode([
+        'ok' => true,
+        'feedback' => $feedback,
+        'sources' => $docContext['sources'],
+        'attempt_saved' => $saveResult['saved'],
+        'attempt' => [
+            'id' => $saveResult['id'],
+            'score' => $score,
+            'total' => $total,
+            'percent' => $saveResult['percent'],
+        ],
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }

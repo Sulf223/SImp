@@ -93,6 +93,13 @@ $solvedGrile = 0;
 $quizAttempts = 0;
 $quizCorrect = 0;
 $quizAccuracy = 0;
+$aiQuizStats = [
+    'total' => 0,
+    'avg_percent' => 0,
+    'best_percent' => 0,
+    'latest_percent' => null,
+];
+$aiQuizHistory = [];
 if ($res = $con->query("SELECT COUNT(*) AS c FROM grile_cpp")) {
     $totalGrile = (int)($res->fetch_assoc()['c'] ?? 0);
     $res->free();
@@ -111,6 +118,29 @@ if ($tableExists('quiz_attempts') && ($stmt = $con->prepare("SELECT COUNT(*) AS 
     $quizCorrect = (int)($row['correct'] ?? 0);
     $quizAccuracy = $quizAttempts > 0 ? (int)round(($quizCorrect / $quizAttempts) * 100) : 0;
     $stmt->close();
+}
+if ($tableExists('ai_quiz_attempts')) {
+    if ($stmt = $con->prepare("SELECT COUNT(*) AS total, AVG(percent) AS avg_percent, MAX(percent) AS best_percent FROM ai_quiz_attempts WHERE user_id = ?")) {
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc() ?: [];
+        $aiQuizStats['total'] = (int)($row['total'] ?? 0);
+        $aiQuizStats['avg_percent'] = (int)round((float)($row['avg_percent'] ?? 0));
+        $aiQuizStats['best_percent'] = (int)round((float)($row['best_percent'] ?? 0));
+        $stmt->close();
+    }
+    if ($stmt = $con->prepare("SELECT path_slug, score, total, percent, created_at FROM ai_quiz_attempts WHERE user_id = ? ORDER BY created_at DESC LIMIT 10")) {
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        while ($row = $res->fetch_assoc()) {
+            $aiQuizHistory[] = $row;
+        }
+        $stmt->close();
+    }
+    if (!empty($aiQuizHistory)) {
+        $aiQuizStats['latest_percent'] = (int)round((float)$aiQuizHistory[0]['percent']);
+    }
 }
 
 $nextProfileRecommendation = 'Continuă lecțiile de sortare și rulează câteva grile după fiecare algoritm.';
@@ -200,6 +230,45 @@ if ($tableExists('achievements') && $tableExists('user_achievements') && ($stmt 
           <p><?= htmlspecialchars($nextProfileRecommendation, ENT_QUOTES, 'UTF-8') ?></p>
         </section>
       </div>
+    </article>
+
+    <article class="card bento__card--timeline ai-progress-card">
+      <header class="card__head">
+        <span class="card__eyebrow">Evoluție teste AI</span>
+        <a href="index.php?page=profesor_ai" class="btn btn--ghost btn--sm">Dă un test AI</a>
+      </header>
+      <?php if (empty($aiQuizHistory)): ?>
+        <p class="card__body">Încă nu ai teste AI finalizate. După primul test, aici apar scorurile și evoluția.</p>
+      <?php else: ?>
+        <div class="ai-progress-summary">
+          <section>
+            <span class="stat__label">Teste AI</span>
+            <strong><?= (int)$aiQuizStats['total'] ?></strong>
+          </section>
+          <section>
+            <span class="stat__label">Ultimul scor</span>
+            <strong><?= (int)$aiQuizStats['latest_percent'] ?>%</strong>
+          </section>
+          <section>
+            <span class="stat__label">Media</span>
+            <strong><?= (int)$aiQuizStats['avg_percent'] ?>%</strong>
+          </section>
+          <section>
+            <span class="stat__label">Cel mai bun</span>
+            <strong><?= (int)$aiQuizStats['best_percent'] ?>%</strong>
+          </section>
+        </div>
+        <div class="ai-progress-chart ai-progress-chart--wide" aria-label="Evoluția ultimelor teste AI">
+          <?php foreach (array_reverse($aiQuizHistory) as $attempt):
+              $percent = max(3, min(100, (int)round((float)$attempt['percent'])));
+          ?>
+            <div class="ai-progress-bar" title="<?= htmlspecialchars($attempt['score'] . '/' . $attempt['total'] . ' · ' . $attempt['path_slug'] . ' · ' . date('d.m H:i', strtotime($attempt['created_at'])), ENT_QUOTES, 'UTF-8') ?>">
+              <span style="height: <?= $percent ?>%;"></span>
+              <small><?= $percent ?>%</small>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
     </article>
     
     <!-- Heatmap (col-span-12) -->

@@ -80,6 +80,9 @@ $quizAttempts = 0;
 $quizCorrect = 0;
 $quizAccuracy = 0;
 $lastWrongQuiz = null;
+$aiQuizTotal = 0;
+$aiQuizAvg = 0;
+$aiQuizLatest = null;
 
 if ($res = $con->query("SELECT COUNT(*) AS c FROM grile_cpp")) {
     $totalGrile = (int)($res->fetch_assoc()['c'] ?? 0);
@@ -105,6 +108,23 @@ if ($tableExists('quiz_attempts')) {
         $stmt->bind_param('i', $userId);
         $stmt->execute();
         $lastWrongQuiz = $stmt->get_result()->fetch_assoc() ?: null;
+        $stmt->close();
+    }
+}
+if ($tableExists('ai_quiz_attempts')) {
+    if ($stmt = $con->prepare("SELECT COUNT(*) AS total, AVG(percent) AS avg_percent FROM ai_quiz_attempts WHERE user_id = ?")) {
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc() ?: [];
+        $aiQuizTotal = (int)($row['total'] ?? 0);
+        $aiQuizAvg = (int)round((float)($row['avg_percent'] ?? 0));
+        $stmt->close();
+    }
+    if ($stmt = $con->prepare("SELECT percent FROM ai_quiz_attempts WHERE user_id = ? ORDER BY created_at DESC LIMIT 1")) {
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc() ?: null;
+        $aiQuizLatest = $row ? (int)round((float)$row['percent']) : null;
         $stmt->close();
     }
 }
@@ -257,6 +277,11 @@ if ($lastWrongQuiz) {
                     <span class="stat__label">Acuratețe</span>
                     <strong><?php echo $quizAttempts > 0 ? $quizAccuracy . '%' : '—'; ?></strong>
                     <p><?php echo $quizAttempts > 0 ? $quizCorrect . ' corecte din ' . $quizAttempts . ' încercări.' : 'Apare după primele încercări.'; ?></p>
+                </section>
+                <section>
+                    <span class="stat__label">Teste AI</span>
+                    <strong><?php echo $aiQuizTotal; ?></strong>
+                    <p><?php echo $aiQuizTotal > 0 ? 'Ultimul scor: ' . $aiQuizLatest . '%. Media: ' . $aiQuizAvg . '%.' : 'Apare după primul test AI finalizat.'; ?></p>
                 </section>
             </div>
         </article>

@@ -160,6 +160,10 @@ class SortingVisualizer {
         return this.algorithmLabelMap[key] || "Bubble Sort";
     }
 
+    getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    }
+
     onResize() {
         if (!this.canvas || !this.container) return;
         const rect = this.canvas.getBoundingClientRect();
@@ -201,6 +205,9 @@ class SortingVisualizer {
         });
         document.querySelectorAll('[data-action="regenerate"]').forEach(btn => {
             btn.addEventListener('click', () => this.resetArray());
+        });
+        document.querySelectorAll('[data-action="explain"]').forEach(btn => {
+            btn.addEventListener('click', () => this.explainCurrentAlgorithm());
         });
         document.querySelectorAll('[data-control="size"]').forEach(input => {
             input.addEventListener('change', e => {
@@ -333,7 +340,7 @@ class SortingVisualizer {
 
         const btnExplain = document.createElement("button");
         btnExplain.className = "btn btn-ghost";
-        btnExplain.textContent = "Explica-mi";
+        btnExplain.textContent = "Explică-mi";
         btnExplain.onclick = () => this.explainCurrentAlgorithm();
 
         controlsMain.appendChild(btnStart);
@@ -363,8 +370,34 @@ class SortingVisualizer {
 
         this.explainPanel = document.createElement("div");
         this.explainPanel.className = "viz-panel viz-explain";
-        this.explainPanel.innerHTML = "<div class='step-log'>Apasa \"Explica-mi\" pentru explicatii AI in romana.</div>";
+        this.explainPanel.innerHTML = [
+            "<div class='viz-explain-toolbar'>",
+                "<div>",
+                    "<span class='viz-explain-toolbar__label'>Profesor AI</span>",
+                    "<strong>Explicația rulării</strong>",
+                "</div>",
+                "<button class='btn btn--secondary btn--sm' type='button' data-action='explain-inline'>Explică-mi</button>",
+            "</div>",
+            "<div class='step-log' data-explain-output>Apasă \"Explică-mi\" pentru explicații AI în română.</div>"
+        ].join("");
+        this.explainOutput = this.explainPanel.querySelector("[data-explain-output]");
+        const inlineExplain = this.explainPanel.querySelector('[data-action="explain-inline"]');
+        if (inlineExplain) {
+            inlineExplain.addEventListener("click", () => this.explainCurrentAlgorithm());
+        }
         this.container.appendChild(this.explainPanel);
+    }
+
+    setExplainOutput(html) {
+        const output = this.explainOutput || (this.explainPanel && this.explainPanel.querySelector("[data-explain-output]"));
+        if (output) {
+            output.innerHTML = html;
+            return;
+        }
+
+        if (this.explainPanel) {
+            this.explainPanel.innerHTML = "<div class='step-log'>" + html + "</div>";
+        }
     }
 
     resetCounters() {
@@ -625,25 +658,32 @@ class SortingVisualizer {
             ". Include: idee, complexitate, cand este bun/slab, si aplica pe exemplul curent. " +
             "Avem " + this.comparisons + " comparatii si " + this.swaps + " swap-uri in ultima rulare.";
 
-        this.explainPanel.innerHTML = "<div class='step-log'>Generez explicatia AI...</div>";
+        if (!this.explainPanel) {
+            this.createInfoPanels();
+        }
+
+        this.setExplainOutput("Generez explicația AI...");
 
         try {
             const response = await fetch("PHP/profesor_ai_chat.php", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-Token": this.getCsrfToken()
+                },
                 body: JSON.stringify({ message: prompt, history: [] })
             });
 
             const data = await response.json();
             if (!response.ok || !data.ok) {
                 const err = (data && data.error) ? data.error : "Eroare la explicatia AI.";
-                this.explainPanel.innerHTML = "<div class='step-log'>" + this.escapeHtml(err) + "</div>";
+                this.setExplainOutput(this.escapeHtml(err));
                 return;
             }
 
-            this.explainPanel.innerHTML = "<div class='step-log'>" + this.escapeHtml(String(data.reply || "")) + "</div>";
+            this.setExplainOutput(this.escapeHtml(String(data.reply || "")));
         } catch (error) {
-            this.explainPanel.innerHTML = "<div class='step-log'>Nu am putut contacta serviciul AI. Incearca din nou.</div>";
+            this.setExplainOutput("Nu am putut contacta serviciul AI. Încearcă din nou.");
         }
     }
 
@@ -940,7 +980,10 @@ class AlgorithmLab {
 
     buildLayout() {
         this.controls = document.createElement("div");
-        this.controls.className = "visualizer-controls";
+        this.controls.className = "visualizer-controls visualizer-controls--settings";
+
+        this.actionControls = document.createElement("div");
+        this.actionControls.className = "visualizer-controls visualizer-controls--actions";
 
         this.algorithmSelect = document.createElement("select");
         this.algorithmSelect.className = "viz-select";
@@ -1013,11 +1056,12 @@ class AlgorithmLab {
         this.controls.appendChild(sizeLabel);
         this.controls.appendChild(this.presetSelect);
         this.controls.appendChild(this.btnGenerate);
-        this.controls.appendChild(this.btnPrev);
-        this.controls.appendChild(this.btnStep);
-        this.controls.appendChild(this.btnPlay);
-        this.controls.appendChild(this.btnReset);
-        this.controls.appendChild(this.speedSelect);
+
+        this.actionControls.appendChild(this.btnPrev);
+        this.actionControls.appendChild(this.btnStep);
+        this.actionControls.appendChild(this.btnPlay);
+        this.actionControls.appendChild(this.btnReset);
+        this.actionControls.appendChild(this.speedSelect);
 
         this.meta = document.createElement("div");
         this.meta.className = "viz-meta";
@@ -1072,6 +1116,7 @@ class AlgorithmLab {
         this.container.appendChild(this.legend);
         this.container.appendChild(this.meta);
         this.container.appendChild(this.explain);
+        this.container.appendChild(this.actionControls);
         this.container.appendChild(this.mainGrid);
         this.container.appendChild(this.panel);
 

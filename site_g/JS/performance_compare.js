@@ -75,7 +75,7 @@
             reason: "Quick Sort este de obicei cel mai rapid în practică pe date amestecate, cu timp mediu O(n log n).",
             warning: "Dacă pivotul este ales prost repetat, poate coborî la O(n^2).",
             tags: ["rapid în practică", "puțină memorie", "bun general"],
-            dataset: { type: "random", size: 300, max: 1000 }
+            dataset: { type: "random", size: 600, max: 100000 }
         },
         small: {
             title: "Vector mic",
@@ -123,7 +123,7 @@
             reason: "Quick Sort lucrează în mare parte în același vector și are memorie auxiliară mică în medie.",
             warning: "Dacă ai nevoie de O(1) strict, Selection Sort folosește și mai puțină memorie, dar este mult mai lent.",
             tags: ["memorie mică", "rapid", "in-place"],
-            dataset: { type: "random", size: 300, max: 1000 }
+            dataset: { type: "random", size: 600, max: 100000 }
         },
         guaranteed: {
             title: "Caz rău sigur",
@@ -563,6 +563,34 @@
         if (field) field.value = value;
     }
 
+    function resetBenchmarkOutput() {
+        var canvas = document.getElementById("benchmark-chart");
+        var placeholder = document.getElementById("benchmark-placeholder");
+        var legend = document.getElementById("benchmark-legend");
+        var iterationInfo = document.getElementById("iteration-info");
+        var liveStatus = document.getElementById("benchmark-live-status");
+        var conclusion = document.getElementById("benchmark-conclusion");
+
+        lastResults = null;
+
+        if (canvas) {
+            var ctx = canvas.getContext("2d");
+            if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.hidden = true;
+        }
+        if (placeholder) placeholder.hidden = false;
+        if (legend) legend.innerHTML = "";
+        if (iterationInfo) iterationInfo.textContent = "";
+        if (liveStatus) {
+            liveStatus.hidden = true;
+            liveStatus.textContent = "";
+        }
+        if (conclusion) {
+            conclusion.innerHTML = '<h2>Rulează o comparație</h2>' +
+                '<p>După benchmark, aici apare pe scurt cine a câștigat, dacă recomandarea se potrivește și ce limită trebuie ținută minte.</p>';
+        }
+    }
+
     function applyScenario(slug) {
         activeScenario = scenarios[slug] ? slug : "random-large";
         var scenario = scenarios[activeScenario];
@@ -575,13 +603,19 @@
         setFieldValue("dataset-size", scenario.dataset.size);
         setFieldValue("dataset-max", scenario.dataset.max);
 
+        resetBenchmarkOutput();
         renderRecommendation();
         renderHeatmap();
-        renderTable(lastResults);
+        renderTable(null);
     }
 
     function getIterations(size, quickRun) {
-        if (quickRun) return 1;
+        if (quickRun) {
+            if (size <= 300) return 10;
+            if (size <= 800) return 8;
+            if (size <= 1500) return 3;
+            return 1;
+        }
         if (size <= 300) return 40;
         if (size <= 800) return 15;
         if (size <= 1500) return 5;
@@ -698,6 +732,15 @@
         if (quickButton) {
             quickButton.addEventListener("click", function () { runBenchmark(true); });
         }
+
+        ["dataset-type", "dataset-size", "dataset-max"].forEach(function (id) {
+            var field = document.getElementById(id);
+            if (!field) return;
+            field.addEventListener("change", function () {
+                resetBenchmarkOutput();
+                renderTable(null);
+            });
+        });
     }
 
     function init() {

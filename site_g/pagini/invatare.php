@@ -10,7 +10,19 @@ $id_utilizator = $_SESSION['user_id'] ?? 0;
 // FIX [C1]: Optimizare interogări (eliminare N+1) și prevenire SQL Injection prin preluare bulk
 $paths = []; 
 $by_id = [];
-$rs = $con->query("SELECT * FROM learning_paths ORDER BY id ASC");
+$rs = $con->query("
+    SELECT *
+    FROM learning_paths
+    ORDER BY
+        CASE slug
+            WHEN 'parcurs-recomandat' THEN 1
+            WHEN 'algoritmi-fundamentali' THEN 2
+            WHEN 'sorting-basics' THEN 3
+            WHEN 'tehnici-algoritmice' THEN 4
+            ELSE 99
+        END,
+        id ASC
+");
 if ($rs) {
     while ($r = $rs->fetch_assoc()) {
         $r['steps'] = [];
@@ -43,11 +55,17 @@ function invatare_e($value): string {
         <p class="dash__lede">Alege un parcurs structurat pentru a stăpâni conceptele de programare, pas cu pas.</p>
     </header>
 
-    <div class="bento" style="gap: var(--space-8);">
-        <?php foreach ($paths as $path): ?>
-            <article class="card bento__card--hero" style="border: 1px solid var(--color-border); background: var(--color-surface-1);">
+    <div class="bento learning-paths-grid" style="gap: var(--space-6);">
+        <?php foreach ($paths as $path): 
+            $pathSlug = (string)$path['slug'];
+            $is_featured = $pathSlug === 'parcurs-recomandat';
+        ?>
+            <article class="card learning-path-card <?php echo $is_featured ? 'learning-path-card--featured' : ''; ?>" style="border: 1px solid var(--color-border); background: var(--color-surface-1);">
                 <div class="card__head">
                     <span class="card__eyebrow" style="color: var(--color-primary);"><?php echo invatare_e($path['title']); ?></span>
+                    <?php if ($is_featured): ?>
+                        <span class="badge badge--soft">Recomandat</span>
+                    <?php endif; ?>
                 </div>
                 <p style="color: var(--color-fg-muted); margin-bottom: var(--space-6);"><?php echo invatare_e($path['description']); ?></p>
                 
@@ -56,16 +74,23 @@ function invatare_e($value): string {
                     
                     <?php foreach ($path['steps'] as $index => $step): 
                         $is_quiz = ($step['lesson_slug'] === 'final_quiz');
+                        $lesson_slug = (string)$step['lesson_slug'];
+                        $step_link = 'index.php?page=' . rawurlencode($lesson_slug);
+                        $button_label = 'Deschide etapa';
+                        if ($lesson_slug === 'profesor_ai') {
+                            $step_link = 'index.php?page=profesor_ai&path_exam=' . rawurlencode($pathSlug);
+                            $button_label = 'Antrenează-te cu AI';
+                        }
+                        if ($is_quiz) {
+                            $step_link = 'index.php?page=profesor_ai&path_exam=' . rawurlencode($pathSlug);
+                            $button_label = 'Test AI';
+                        }
                     ?>
                         <div class="step-item" style="position: relative; margin-bottom: var(--space-6);">
                             <div style="position: absolute; left: -26px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: <?php echo $is_quiz ? 'var(--color-accent)' : 'var(--color-primary)'; ?>; border: 3px solid var(--color-surface-1); box-shadow: 0 0 0 1px var(--color-border-strong);"></div>
                             <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--space-1);"><?php echo invatare_e($step['title']); ?></h4>
                             <div class="card__actions" style="margin-top: var(--space-2);">
-                                <?php if ($is_quiz): ?>
-                                    <a href="index.php?page=profesor_ai&path_exam=<?php echo rawurlencode((string)$path['slug']); ?>" class="btn btn--primary btn--sm">Examen Final AI</a>
-                                <?php else: ?>
-                                    <a href="index.php?page=<?php echo rawurlencode((string)$step['lesson_slug']); ?>" class="btn btn--quiet btn--sm">Lecție & Exerciții</a>
-                                <?php endif; ?>
+                                <a href="<?php echo invatare_e($step_link); ?>" class="btn <?php echo $is_quiz ? 'btn--primary' : 'btn--quiet'; ?> btn--sm"><?php echo invatare_e($button_label); ?></a>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -74,17 +99,17 @@ function invatare_e($value): string {
         <?php endforeach; ?>
         
         <!-- SIDEBAR INFO -->
-        <article class="card bento__card--accent" style="border: 1px solid var(--color-accent-soft); background: var(--color-surface-2);">
+        <article class="card learning-help-card" style="border: 1px solid var(--color-accent-soft); background: var(--color-surface-2);">
             <div class="card__head">
                 <span class="card__eyebrow" style="color: var(--color-accent);">Cum funcționează?</span>
             </div>
             <div class="prose" style="font-size: var(--text-sm);">
-                <p>Fiecare path este conceput pentru a te duce de la zero la expert într-un domeniu specific.</p>
+                <p>Parcursurile sunt ordonate ca să începi cu baza, apoi să treci la sortări, tehnici algoritmice și verificare prin AI.</p>
                 <ol style="padding-left: var(--space-4); margin-top: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3);">
-                    <li>Parcurgi lecțiile teoretice.</li>
-                    <li>Rezolvi exercițiile practice la fiecare pas.</li>
-                    <li>Sistemul AI verifică dacă ești gata pentru pasul următor.</li>
-                    <li><strong>Examenul Final AI:</strong> Un test unic generat special pentru tine care confirmă absolvirea path-ului.</li>
+                    <li>Începi cu fișele teoretice și exemplele C++.</li>
+                    <li>Testezi pașii în laboratorul vizual sau în compilator.</li>
+                    <li>Rezolvi grile pentru fixare.</li>
+                    <li><strong>Testul AI:</strong> primești întrebări generate pe tema parcursului ales.</li>
                 </ol>
             </div>
         </article>

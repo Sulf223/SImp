@@ -146,6 +146,7 @@ $page_titles = [
     'algoritmi_fundamentali' => 'Algoritmi fundamentali',
     'algoritmi_avansati' => 'Tehnici algoritmice',
     'comparatii_sortare' => 'Comparații de performanță',
+    'invatare' => 'Drumuri de învățare',
     'sort_bubble' => 'Bubble Sort',
     'sort_selection' => 'Selection Sort',
     'sort_insertion' => 'Insertion Sort',
@@ -192,7 +193,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="CSS/modern_vars.css?v=20260506-security-light-mail">
     <link rel="stylesheet" href="stil.css?v=20260506-security-light-mail">
-    <link rel="stylesheet" href="CSS/dashboard_modern.css?v=20260513-algo-cards">
+    <link rel="stylesheet" href="CSS/dashboard_modern.css?v=20260515-explain-panel">
     <?php if ($pagina_curenta === 'admin'): ?>
         <link rel="stylesheet" href="CSS/admin.css?v=20260506-security-light-mail">
     <?php endif; ?>

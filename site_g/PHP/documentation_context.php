@@ -221,6 +221,7 @@ function documentation_context_for_slug(string $slug, int $maxChars = 7500, int 
     $slug = trim($slug);
     $queries = [
         'sorting-basics' => 'metode de sortare bubble selection insertion quick merge counting interclasare numarare ordonare',
+        'parcurs-recomandat' => 'algoritmi fundamentali sortare laborator vizual recursivitate backtracking greedy divide et impera grile profesor ai C++',
         'algoritmi-fundamentali' => 'algoritmi fundamentali elementari parcurgere cifre divizori cmmdc cmmmc euclid primalitate factorizare fibonacci baza numeratie cautare binara frecventa ciur eratostene',
         'fundamentals' => 'algoritmi fundamentali elementari parcurgere cifre divizori cmmdc primalitate frecventa ciur',
         'tehnici-algoritmice' => 'recursivitate autoapel stiva divide et impera backtracking valid solutie greedy optim local global permutari combinari aranjamente submultimi',

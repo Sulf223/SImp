@@ -237,12 +237,14 @@ if (!function_exists('render_sort_lesson')) {
                 <button class="btn btn--secondary" type="button" onclick="afiseazaAjutor()">Ajutor</button>
                 <button class="btn btn--primary" type="button" onclick="urmatorulExercitiu()">Urmatorul</button>
             </div>
+            <div id="hint" class="hint" style="display: none;"></div>
+            <div id="feedback" style="display: none;"></div>
             <div data-lesson-slug="<?= sort_lesson_h($lessonSlug) ?>" hidden></div>
         </div>
     </article>
 </div>
 
-<script nonce="<?= sort_lesson_h($nonce) ?>" src="JS/visualizer.js?v=20260512-stats-sync"></script>
+<script nonce="<?= sort_lesson_h($nonce) ?>" src="JS/visualizer.js?v=20260515-explain-panel"></script>
 <script nonce="<?= sort_lesson_h($nonce) ?>" src="JS/exercitii.js?v=20260512-sort-lessons"></script>
 <script nonce="<?= sort_lesson_h($nonce) ?>" src="JS/lesson_tracker.js?v=20260512-sort-lessons"></script>
 <?php

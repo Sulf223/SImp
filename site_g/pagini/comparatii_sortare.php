@@ -226,4 +226,4 @@ if (session_status() === PHP_SESSION_NONE) {
     </div>
 </div>
 
-<script nonce="<?= htmlspecialchars($nonce ?? '', ENT_QUOTES, 'UTF-8') ?>" src="JS/performance_compare.js?v=20260512-presentation-polish"></script>
+<script nonce="<?= htmlspecialchars($nonce ?? '', ENT_QUOTES, 'UTF-8') ?>" src="JS/performance_compare.js?v=20260515-comparison-fix2"></script>

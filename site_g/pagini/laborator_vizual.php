@@ -21,7 +21,7 @@ if (session_status() === PHP_SESSION_NONE) {
     </header>
 
     <div class="bento" style="gap: var(--space-6);">
-        <article class="card bento__card--hero" style="grid-column: 1 / -1;">
+        <article class="card bento__card--hero lab-visual-card" style="grid-column: 1 / -1;">
             <div class="card__head">
                 <span class="card__eyebrow">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -52,4 +52,4 @@ if (session_status() === PHP_SESSION_NONE) {
     </div>
 </div>
 
-<script src="JS/visualizer.js?v=20260512-laborator-vizual-sync" nonce="<?= $nonce ?>"></script>
+<script src="JS/visualizer.js?v=20260515-laborator-controls" nonce="<?= $nonce ?>"></script>

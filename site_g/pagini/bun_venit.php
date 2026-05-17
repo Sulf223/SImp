@@ -26,8 +26,8 @@
                     <h1 style="font-size: clamp(18px, 3vw, 26px); font-weight: 300; color: rgba(255, 255, 255, 0.5); letter-spacing: 4px; text-transform: uppercase; margin: 0;">Metode de Sortare</h1>
                 </div>
                 <canvas id="solar-canvas" style="position: relative; z-index: 1; display: block; width: 100%; height: 100%;"></canvas>
-                <div id="click-hint" style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 2; pointer-events: none; color: rgba(255, 255, 255, 0.2); font-size: 12px;">Hover pentru detalii - Click pentru a intra în lecție</div>
-                <div id="hero-subtitle" style="position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 2; pointer-events: none; color: rgba(255, 255, 255, 0.3); font-size: 13px; letter-spacing: 2px;">OffByOne Academy - Inovație în învățarea sortării</div>
+                <div id="click-hint" class="solar-hint">Hover pentru detalii · Click pentru a intra în lecție</div>
+                <div id="hero-subtitle" class="solar-subtitle">OffByOne Academy · Inovație în învățarea sortării</div>
                 <div id="tooltip" style="position: fixed; z-index: var(--z-tooltip); background: rgba(8, 14, 31, 0.95); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 14px 18px; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; max-width: 220px; backdrop-filter: blur(8px);">
                     <h3 id="tt-name" style="font-size: 15px; font-weight: 600; margin-bottom: 6px; color: #fff;"></h3>
                     <p id="tt-desc" style="font-size: 13px; line-height: 1.5; color: rgba(255, 255, 255, 0.7); margin: 0;"></p>
@@ -122,6 +122,57 @@
 /* Fix: Anulează pointer-events din stil.css pentru a face butoanele clickabile */
 #solar-section * {
     pointer-events: auto !important;
+}
+
+#click-hint,
+#hero-subtitle,
+#hero-title {
+    pointer-events: none !important;
+}
+
+.solar-hint,
+.solar-subtitle {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    text-align: center;
+    line-height: 1.35;
+}
+
+.solar-hint {
+    bottom: 92px;
+    width: min(520px, calc(100% - 48px));
+    padding: 7px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    background: rgba(8, 14, 31, 0.42);
+    color: rgba(255, 255, 255, 0.46);
+    font-size: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.solar-subtitle {
+    bottom: 32px;
+    width: min(720px, calc(100% - 48px));
+    color: rgba(255, 255, 255, 0.36);
+    font-size: clamp(11px, 1.6vw, 13px);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+    .solar-hint {
+        bottom: 112px;
+        width: min(320px, calc(100% - 32px));
+        white-space: normal;
+    }
+
+    .solar-subtitle {
+        bottom: 34px;
+        width: min(330px, calc(100% - 32px));
+        letter-spacing: 1.4px;
+    }
 }
 </style>
 

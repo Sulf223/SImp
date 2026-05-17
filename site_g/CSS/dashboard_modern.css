@@ -1694,6 +1694,9 @@ span.ai-widget-icon {
     flex-direction: column;
     gap: var(--space-4);
 }
+.lab-visual-card {
+    overflow: visible;
+}
 .visualizer-container canvas {
     width: 100% !important;
     height: auto !important;
@@ -1715,6 +1718,27 @@ span.ai-widget-icon {
     padding: var(--space-2) var(--space-3);
     font-size: var(--text-xs);
 }
+.visualizer-controls--settings {
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-border);
+}
+.visualizer-controls--actions {
+    position: sticky;
+    top: calc(4rem + var(--space-2));
+    z-index: 20;
+    justify-content: center;
+    align-self: stretch;
+    padding: var(--space-3);
+    background: color-mix(in srgb, var(--color-surface-2) 88%, transparent);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+}
+.visualizer-controls--actions .btn--primary {
+    min-width: 116px;
+}
 .visualizer-controls button:disabled,
 .visualizer-controls .btn:disabled,
 .viz-select:disabled {
@@ -1725,6 +1749,11 @@ span.ai-widget-icon {
 @media (max-width: 640px) {
     .visualizer-container { padding: var(--space-4); }
     .visualizer-controls { flex-direction: column; align-items: stretch; }
+    .visualizer-controls--actions {
+        top: calc(3.5rem + var(--space-2));
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
     .visualizer-controls .btn,
     .visualizer-controls button,
     .visualizer-controls label,
@@ -1936,6 +1965,31 @@ span.ai-widget-icon {
     border-radius: var(--radius-md);
     padding: var(--space-4);
 }
+.viz-explain {
+    display: grid;
+    gap: var(--space-3);
+}
+.viz-explain-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+.viz-explain-toolbar > div {
+    display: grid;
+    gap: var(--space-1);
+}
+.viz-explain-toolbar strong {
+    color: var(--color-fg);
+    font-size: var(--text-sm);
+}
+.viz-explain-toolbar__label {
+    color: var(--color-primary);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+}
 .step-log {
     display: grid;
     gap: var(--space-1);
@@ -1944,6 +1998,17 @@ span.ai-widget-icon {
     font-size: var(--text-sm);
     font-family: var(--font-mono);
     white-space: pre-wrap;
+}
+
+@media (max-width: 640px) {
+    .viz-explain-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .viz-explain-toolbar .btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 /* --- ALERTS --------------------------------------------------------------- */
@@ -3943,6 +4008,33 @@ i.fa-forward::before     { content: "\23E9"; }   /* ⏩ */
     border-bottom: 0;
 }
 
+/* ============ DRUMURI DE INVATARE ============ */
+.learning-path-card {
+    grid-column: span 6;
+}
+
+.learning-path-card--featured {
+    grid-column: span 8;
+    border-color: color-mix(in srgb, var(--color-primary) 26%, var(--color-border)) !important;
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 8%, transparent), transparent 70%),
+        var(--color-surface-1) !important;
+}
+
+.learning-help-card {
+    grid-column: span 4;
+}
+
+.learning-path-card .card__head {
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.learning-path-card .step-item:last-child {
+    margin-bottom: 0 !important;
+}
+
 body[data-theme="light"] {
     background: var(--color-bg) !important;
 }
@@ -4016,6 +4108,12 @@ body[data-theme="light"] .comparison-page .scenario-chip.is-active {
     .techniques-hero-grid,
     .technique-split {
         grid-template-columns: 1fr;
+    }
+
+    .learning-path-card,
+    .learning-path-card--featured,
+    .learning-help-card {
+        grid-column: span 12;
     }
 
     .comparison-conclusion-card {

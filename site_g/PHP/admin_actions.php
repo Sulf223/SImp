@@ -119,8 +119,8 @@ if ($action === 'delete_user') {
         header("Location: ../index.php?page=admin&tab=actiuni");
         exit;
     }
-    // Foreign key-urile au ON DELETE CASCADE pentru user_streak/activity_day/utilizatori_progres,
-    // dar pentru tabelele MyISAM/fără FK trebuie să curățăm manual
+    // Foreign key-urile au ON DELETE CASCADE doar pe o parte din tabele,
+    // iar tabelele legacy fără FK trebuie curățate manual.
     $con->begin_transaction();
     try {
         $tabele_cleanup = [

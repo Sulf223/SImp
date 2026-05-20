@@ -145,5 +145,5 @@ include __DIR__ . '/conexiune.php';
     </div>
 </div>
 
-<script src="JS/exercitii_avansate.js" nonce="<?= $nonce ?>"></script>
-<script src="JS/visualizer.js" nonce="<?= $nonce ?>"></script>
+<script src="JS/exercitii_avansate.js?v=20260521-audit-polish" nonce="<?= $nonce ?>"></script>
+<script src="JS/visualizer.js?v=20260521-audit-polish" nonce="<?= $nonce ?>"></script>

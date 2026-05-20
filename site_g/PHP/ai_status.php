@@ -7,6 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 require_once 'helpers.php';
+require_once 'config.php';
 
 // FIX [A2]: Actualizăm activitatea (fără redirect) pentru a păstra sesiunea vie cât timp widget-ul e activ
 enforce_session_timeout_ajax();
@@ -19,7 +20,7 @@ if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $ttl) {
     exit;
 }
 
-$apiKey = getenv('GROQ_API_KEY') ?: ($_ENV['GROQ_API_KEY'] ?? '');
+$apiKey = getenv('GROQ_API_KEY') ?: '';
 $status = ['online' => false, 'latency_ms' => 0, 'state' => 'unknown'];
 
 if ($apiKey) {
@@ -38,7 +39,8 @@ if ($apiKey) {
     
     $status['latency_ms'] = $latency;
     $status['online'] = ($code === 200);
-    if ($code !== 200) $status['state'] = 'offline';
+    if ($code === 429) $status['state'] = 'degraded';
+    elseif ($code !== 200) $status['state'] = 'offline';
     elseif ($latency < 800) $status['state'] = 'fast';
     elseif ($latency < 2500) $status['state'] = 'slow';
     else $status['state'] = 'degraded';

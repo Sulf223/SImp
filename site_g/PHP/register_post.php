@@ -67,19 +67,25 @@ if (strlen($password) < 8 || !preg_match('/[A-Za-z]/', $password) || !preg_match
 // 2. Verificăm dacă utilizatorul sau emailul există deja în baza de date
 $sql_check = "SELECT id FROM utilizatori WHERE username = ? OR email = ?";
 $stmt_check = $con->prepare($sql_check);
-if ($stmt_check) {
-    $stmt_check->bind_param('ss', $username, $email);
-    $stmt_check->execute();
-    $stmt_check->store_result();
-
-    if ($stmt_check->num_rows > 0) {
-        // Utilizatorul există deja - Mesaj generic anti-enumeration (P1)
-        set_flash('error', 'Înregistrarea a eșuat. Numele de utilizator sau emailul pot fi deja utilizate.');
-        header('Location: ../index.php?page=register');
-        exit;
-    }
-    $stmt_check->close();
+if (!$stmt_check) {
+    error_log('register_post prepare check failed: ' . $con->error);
+    set_flash('error', 'A apărut o eroare tehnică la crearea contului. Te rugăm să încerci din nou.');
+    header('Location: ../index.php?page=register');
+    exit;
 }
+
+$stmt_check->bind_param('ss', $username, $email);
+$stmt_check->execute();
+$stmt_check->store_result();
+
+if ($stmt_check->num_rows > 0) {
+    $stmt_check->close();
+    // Utilizatorul există deja - Mesaj generic anti-enumeration (P1)
+    set_flash('error', 'Înregistrarea a eșuat. Numele de utilizator sau emailul pot fi deja utilizate.');
+    header('Location: ../index.php?page=register');
+    exit;
+}
+$stmt_check->close();
 
 
 // 3. Hash-uim parola
@@ -88,17 +94,23 @@ $password_hash = password_hash($password, PASSWORD_DEFAULT);
 // 4. Inserăm utilizatorul nou în baza de date cu rolul 'user'
 $sql_insert = "INSERT INTO utilizatori (username, email, parola_hash, rol) VALUES (?, ?, ?, 'user')";
 $stmt_insert = $con->prepare($sql_insert);
-if ($stmt_insert) {
-    $stmt_insert->bind_param('sss', $username, $email, $password_hash);
-
-    if ($stmt_insert->execute()) {
-        set_flash('success', 'Contul a fost creat cu succes! Te rugăm să te autentifici.');
-        header('Location: ../index.php?page=login');
-    } else {
-        set_flash('error', 'A apărut o eroare la crearea contului. Te rugăm să încerci din nou.');
-        header('Location: ../index.php?page=register');
-    }
-    $stmt_insert->close();
+if (!$stmt_insert) {
+    error_log('register_post prepare insert failed: ' . $con->error);
+    set_flash('error', 'A apărut o eroare tehnică la crearea contului. Te rugăm să încerci din nou.');
+    header('Location: ../index.php?page=register');
+    exit;
 }
+
+$stmt_insert->bind_param('sss', $username, $email, $password_hash);
+
+if ($stmt_insert->execute()) {
+    set_flash('success', 'Contul a fost creat cu succes! Te rugăm să te autentifici.');
+    header('Location: ../index.php?page=login');
+} else {
+    error_log('register_post insert failed: ' . $stmt_insert->error);
+    set_flash('error', 'A apărut o eroare la crearea contului. Te rugăm să încerci din nou.');
+    header('Location: ../index.php?page=register');
+}
+$stmt_insert->close();
 exit;
 ?>

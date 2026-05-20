@@ -380,7 +380,7 @@ for (int p = 2; p * p &lt;= N; p++) {
                         <td>Pot opri la <code>d * d &lt;= n</code>?</td>
                     </tr>
                     <tr>
-                        <td>“valori repetate”, “aparitii”, “frecventa”</td>
+                        <td>“valori repetate”, “apariții”, “frecvență”</td>
                         <td>Vector de frecvență</td>
                         <td>Valorile sunt într-un interval mic?</td>
                     </tr>

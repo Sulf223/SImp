@@ -52,4 +52,4 @@ if (session_status() === PHP_SESSION_NONE) {
     </div>
 </div>
 
-<script src="JS/visualizer.js?v=20260515-laborator-controls" nonce="<?= $nonce ?>"></script>
+<script src="JS/visualizer.js?v=20260521-audit-polish" nonce="<?= $nonce ?>"></script>

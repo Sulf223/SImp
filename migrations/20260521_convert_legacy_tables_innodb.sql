@@ -1,0 +1,2 @@
+ALTER TABLE exercitii ENGINE=InnoDB;
+ALTER TABLE rezultate ENGINE=InnoDB;

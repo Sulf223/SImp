@@ -6,7 +6,7 @@
                 "fact(4) -> fact(3)",
                 "fact(3) -> fact(2)",
                 "fact(2) -> fact(1)",
-                "fact(1) -> fact(0) (caz de baza)",
+                "fact(1) -> fact(0) (caz de bază)",
                 "Return: fact(0)=1",
                 "Return: fact(1)=1",
                 "Return: fact(2)=2",
@@ -18,22 +18,22 @@
         if (topic === "backtracking") {
             return [
                 "Pornire: x = [_, _, _]",
-                "x[1] = 1 (pas inainte)",
+                "x[1] = 1 (pas înainte)",
                 "x[2] = 1 (invalid, deja folosit)",
                 "x[2] = 2 (valid)",
-                "x[3] = 3 -> solutie: 1 2 3",
-                "Pas inapoi la x[3] si x[2]",
-                "x[2] = 3, x[3] = 2 -> solutie: 1 3 2",
-                "Pas inapoi la x[1], alegem 2",
-                "Generam urmatoarele solutii...",
-                "Final: toate permutarile generate"
+                "x[3] = 3 -> soluție: 1 2 3",
+                "Pas înapoi la x[3] și x[2]",
+                "x[2] = 3, x[3] = 2 -> soluție: 1 3 2",
+                "Pas înapoi la x[1], alegem 2",
+                "Generăm următoarele soluții...",
+                "Final: toate permutările generate"
             ];
         }
 
         if (topic === "greedy") {
             return [
                 "Problema: suma = 87, monede = {50, 10, 5, 1}",
-                "Alegem 50 (cea mai mare moneda posibila)",
+                "Alegem 50 (cea mai mare monedă posibilă)",
                 "Ramas: 37, alegem 10",
                 "Ramas: 27, alegem 10",
                 "Ramas: 17, alegem 10",
@@ -46,16 +46,16 @@
         }
 
         return [
-            "Problema: cautam 23 in vector sortat",
-            "Interval initial: [0, n-1]",
-            "Calculam mijlocul si comparam",
-            "Daca 23 e mai mare, pastram jumatatea dreapta",
-            "Recalculam mijlocul in intervalul nou",
-            "Daca 23 e mai mic, pastram jumatatea stanga",
-            "Continuam pana gasim valoarea",
-            "Sau pana intervalul devine vid",
-            "Numar de pasi ~ log2(n)",
-            "Concluzie: mult mai rapid decat cautarea liniara"
+            "Problema: căutăm 23 în vector sortat",
+            "Interval inițial: [0, n-1]",
+            "Calculăm mijlocul și comparăm",
+            "Dacă 23 e mai mare, păstrăm jumătatea dreaptă",
+            "Recalculăm mijlocul în intervalul nou",
+            "Dacă 23 e mai mic, păstrăm jumătatea stângă",
+            "Continuăm până găsim valoarea",
+            "Sau până intervalul devine vid",
+            "Număr de pași ~ log2(n)",
+            "Concluzie: mult mai rapid decât căutarea liniară"
         ];
     }
 
@@ -66,7 +66,7 @@
         var html = "";
         html += '<div class="visualizer-controls">';
         html += '<button class="btn btn-primary" data-action="prev">Pas anterior</button>';
-        html += '<button class="btn btn-ghost" data-action="next">Pas urmator</button>';
+        html += '<button class="btn btn-ghost" data-action="next">Pas următor</button>';
         html += '<button class="btn" data-action="reset">Reset</button>';
         html += '</div>';
 
@@ -76,7 +76,7 @@
         html += '</div>';
 
         html += '<div class="table-wrapper" style="margin-top:12px;">';
-        html += '<table><thead><tr><th>Istoric pasi</th></tr></thead><tbody>';
+        html += '<table><thead><tr><th>Istoric pași</th></tr></thead><tbody>';
         for (var i = 0; i <= safeIndex; i++) {
             html += '<tr><td>' + steps[i] + '</td></tr>';
         }

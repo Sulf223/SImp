@@ -252,6 +252,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ action: 'generate_quiz', path_slug: pathSlug })
             });
             const data = await res.json();
+            if (!res.ok || data.ok === false) {
+                throw new Error(data.error || 'Nu s-au putut genera întrebările.');
+            }
             
             if (data && data.quiz && Array.isArray(data.quiz)) {
                 quizSources = Array.isArray(data.sources) ? data.sources : [];
@@ -389,6 +392,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ action: 'grade_quiz', path_slug: pathSlug, answers: userSelections })
             });
             const data = await res.json();
+            if (!res.ok || data.ok === false) {
+                throw new Error(data.error || 'Feedback-ul AI nu este disponibil momentan.');
+            }
             
             // FIX [Q8]: Ensure feedback text is properly UTF-8 encoded and fixed
             const rawFeedback = data.feedback || 'Analiză indisponibilă.';
@@ -426,7 +432,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
         } catch (e) {
-            resultsView.innerHTML = `<h3>Scor: ${score} / ${quizData.length}</h3><button onclick="location.reload()" class="btn btn--primary">Reia</button>`;
+            resultsView.innerHTML = `
+                <h3>Scor: ${score} / ${quizData.length}</h3>
+                <p class="card__body">${escapeHtml(e.message || 'Feedback-ul nu este disponibil momentan.')}</p>
+                <button onclick="location.reload()" class="btn btn--primary">Reia</button>
+            `;
         }
     }
 });

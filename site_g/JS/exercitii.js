@@ -4,8 +4,8 @@
         {
             id: 'bubble_1',
             lesson: 'sort_bubble',
-            titlu: 'Bubble Sort - conditia din if',
-            text: 'Completeaza conditia astfel incat vectorul sa fie sortat crescator.',
+            titlu: 'Bubble Sort - condiția din if',
+            text: 'Completează condiția astfel încât vectorul să fie sortat crescător.',
             cod: [
                 'if ( ____ ) {',
                 '    int aux = v[i];',
@@ -14,13 +14,13 @@
                 '}'
             ],
             raspunsuri: ['v[i] > v[i + 1]'],
-            hint: 'Compara elementul curent cu urmatorul si inverseaza doar daca sunt in ordinea gresita.'
+            hint: 'Compară elementul curent cu următorul și inversează doar dacă sunt în ordinea greșită.'
         },
         {
             id: 'bubble_2',
             lesson: 'sort_bubble',
             titlu: 'Bubble Sort - limita buclei interioare',
-            text: 'Completeaza limita lui j.',
+            text: 'Completează limita lui j.',
             cod: [
                 'for (int j = 0; j < ____; j++) {',
                 '    if (v[j] > v[j + 1]) {',
@@ -29,65 +29,65 @@
                 '}'
             ],
             raspunsuri: ['n - i - 1'],
-            hint: 'La fiecare pas i, ultimele i elemente sunt deja pozitionate.'
+            hint: 'La fiecare pas i, ultimele i elemente sunt deja poziționate.'
         },
         {
             id: 'bubble_3',
             lesson: 'sort_bubble',
             titlu: 'Bubble Sort - finalul swap-ului',
-            text: 'Completeaza ultima linie din interschimbare.',
+            text: 'Completează ultima linie din interschimbare.',
             cod: [
                 'int aux = v[j];',
                 'v[j] = v[j + 1];',
                 'v[j + 1] = ____;'
             ],
             raspunsuri: ['aux'],
-            hint: 'La final pui inapoi valoarea salvata in variabila auxiliara.'
+            hint: 'La final pui înapoi valoarea salvată în variabila auxiliară.'
         },
         {
             id: 'selection_1',
             lesson: 'sort_selection',
             titlu: 'Selection Sort - actualizare minim',
-            text: 'Completeaza expresia care actualizeaza indexul minim.',
+            text: 'Completează expresia care actualizează indexul minim.',
             cod: [
                 'if (v[j] < v[minIdx]) {',
                 '    minIdx = ____;',
                 '}'
             ],
             raspunsuri: ['j'],
-            hint: 'Cand gasesti un element mai mic, memorezi pozitia lui curenta.'
+            hint: 'Când găsești un element mai mic, memorezi poziția lui curentă.'
         },
         {
             id: 'selection_2',
             lesson: 'sort_selection',
             titlu: 'Selection Sort - swap final',
-            text: 'Completeaza swap-ul dintre pozitia curenta si minimul gasit.',
+            text: 'Completează swap-ul dintre poziția curentă și minimul găsit.',
             cod: [
                 'int aux = v[i];',
                 'v[i] = ____;',
                 'v[minIdx] = aux;'
             ],
             raspunsuri: ['v[minIdx]'],
-            hint: 'Pe pozitia i trebuie adus minimul gasit in sub-secventa nesortata.'
+            hint: 'Pe poziția i trebuie adus minimul găsit în sub-secvența nesortată.'
         },
         {
             id: 'insertion_1',
             lesson: 'sort_insertion',
             titlu: 'Insertion Sort - cheia',
-            text: 'Completeaza linia care salveaza elementul curent.',
+            text: 'Completează linia care salvează elementul curent.',
             cod: [
                 'for (int i = 1; i < n; i++) {',
                 '    int key = ____;',
                 '}'
             ],
             raspunsuri: ['v[i]'],
-            hint: 'Cheia este elementul de pe pozitia curenta i.'
+            hint: 'Cheia este elementul de pe poziția curentă i.'
         },
         {
             id: 'insertion_2',
             lesson: 'sort_insertion',
-            titlu: 'Insertion Sort - conditia while',
-            text: 'Completeaza conditia pentru deplasarea elementelor.',
+            titlu: 'Insertion Sort - condiția while',
+            text: 'Completează condiția pentru deplasarea elementelor.',
             cod: [
                 'while ( ____ ) {',
                 '    v[j + 1] = v[j];',
@@ -95,35 +95,35 @@
                 '}'
             ],
             raspunsuri: ['j >= 0 && v[j] > key'],
-            hint: 'Muti spre dreapta cat timp mai ai elemente in stanga si acestea sunt mai mari decat key.'
+            hint: 'Muți spre dreapta cât timp mai ai elemente în stânga și acestea sunt mai mari decât key.'
         },
         {
             id: 'insertion_3',
             lesson: 'sort_insertion',
-            titlu: 'Insertion Sort - plasarea finala',
-            text: 'Completeaza plasarea finala a cheii.',
+            titlu: 'Insertion Sort - plasarea finală',
+            text: 'Completează plasarea finală a cheii.',
             cod: [
                 'v[j + 1] = ____;'
             ],
             raspunsuri: ['key'],
-            hint: 'Dupa deplasari, key merge pe pozitia j + 1.'
+            hint: 'După deplasări, key merge pe poziția j + 1.'
         },
         {
             id: 'quick_1',
             lesson: 'sort_quick',
             titlu: 'Quick Sort - pivotul',
-            text: 'Completeaza alegerea pivotului in varianta clasica.',
+            text: 'Completează alegerea pivotului în varianta clasică.',
             cod: [
                 'int pivot = ____;'
             ],
             raspunsuri: ['arr[high]'],
-            hint: 'In implementarea uzuala, pivotul este ultimul element din segment.'
+            hint: 'În implementarea uzuală, pivotul este ultimul element din segment.'
         },
         {
             id: 'quick_2',
             lesson: 'sort_quick',
-            titlu: 'Quick Sort - conditia partitionarii',
-            text: 'Completeaza conditia pentru mutarea in stanga pivotului.',
+            titlu: 'Quick Sort - condiția partiționării',
+            text: 'Completează condiția pentru mutarea în stânga pivotului.',
             cod: [
                 'if (____) {',
                 '    i++;',
@@ -131,26 +131,26 @@
                 '}'
             ],
             raspunsuri: ['arr[j] <= pivot'],
-            hint: 'Elementele <= pivot ajung in partea stanga.'
+            hint: 'Elementele <= pivot ajung în partea stângă.'
         },
         {
             id: 'quick_3',
             lesson: 'sort_quick',
-            titlu: 'Quick Sort - recursia pe stanga',
-            text: 'Completeaza apelul recursiv pentru subvectorul din stanga.',
+            titlu: 'Quick Sort - recursia pe stânga',
+            text: 'Completează apelul recursiv pentru subvectorul din stânga.',
             cod: [
                 'int pi = partition(arr, low, high);',
                 '____;',
                 'quickSort(arr, pi + 1, high);'
             ],
             raspunsuri: ['quickSort(arr, low, pi - 1)'],
-            hint: 'Partea stanga este delimitata de low .. pi - 1.'
+            hint: 'Partea stângă este delimitată de low .. pi - 1.'
         },
         {
             id: 'merge_1',
             lesson: 'sort_merge',
-            titlu: 'Merge - comparatia in interclasare',
-            text: 'Completeaza conditia pentru alegerea elementului mai mic.',
+            titlu: 'Merge - comparația în interclasare',
+            text: 'Completează condiția pentru alegerea elementului mai mic.',
             cod: [
                 'if ( ____ ) {',
                 '    C[k++] = A[i++];',
@@ -159,44 +159,44 @@
                 '}'
             ],
             raspunsuri: ['A[i] <= B[j]'],
-            hint: 'Interclasarea corecta ia elementul mai mic dintre A[i] si B[j].'
+            hint: 'Interclasarea corectă ia elementul mai mic dintre A[i] și B[j].'
         },
         {
             id: 'merge_2',
             lesson: 'sort_merge',
-            titlu: 'Merge Sort - conditia de oprire',
-            text: 'Completeaza baza recursiei.',
+            titlu: 'Merge Sort - condiția de oprire',
+            text: 'Completează baza recursiei.',
             cod: [
                 'if ( ____ ) return;'
             ],
             raspunsuri: ['st >= dr'],
-            hint: 'Recursia se opreste cand sub-vectorul are 0 sau 1 element.'
+            hint: 'Recursia se oprește când sub-vectorul are 0 sau 1 element.'
         },
         {
             id: 'counting_1',
             lesson: 'sort_counting',
-            titlu: 'Counting Sort - frecventa',
-            text: 'Completeaza incrementarea vectorului de frecventa.',
+            titlu: 'Counting Sort - frecvența',
+            text: 'Completează incrementarea vectorului de frecvență.',
             cod: [
                 'for (int i = 0; i < n; i++) {',
                 '    freq[ ____ ]++;',
                 '}'
             ],
             raspunsuri: ['v[i]'],
-            hint: 'Indexul din frecventa este valoarea elementului.'
+            hint: 'Indexul din frecvență este valoarea elementului.'
         },
         {
             id: 'counting_2',
             lesson: 'sort_counting',
-            titlu: 'Counting Sort - reconstructie',
-            text: 'Completeaza valoarea copiata in vectorul final.',
+            titlu: 'Counting Sort - reconstrucție',
+            text: 'Completează valoarea copiată în vectorul final.',
             cod: [
                 'while (freq[x]-- > 0) {',
                 '    v[p++] = ____;',
                 '}'
             ],
             raspunsuri: ['x'],
-            hint: 'Scriem de atatea ori valoarea x cat indica frecventa.'
+            hint: 'Scriem de atâtea ori valoarea x cât indică frecvența.'
         }
     ];
 
@@ -298,11 +298,11 @@
                     const done = Number(data.stats.done || 0);
                     const total = Number(data.stats.total || 0);
                     const pct = Number(data.progress || 0);
-                    setLessonProgressText('Progres lectie: ' + done + '/' + total + ' exercitii rezolvate (' + pct + '%)');
+                    setLessonProgressText('Progres lecție: ' + done + '/' + total + ' exerciții rezolvate (' + pct + '%)');
                 }
             })
             .catch(() => {
-                // Nu blocam UI-ul pe erori de retea.
+                // Nu blocăm UI-ul pe erori de rețea.
             });
     }
 
@@ -327,7 +327,7 @@
         }
 
         if (corect) {
-            setFeedback('Bravo, raspuns corect!', true);
+            setFeedback('Bravo, răspuns corect!', true);
             if (!solvedInSession.has(ex.id)) {
                 solvedInSession.add(ex.id);
                 reportExerciseCompletion(ex);
@@ -365,10 +365,10 @@
         if (!ex) return;
 
         if (helpClicks === 0) {
-            setHint('Sugestie: ' + (ex.hint || 'Reia pasii algoritmului si observa ce lipseste.'));
+            setHint('Sugestie: ' + (ex.hint || 'Reia pașii algoritmului și observă ce lipsește.'));
             helpClicks++;
         } else {
-            setHint('O varianta corecta: ' + (ex.raspunsuri && ex.raspunsuri[0] ? ex.raspunsuri[0] : '-'));
+            setHint('O variantă corectă: ' + (ex.raspunsuri && ex.raspunsuri[0] ? ex.raspunsuri[0] : '-'));
         }
     };
 
@@ -385,7 +385,7 @@
             currentSet = allExercises.slice();
         }
 
-        setLessonProgressText('Exercitii disponibile: ' + currentSet.length);
+        setLessonProgressText('Exerciții disponibile: ' + currentSet.length);
         afiseazaExercitiu();
     });
 })();

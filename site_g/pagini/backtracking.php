@@ -104,6 +104,6 @@ if (session_status() === PHP_SESSION_NONE) {
     </div>
 </div>
 
-<script src="JS/fundamental_visualizer.js" nonce="<?= $nonce ?>"></script>
+<script src="JS/fundamental_visualizer.js?v=20260521-audit-polish" nonce="<?= $nonce ?>"></script>
 <div data-lesson-slug="backtracking" hidden></div>
 <script src="JS/lesson_tracker.js" nonce="<?= $nonce ?>"></script>

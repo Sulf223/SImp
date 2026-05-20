@@ -60,12 +60,7 @@ if (!check_rate_limit($con, 'ai_quiz', $identifier, 25, 3600)) {
 
 // FIX [L1]: Sursă unică pentru API Key (getenv). Eliminare fallback la $_ENV/$_SERVER.
 $apiKey = getenv('GROQ_API_KEY') ?: '';
-
-if ($apiKey === '') {
-    http_response_code(503);
-    echo json_encode(['ok' => false, 'error' => 'Serviciul AI Quiz este momentan indisponibil (API key lipsă).'], JSON_UNESCAPED_UNICODE);
-    exit;
-}
+$apiKeyMissing = ($apiKey === '');
 
 $model = getenv('GROQ_MODEL') ?: 'llama-3.3-70b-versatile';
 
@@ -255,12 +250,38 @@ function ai_quiz_fallback_questions(string $pathSlug): array {
     ];
 }
 
+function ai_quiz_local_feedback(int $score, int $total): string {
+    $percent = $total > 0 ? (int)round(($score / $total) * 100) : 0;
+    if ($percent >= 80) {
+        $tone = 'Foarte bine. Ai prins ideile principale și poți trece spre întrebări mai aplicate.';
+    } elseif ($percent >= 50) {
+        $tone = 'Ești pe drumul bun, dar merită să repeți pașii algoritmilor unde ai greșit.';
+    } else {
+        $tone = 'Încă ai zone de consolidat. Reia explicațiile și folosește laboratorul vizual pas cu pas.';
+    }
+
+    return "Feedback local: serviciul AI extern nu este disponibil momentan, dar scorul tău a fost salvat.\n\n" .
+        "Scor: {$score}/{$total} ({$percent}%). {$tone}\n\n" .
+        "Recomandare: repetă Bubble/Selection/Insertion pentru mecanismele de bază, apoi Quick/Merge pentru recursivitate și partiționare/interclasare. La fiecare algoritm urmărește ideea, pseudocodul, complexitatea și un exemplu mic.";
+}
+
 if ($action === 'generate_quiz') {
     $docContext = documentation_context_for_slug((string)$pathSlug, 8500, 6);
     $sourceList = !empty($docContext['sources']) ? implode(', ', $docContext['sources']) : 'niciun fișier găsit';
     $contextText = $docContext['text'] !== ''
         ? $docContext['text']
         : 'Nu există fragmente relevante disponibile în indexul proiect_documentatie.';
+
+    if ($apiKeyMissing) {
+        echo json_encode([
+            'ok' => true,
+            'quiz' => ai_quiz_fallback_questions((string)$pathSlug),
+            'sources' => $docContext['sources'],
+            'fallback' => true,
+            'notice' => 'Cheia AI nu este configurată. Am generat un test local de rezervă pe baza proiectului.'
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     
     $prompt = "Ești expert în predarea algoritmicii. Generează un TEST DE EXAMEN de 10 întrebări grilă pe baza fragmentelor extrase din directorul proiect_documentatie.
 
@@ -325,11 +346,27 @@ Răspunde DOAR cu JSON-ul valid, fără alt text, comentarii sau markdown.";
 
     if ($res === false) {
         error_log("ai_quiz_api generate curl error #{$curlErrno}: {$curlErr}");
-        echo json_encode(['ok' => false, 'error' => 'Serviciul AI este indisponibil. Încearcă mai târziu.'], JSON_UNESCAPED_UNICODE);
+        echo json_encode([
+            'ok' => true,
+            'quiz' => ai_quiz_fallback_questions((string)$pathSlug),
+            'sources' => $docContext['sources'],
+            'fallback' => true,
+            'notice' => 'Serviciul AI extern nu este disponibil momentan. Am generat un test local de rezervă.'
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
     if ($httpCode !== 200) {
         error_log("ai_quiz_api generate HTTP {$httpCode}: " . substr((string)$res, 0, 500));
+        if ($httpCode === 429) {
+            echo json_encode([
+                'ok' => true,
+                'quiz' => ai_quiz_fallback_questions((string)$pathSlug),
+                'sources' => $docContext['sources'],
+                'fallback' => true,
+                'notice' => 'Serviciul AI extern a atins temporar limita de cereri. Am generat un test local de rezervă.'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
         echo json_encode(['ok' => false, 'error' => 'AI a răspuns cu eroare (HTTP ' . $httpCode . ').'], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -512,7 +549,7 @@ Răspunde DOAR cu JSON-ul valid, fără alt text, comentarii sau markdown.";
         if ($insStmt) $insStmt->close();
     }
 
-    echo json_encode(['quiz' => $sanitizedQuiz, 'sources' => $docContext['sources']], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => true, 'quiz' => $sanitizedQuiz, 'sources' => $docContext['sources']], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -532,6 +569,29 @@ if ($action === 'grade_quiz') {
     $contextText = $docContext['text'] !== ''
         ? $docContext['text']
         : 'Nu există fragmente relevante disponibile în indexul proiect_documentatie.';
+
+    if ($apiKeyMissing) {
+        $feedback = ai_quiz_local_feedback($score, $total);
+        $saveResult = ['saved' => false, 'id' => null, 'percent' => $total > 0 ? round(($score / $total) * 100, 2) : 0];
+        if (!empty($_SESSION['user_id'])) {
+            $saveResult = ai_quiz_save_attempt($con, (int)$_SESSION['user_id'], (string)$pathSlug, $score, $total, $feedback, $docContext['sources']);
+        }
+
+        echo json_encode([
+            'ok' => true,
+            'feedback' => $feedback,
+            'sources' => $docContext['sources'],
+            'fallback' => true,
+            'attempt_saved' => $saveResult['saved'],
+            'attempt' => [
+                'id' => $saveResult['id'],
+                'score' => $score,
+                'total' => $total,
+                'percent' => $saveResult['percent'],
+            ],
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
 
     $prompt = "Ești profesor experimentat de informatică. Un elev a terminat un test de $total întrebări și a obținut scorul $score/$total.
 
@@ -576,11 +636,51 @@ STIL: Pedagogic, prietenos, motivator, concis.";
 
     if ($res === false) {
         error_log("ai_quiz_api grade curl error #{$curlErrno}: {$curlErr}");
-        echo json_encode(['ok' => false, 'error' => 'Serviciul AI este indisponibil. Încearcă mai târziu.'], JSON_UNESCAPED_UNICODE);
+        $feedback = ai_quiz_local_feedback($score, $total);
+        $saveResult = ['saved' => false, 'id' => null, 'percent' => $total > 0 ? round(($score / $total) * 100, 2) : 0];
+        if (!empty($_SESSION['user_id'])) {
+            $saveResult = ai_quiz_save_attempt($con, (int)$_SESSION['user_id'], (string)$pathSlug, $score, $total, $feedback, $docContext['sources']);
+        }
+
+        echo json_encode([
+            'ok' => true,
+            'feedback' => $feedback,
+            'sources' => $docContext['sources'],
+            'fallback' => true,
+            'attempt_saved' => $saveResult['saved'],
+            'attempt' => [
+                'id' => $saveResult['id'],
+                'score' => $score,
+                'total' => $total,
+                'percent' => $saveResult['percent'],
+            ],
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
     if ($httpCode !== 200) {
         error_log("ai_quiz_api grade HTTP {$httpCode}: " . substr((string)$res, 0, 500));
+        if ($httpCode === 429) {
+            $feedback = ai_quiz_local_feedback($score, $total);
+            $saveResult = ['saved' => false, 'id' => null, 'percent' => $total > 0 ? round(($score / $total) * 100, 2) : 0];
+            if (!empty($_SESSION['user_id'])) {
+                $saveResult = ai_quiz_save_attempt($con, (int)$_SESSION['user_id'], (string)$pathSlug, $score, $total, $feedback, $docContext['sources']);
+            }
+
+            echo json_encode([
+                'ok' => true,
+                'feedback' => $feedback,
+                'sources' => $docContext['sources'],
+                'fallback' => true,
+                'attempt_saved' => $saveResult['saved'],
+                'attempt' => [
+                    'id' => $saveResult['id'],
+                    'score' => $score,
+                    'total' => $total,
+                    'percent' => $saveResult['percent'],
+                ],
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
         echo json_encode(['ok' => false, 'error' => 'AI a răspuns cu eroare (HTTP ' . $httpCode . ').'], JSON_UNESCAPED_UNICODE);
         exit;
     }

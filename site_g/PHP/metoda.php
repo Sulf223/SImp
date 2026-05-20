@@ -142,7 +142,7 @@ if (!empty($metoda['fisier_cpp'])) {
     </div>
 </div>
 
-<script src="JS/visualizer.js" nonce="<?= $nonce ?? '' ?>"></script>
+<script src="JS/visualizer.js?v=20260521-audit-polish" nonce="<?= $nonce ?? '' ?>"></script>
 <script nonce="<?= $nonce ?? '' ?>"> // FIX [M2]: Adăugare nonce pentru CSP
 function copyCode() {
     const code = <?php echo json_encode($cod_cpp); ?>;

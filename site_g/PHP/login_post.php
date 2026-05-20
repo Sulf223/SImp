@@ -26,7 +26,7 @@ $username = trim($_POST['username'] ?? '');
 $password = (string)($_POST['password'] ?? '');
 
 if ($username === '' || $password === '') {
-    set_flash('error', 'Completă utilizator și parolă');
+    set_flash('error', 'Completează utilizatorul și parola.');
     header('Location: ../index.php?page=login');
     exit;
 }

@@ -1,6 +1,6 @@
 /**
  * visualizer.js
- * 1) Pastreaza vizualizarea pentru metodele de sortare (pagina metoda)
+ * 1) Păstrează vizualizarea pentru metodele de sortare (pagina metoda)
  * 2) Adauga un laborator unificat (sortari + recursivitate + backtracking)
  */
 
@@ -135,13 +135,13 @@ class SortingVisualizer {
     }
 
     formatRunStatus(message) {
-        const text = String(message || '').toLowerCase();
+        const text = String(message || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         if (text.includes('finalizata')) return 'Finalizat';
-        if (text.includes('ruleaza')) return 'Ruleaza';
+        if (text.includes('ruleaza')) return 'Rulează';
         if (text.includes('quiz')) return 'Quiz';
-        if (text.includes('resetate') || text.includes('pregatit')) return 'Pregatit';
-        if (this.isSorting) return 'Ruleaza';
-        return 'Pregatit';
+        if (text.includes('resetate') || text.includes('pregatit')) return 'Pregătit';
+        if (this.isSorting) return 'Rulează';
+        return 'Pregătit';
     }
 
     resolveAlgorithmName(name) {
@@ -335,7 +335,7 @@ class SortingVisualizer {
 
         const btnCheckQuiz = document.createElement("button");
         btnCheckQuiz.className = "btn";
-        btnCheckQuiz.textContent = "Verifica raspuns";
+        btnCheckQuiz.textContent = "Verifică răspuns";
         btnCheckQuiz.onclick = () => this.checkQuizAnswer();
 
         const btnExplain = document.createElement("button");
@@ -413,7 +413,7 @@ class SortingVisualizer {
         if (!this.statsEl) return;
         const algorithm = this.formatAlgorithmName(this.lastRunAlgorithm || this.algorithmName);
         this.statsEl.innerHTML = "<strong>Algoritm:</strong> " + algorithm +
-            " <span>|</span> <strong>Comparatii:</strong> " + this.comparisons +
+            " <span>|</span> <strong>Comparații:</strong> " + this.comparisons +
             " <span>|</span> <strong>Swap-uri:</strong> " + this.swaps +
             (message ? " <span>|</span> " + message : "");
     }
@@ -498,7 +498,7 @@ class SortingVisualizer {
 
         const text = raw.replace(/\s+/g, "");
         if (text.length < 2) {
-            this.updateStats("Inputul trebuie sa aiba cel putin 2 elemente.");
+            this.updateStats("Inputul trebuie să aibă cel puțin 2 elemente.");
             return;
         }
 
@@ -605,7 +605,7 @@ class SortingVisualizer {
         this.lastRunAlgorithm = activeAlgorithm;
         this.resetCounters();
         this.sortStartedAt = performance.now();
-        this.updateStats("Ruleaza animatia...");
+        this.updateStats("Rulează animația...");
 
         if (activeAlgorithm === "bubble") await this.bubbleSort();
         else if (activeAlgorithm === "selection") await this.selectionSort();
@@ -621,7 +621,7 @@ class SortingVisualizer {
         this.sortStartedAt = null;
 
         if (quizMode) {
-            this.updateStats("Quiz: ghiceste algoritmul si apasa Verifica raspuns.");
+            this.updateStats("Quiz: ghicește algoritmul și apasă Verifică răspuns.");
         } else {
             this.updateStats("Sortare finalizata.");
         }
@@ -633,13 +633,13 @@ class SortingVisualizer {
         const index = Math.floor(Math.random() * options.length);
         this.quizCurrentAlgorithm = options[index];
         this.resetArray();
-        this.updateStats("Quiz pornit: priveste animatia si ghiceste algoritmul.");
+        this.updateStats("Quiz pornit: privește animația și ghicește algoritmul.");
         this.runSort(this.quizCurrentAlgorithm, true);
     }
 
     checkQuizAnswer() {
         if (!this.quizCurrentAlgorithm) {
-            this.updateStats("Porneste mai intai Mod quiz.");
+            this.updateStats("Pornește mai întâi Mod quiz.");
             return;
         }
 
@@ -676,7 +676,7 @@ class SortingVisualizer {
 
             const data = await response.json();
             if (!response.ok || !data.ok) {
-                const err = (data && data.error) ? data.error : "Eroare la explicatia AI.";
+                const err = (data && data.error) ? data.error : "Eroare la explicația AI.";
                 this.setExplainOutput(this.escapeHtml(err));
                 return;
             }

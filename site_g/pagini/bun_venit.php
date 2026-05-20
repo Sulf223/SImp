@@ -182,8 +182,8 @@
     const PLANETS = [
         {
             name: 'Bubble Sort',
-            desc: 'Comparatii adiacente + interschimbari repetate',
-            complexity: 'O(n^2) timp · O(1) spatiu',
+            desc: 'Comparații adiacente + interschimbări repetate',
+            complexity: 'O(n^2) timp · O(1) spațiu',
             color: '#ff6b6b',
             glow: 'rgba(255,107,107,0.4)',
             radius: 18,
@@ -196,8 +196,8 @@
         },
         {
             name: 'Selection Sort',
-            desc: 'Selecteaza minimul si il aduce pe pozitia curenta',
-            complexity: 'O(n^2) timp · O(1) spatiu',
+            desc: 'Selectează minimul și îl aduce pe poziția curentă',
+            complexity: 'O(n^2) timp · O(1) spațiu',
             color: '#3b82f6',
             glow: 'rgba(59,130,246,0.4)',
             radius: 16,
@@ -210,8 +210,8 @@
         },
         {
             name: 'Insertion Sort',
-            desc: 'Construieste secventa sortata prin inserare',
-            complexity: 'O(n^2) timp · O(1) spatiu',
+            desc: 'Construiește secvența sortată prin inserare',
+            complexity: 'O(n^2) timp · O(1) spațiu',
             color: '#22c55e',
             glow: 'rgba(34,197,94,0.4)',
             radius: 15,
@@ -224,7 +224,7 @@
         },
         {
             name: 'Quick Sort',
-            desc: 'Divide et Impera bazat pe pivot si partitionare',
+            desc: 'Divide et Impera bazat pe pivot și partiționare',
             complexity: 'O(n log n) mediu · O(n^2) worst',
             color: '#a855f7',
             glow: 'rgba(168,85,247,0.4)',
@@ -238,8 +238,8 @@
         },
         {
             name: 'Merge Sort',
-            desc: 'Imparte vectorul si interclaseaza recursiv',
-            complexity: 'O(n log n) timp · O(n) spatiu',
+            desc: 'Împarte vectorul și interclasează recursiv',
+            complexity: 'O(n log n) timp · O(n) spațiu',
             color: '#facc15',
             glow: 'rgba(250,204,21,0.4)',
             radius: 20,
@@ -252,8 +252,8 @@
         },
         {
             name: 'Counting Sort',
-            desc: 'Numarare frecvente, eficient pentru valori in interval mic',
-            complexity: 'O(n + k) timp · O(k) spatiu',
+            desc: 'Numărare frecvențe, eficient pentru valori în interval mic',
+            complexity: 'O(n + k) timp · O(k) spațiu',
             color: '#48cae4',
             glow: 'rgba(72,202,228,0.4)',
             radius: 14,

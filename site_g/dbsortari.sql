@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `exercitii` (
   `nivel` enum('incepator','mediu','avansat') COLLATE utf8mb4_unicode_ci DEFAULT 'incepator',
   PRIMARY KEY (`id_exercitiu`),
   KEY `id_metoda` (`id_metoda`)
-) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `exercitii`
@@ -232,7 +232,7 @@ CREATE TABLE IF NOT EXISTS `rezultate` (
   `data_rezolvare` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_rezultat`),
   KEY `id_exercitiu` (`id_exercitiu`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 

@@ -1,6 +1,6 @@
 <?php
-// Parse the config file
-$config = require 'config.php';
+// Parse the config file relative to this directory, indiferent de scriptul care include conexiunea.
+$config = require __DIR__ . '/config.php';
 
 // În PHP 8.x, mysqli poate arunca excepții implicit; păstrăm fluxul aplicației bazat pe verificări de retur.
 mysqli_report(MYSQLI_REPORT_OFF);

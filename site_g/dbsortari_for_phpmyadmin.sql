@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `exercitii` (
   `nivel` enum('incepator','mediu','avansat') COLLATE utf8mb4_unicode_ci DEFAULT 'incepator',
   PRIMARY KEY (`id_exercitiu`),
   KEY `id_metoda` (`id_metoda`)
-) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 INSERT INTO `exercitii` (`id_exercitiu`, `id_metoda`, `titlu`, `enunt`, `cod_sablon`, `solutie`, `nivel`) VALUES
 (1, 1, 'Bubble sort – completare conditie', 'Completeaza conditia din if astfel incat vectorul sa fie sortat crescator.', 'for (int i = 0; i < n - 1; i++) {\n    if (____) {\n        int aux = v[i];\n        v[i] = v[i + 1];\n        v[i + 1] = aux;\n    }\n}', 'for (int i = 0; i < n - 1; i++) {\n    if (v[i] > v[i + 1]) {\n        int aux = v[i];\n        v[i] = v[i + 1];\n        v[i + 1] = aux;\n    }\n}', 'incepator'),
 (2, 2, 'Insertie directa – conditie while', 'Completeaza conditia astfel incat elementele mai mari decat cheia sa fie deplasate spre dreapta.', 'for (int i = 1; i < n; i++) {\n    int key = v[i];\n    int j = i - 1;\n    while (____) {\n        v[j + 1] = v[j];\n        j--;\n    }\n    v[j + 1] = key;\n}', 'for (int i = 1; i < n; i++) {\n    int key = v[i];\n    int j = i - 1;\n    while (j >= 0 && v[j] > key) {\n        v[j + 1] = v[j];\n        j--;\n    }\n    v[j + 1] = key;\n}', 'mediu'),
@@ -162,7 +162,7 @@ CREATE TABLE IF NOT EXISTS `rezultate` (
   `data_rezolvare` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_rezultat`),
   KEY `id_exercitiu` (`id_exercitiu`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 DROP TABLE IF EXISTS `utilizatori`;
 CREATE TABLE IF NOT EXISTS `utilizatori` (
   `id` int(11) NOT NULL AUTO_INCREMENT,

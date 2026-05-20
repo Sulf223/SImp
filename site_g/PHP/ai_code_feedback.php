@@ -76,14 +76,51 @@ $contextText = $docContext['text'] !== ''
     ? $docContext['text']
     : 'Nu există fragmente relevante disponibile în indexul proiect_documentatie.';
 
+function local_code_feedback_fallback(string $code, string $contextText, array $sources): string {
+    $sourceText = !empty($sources) ? implode(', ', array_slice($sources, 0, 3)) : 'proiect_documentatie';
+    $tips = [];
+
+    if (preg_match('/for\s*\(|while\s*\(/i', $code)) {
+        $tips[] = 'Verifică limitele buclelor: inițializarea, condiția de oprire și incrementarea trebuie să nu sară peste elemente.';
+    }
+    if (preg_match('/swap|aux|temp/i', $code)) {
+        $tips[] = 'La interschimbare, păstrează o valoare temporară și asigură-te că ultima atribuire pune valoarea salvată la locul corect.';
+    }
+    if (preg_match('/pivot|quick/i', $code)) {
+        $tips[] = 'La Quick Sort, urmărește dacă pivotul separă corect elementele mai mici și mai mari.';
+    }
+    if (preg_match('/freq|fr\[|count/i', $code)) {
+        $tips[] = 'La sortarea prin numărare, indexul din vectorul de frecvență trebuie să fie valoarea elementului, iar intervalul trebuie să fie rezonabil.';
+    }
+
+    if (empty($tips)) {
+        $tips[] = 'Verifică dacă datele de intrare sunt citite corect și dacă rezultatul este afișat după prelucrare.';
+        $tips[] = 'Compară codul cu pseudocodul din lecție și urmărește pașii în laboratorul vizual.';
+    }
+
+    $contextSnippet = trim(preg_replace('/\s+/', ' ', $contextText));
+    if (mb_strlen($contextSnippet, 'UTF-8') > 360) {
+        $contextSnippet = mb_substr($contextSnippet, 0, 360, 'UTF-8') . '...';
+    }
+
+    return "Feedback local: serviciul AI extern nu este disponibil momentan, deci îți dau o analiză de rezervă pe baza documentației proiectului.\n\n" .
+        "Observații:\n- " . implode("\n- ", $tips) . "\n\n" .
+        "Surse folosite: {$sourceText}.\n" .
+        "Fragment relevant: {$contextSnippet}";
+}
+
 $api_key = getenv('GROQ_API_KEY');
 if (!$api_key && defined('GROQ_API_KEY')) {
     $api_key = GROQ_API_KEY;
 }
 
 if (!$api_key) {
-    http_response_code(503);
-    echo json_encode(['ok' => false, 'error' => 'Cheia API Groq nu este configurată pe server.']);
+    echo json_encode([
+        'ok' => true,
+        'feedback' => local_code_feedback_fallback($code, $contextText, $docContext['sources']),
+        'fallback' => true,
+        'sources' => $docContext['sources']
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -126,12 +163,25 @@ curl_close($ch);
 if ($response === false) {
     // FIX [A10]: logging erori curl
     error_log("ai_code_feedback curl error #{$curl_errno}: {$curl_err}");
-    http_response_code(502);
-    echo json_encode(['ok' => false, 'error' => 'Serviciul AI este indisponibil. Încearcă mai târziu.']);
+    echo json_encode([
+        'ok' => true,
+        'feedback' => local_code_feedback_fallback($code, $contextText, $docContext['sources']),
+        'fallback' => true,
+        'sources' => $docContext['sources']
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 if ($http_code !== 200) {
     error_log("ai_code_feedback HTTP {$http_code}: " . substr((string)$response, 0, 500));
+    if ($http_code === 429) {
+        echo json_encode([
+            'ok' => true,
+            'feedback' => local_code_feedback_fallback($code, $contextText, $docContext['sources']),
+            'fallback' => true,
+            'sources' => $docContext['sources']
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     http_response_code(502);
     echo json_encode(['ok' => false, 'error' => 'AI a răspuns cu eroare (HTTP ' . $http_code . ').']);
     exit;

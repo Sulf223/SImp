@@ -37,17 +37,17 @@ if (!function_exists('render_sort_lesson')) {
         $accent = $lesson['accent'] ?? '';
         $algorithm = $lesson['algorithm'] ?? '';
         $lessonSlug = $lesson['lesson_slug'] ?? '';
-        $visualizerTitle = $lesson['visualizer_title'] ?? 'Simulare vizuala';
+        $visualizerTitle = $lesson['visualizer_title'] ?? 'Simulare vizuală';
         ?>
 
 <header class="page-header">
     <div>
-        <p class="page-kicker">Algoritmi / Sortari</p>
+        <p class="page-kicker">Algoritmi / Sortări</p>
         <h1><?= sort_lesson_h($title) ?><?php if ($accent !== ''): ?> <span><?= sort_lesson_h($accent) ?></span><?php endif; ?></h1>
         <p><?= sort_lesson_h($lesson['lead'] ?? '') ?></p>
     </div>
     <div class="actions">
-        <a class="btn btn--secondary" href="index.php?page=sortare"><i class="fa-solid fa-arrow-left"></i> Inapoi la metode</a>
+        <a class="btn btn--secondary" href="index.php?page=sortare"><i class="fa-solid fa-arrow-left"></i> Înapoi la metode</a>
         <a class="btn btn--primary" href="index.php?page=laborator_vizual"><i class="fa-solid fa-flask"></i> Laborator vizual</a>
     </div>
 </header>
@@ -56,8 +56,8 @@ if (!function_exists('render_sort_lesson')) {
     <article class="card bento__card--hero lesson-overview-card">
         <div class="card__header">
             <div>
-                <span class="badge">Explicatie</span>
-                <h2>Ideea de baza</h2>
+                <span class="badge">Explicație</span>
+                <h2>Ideea de bază</h2>
             </div>
         </div>
         <div class="card__body lesson-content">
@@ -65,11 +65,11 @@ if (!function_exists('render_sort_lesson')) {
 
             <div class="lesson-split">
                 <section>
-                    <h3>Cand merita folosit</h3>
+                    <h3>Când merită folosit</h3>
                     <?php sort_lesson_render_list($lesson['use_when'] ?? []); ?>
                 </section>
                 <section>
-                    <h3>Cand il eviti</h3>
+                    <h3>Când îl eviți</h3>
                     <?php sort_lesson_render_list($lesson['avoid_when'] ?? []); ?>
                 </section>
             </div>
@@ -80,7 +80,7 @@ if (!function_exists('render_sort_lesson')) {
         <div class="card__header">
             <div>
                 <span class="badge">Complexitate</span>
-                <h2>Cat costa</h2>
+                <h2>Cât costă</h2>
             </div>
         </div>
         <div class="card__body">
@@ -99,7 +99,7 @@ if (!function_exists('render_sort_lesson')) {
         <div class="card__header">
             <div>
                 <span class="badge">Mecanism</span>
-                <h2>Pasii algoritmului</h2>
+                <h2>Pașii algoritmului</h2>
             </div>
         </div>
         <div class="card__body lesson-content">
@@ -121,8 +121,8 @@ if (!function_exists('render_sort_lesson')) {
     <article class="card bento__card--accent lesson-mistakes-card">
         <div class="card__header">
             <div>
-                <span class="badge">Atentie</span>
-                <h2>Greseli frecvente</h2>
+                <span class="badge">Atenție</span>
+                <h2>Greșeli frecvente</h2>
             </div>
         </div>
         <div class="card__body lesson-content">
@@ -134,7 +134,7 @@ if (!function_exists('render_sort_lesson')) {
         <div class="card__header">
             <div>
                 <span class="badge">Variabile</span>
-                <h2>Ce urmaresc</h2>
+                <h2>Ce urmăresc</h2>
             </div>
         </div>
         <div class="card__body" data-var-inspector>
@@ -185,18 +185,18 @@ if (!function_exists('render_sort_lesson')) {
                     </select>
                 </label>
                 <button class="btn btn--secondary" type="button" data-action="regenerate"><i class="fa-solid fa-shuffle"></i> Date noi</button>
-                <button class="btn btn--primary" type="button" data-action="start"><i class="fa-solid fa-play"></i> Porneste</button>
+                <button class="btn btn--primary" type="button" data-action="start"><i class="fa-solid fa-play"></i> Pornește</button>
             </div>
         </div>
         <div class="card__body">
             <canvas id="sorting-visualizer" class="visualizer-canvas" data-algorithm="<?= sort_lesson_h($algorithm) ?>" width="1100" height="420"></canvas>
             <div class="visualizer-stats">
                 <div>
-                    <span>Comparatii</span>
+                    <span>Comparații</span>
                     <strong id="comparisons">0</strong>
                 </div>
                 <div>
-                    <span>Schimbari</span>
+                    <span>Schimbări</span>
                     <strong id="swaps">0</strong>
                 </div>
                 <div>
@@ -205,7 +205,7 @@ if (!function_exists('render_sort_lesson')) {
                 </div>
                 <div>
                     <span>Stare</span>
-                    <strong id="sort-status">Pregatit</strong>
+                    <strong id="sort-status">Pregătit</strong>
                 </div>
             </div>
         </div>
@@ -214,7 +214,7 @@ if (!function_exists('render_sort_lesson')) {
     <article class="card bento__card--stat lesson-pseudocode-card">
         <div class="card__header">
             <div>
-                <span class="badge">Sincronizat cu animatia</span>
+                <span class="badge">Sincronizat cu animația</span>
                 <h2>Pseudocod</h2>
             </div>
         </div>
@@ -226,16 +226,16 @@ if (!function_exists('render_sort_lesson')) {
     <article class="card bento__card--timeline">
         <div class="card__header">
             <div>
-                <span class="badge">Exercitiu</span>
-                <h2>Verifica daca ai prins ideea</h2>
+                <span class="badge">Exercițiu</span>
+                <h2>Verifică dacă ai prins ideea</h2>
             </div>
         </div>
         <div class="card__body">
             <div id="exercitiu-container" class="exercise-panel" data-lesson="<?= sort_lesson_h($lessonSlug) ?>"></div>
             <div class="exercise-actions">
-                <button class="btn btn--secondary" type="button" onclick="verificaExercitiu()">Verifica</button>
+                <button class="btn btn--secondary" type="button" onclick="verificaExercitiu()">Verifică</button>
                 <button class="btn btn--secondary" type="button" onclick="afiseazaAjutor()">Ajutor</button>
-                <button class="btn btn--primary" type="button" onclick="urmatorulExercitiu()">Urmatorul</button>
+                <button class="btn btn--primary" type="button" onclick="urmatorulExercitiu()">Următorul</button>
             </div>
             <div id="hint" class="hint" style="display: none;"></div>
             <div id="feedback" style="display: none;"></div>
@@ -244,9 +244,9 @@ if (!function_exists('render_sort_lesson')) {
     </article>
 </div>
 
-<script nonce="<?= sort_lesson_h($nonce) ?>" src="JS/visualizer.js?v=20260515-explain-panel"></script>
-<script nonce="<?= sort_lesson_h($nonce) ?>" src="JS/exercitii.js?v=20260512-sort-lessons"></script>
-<script nonce="<?= sort_lesson_h($nonce) ?>" src="JS/lesson_tracker.js?v=20260512-sort-lessons"></script>
+<script nonce="<?= sort_lesson_h($nonce) ?>" src="JS/visualizer.js?v=20260521-audit-polish"></script>
+<script nonce="<?= sort_lesson_h($nonce) ?>" src="JS/exercitii.js?v=20260521-audit-polish"></script>
+<script nonce="<?= sort_lesson_h($nonce) ?>" src="JS/lesson_tracker.js?v=20260521-audit-polish"></script>
 <?php
     }
 }

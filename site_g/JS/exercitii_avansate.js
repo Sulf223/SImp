@@ -1,9 +1,9 @@
-// Exercitii interactive pentru recursivitate si backtracking
+// Exerciții interactive pentru recursivitate și backtracking
 
 var exercitiiAvansate = [
     {
-        titlu: "Factorial recursiv - cazul de baza",
-        text: "Completeaza conditia pentru cazul de baza.",
+        titlu: "Factorial recursiv - cazul de bază",
+        text: "Completează condiția pentru cazul de bază.",
         cod: [
             "int fact(int n) {",
             "    if ( ____ ) return 1;",
@@ -11,11 +11,11 @@ var exercitiiAvansate = [
             "}"
         ],
         raspunsuri: ["n == 0", "n==0"],
-        hint: "Cazul de baza la factorial apare cand n este 0."
+        hint: "Cazul de bază la factorial apare când n este 0."
     },
     {
         titlu: "Factorial recursiv - autoapel",
-        text: "Completeaza expresia recursiva.",
+        text: "Completează expresia recursivă.",
         cod: [
             "int fact(int n) {",
             "    if (n == 0) return 1;",
@@ -23,11 +23,11 @@ var exercitiiAvansate = [
             "}"
         ],
         raspunsuri: ["n * fact(n - 1)", "n*fact(n-1)"],
-        hint: "Inmultesti n cu factorialul pentru n-1."
+        hint: "Înmulțești n cu factorialul pentru n-1."
     },
     {
         titlu: "Fibonacci recursiv - combinarea rezultatelor",
-        text: "Completeaza relatia recursiva pentru Fibonacci.",
+        text: "Completează relația recursivă pentru Fibonacci.",
         cod: [
             "int fib(int n) {",
             "    if (n <= 1) return n;",
@@ -38,8 +38,8 @@ var exercitiiAvansate = [
         hint: "Termenul curent este suma celor doi termeni anteriori."
     },
     {
-        titlu: "Backtracking permutari - validare",
-        text: "Completeaza conditia pentru a evita repetarea valorilor.",
+        titlu: "Backtracking permutări - validare",
+        text: "Completează condiția pentru a evita repetarea valorilor.",
         cod: [
             "bool ok(int k) {",
             "    for (int i = 1; i < k; i++)",
@@ -48,11 +48,11 @@ var exercitiiAvansate = [
             "}"
         ],
         raspunsuri: ["x[i] == x[k]", "x[i]==x[k]"],
-        hint: "Nu permitem aceeasi valoare pe doua pozitii diferite."
+        hint: "Nu permitem aceeași valoare pe două poziții diferite."
     },
     {
-        titlu: "Backtracking - conditie de solutie",
-        text: "Completeaza testul pentru solutia finala la permutari.",
+        titlu: "Backtracking - condiție de soluție",
+        text: "Completează testul pentru soluția finală la permutări.",
         cod: [
             "void back(int k) {",
             "    for (int v = 1; v <= n; v++) {",
@@ -65,7 +65,7 @@ var exercitiiAvansate = [
             "}"
         ],
         raspunsuri: ["k == n", "k==n"],
-        hint: "Cand ai completat toate pozitiile din vectorul solutie."
+        hint: "Când ai completat toate pozițiile din vectorul soluție."
     }
 ];
 
@@ -134,9 +134,9 @@ function verificaExercitiuAvansat() {
     if (!fb) return;
 
     if (corect) {
-        fb.innerText = "Bravo, raspuns corect!";
+        fb.innerText = "Bravo, răspuns corect!";
     } else {
-        fb.innerText = "Raspuns gresit. Incearca din nou sau foloseste Ajutor.";
+        fb.innerText = "Răspuns greșit. Încearcă din nou sau folosește Ajutor.";
     }
 }
 
@@ -155,10 +155,10 @@ function afiseazaAjutorAvansat() {
     if (!hintElem) return;
 
     if (helpClicksAvansat === 0) {
-        hintElem.innerText = "Sugestie: " + (ex.hint || "Reciteste pasii algoritmului.");
+        hintElem.innerText = "Sugestie: " + (ex.hint || "Recitește pașii algoritmului.");
         helpClicksAvansat++;
     } else {
-        hintElem.innerText = "O varianta corecta: " + ((ex.raspunsuri && ex.raspunsuri[0]) || "N/A");
+        hintElem.innerText = "O variantă corectă: " + ((ex.raspunsuri && ex.raspunsuri[0]) || "N/A");
     }
 
     hintElem.style.display = "block";

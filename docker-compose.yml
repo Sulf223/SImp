@@ -122,6 +122,7 @@ services:
       - ./migrations/20260512_ai_quiz_attempts.sql:/docker-entrypoint-initdb.d/14_ai_quiz_attempts.sql:ro
       - ./migrations/20260513_update_learning_paths.sql:/docker-entrypoint-initdb.d/15_update_learning_paths.sql:ro
       - ./migrations/20260521_convert_legacy_tables_innodb.sql:/docker-entrypoint-initdb.d/16_convert_legacy_tables_innodb.sql:ro
+      - ./migrations/20260521_quiz_attempts_foreign_keys.sql:/docker-entrypoint-initdb.d/17_quiz_attempts_foreign_keys.sql:ro
     
     networks:
       - offbyone_academy_network

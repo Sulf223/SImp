@@ -1098,6 +1098,10 @@ span.ai-widget-icon {
 .comparison-controls-card {
     border-color: var(--color-border);
 }
+.comparison-chart-card {
+    grid-column: 1 / -1;
+    grid-row: auto;
+}
 .benchmark-controls-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -1154,25 +1158,15 @@ span.ai-widget-icon {
     justify-content: center;
 }
 .comparison-chart-card .benchmark-canvas-wrap {
-    min-height: 400px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    min-height: 460px;
+    display: block;
     padding: var(--space-4);
     background: var(--color-surface-2);
     border-radius: var(--radius-md);
 }
-.benchmark-placeholder {
-    display: grid;
-    justify-items: center;
-    gap: var(--space-3);
-    color: var(--color-fg-subtle);
-    text-align: center;
-}
-.benchmark-placeholder .icon {
-    width: 34px;
-    height: 34px;
-    color: var(--color-primary);
+.comparison-chart-card #benchmark-chart {
+    height: min(52vh, 460px);
+    min-height: 360px;
 }
 .comparison-heatmap {
     display: grid;
@@ -1311,7 +1305,11 @@ span.ai-widget-icon {
         grid-template-columns: 1fr;
     }
     .comparison-chart-card .benchmark-canvas-wrap {
-        min-height: 280px;
+        min-height: 300px;
+    }
+    .comparison-chart-card #benchmark-chart {
+        height: 300px;
+        min-height: 300px;
     }
 }
 

@@ -36,7 +36,6 @@ $input = is_array($input) ? $input : [];
 
 $grilaId = (int)($input['id_grila'] ?? 0);
 $selectedAnswer = (int)($input['selected_answer'] ?? 0);
-$isCorrect = !empty($input['is_correct']) ? 1 : 0;
 $userId = (int)$_SESSION['user_id'];
 
 if (!check_rate_limit($con, 'quiz_attempt', 'user_' . $userId, 180, 3600)) {
@@ -62,7 +61,7 @@ $con->query("CREATE TABLE IF NOT EXISTS quiz_attempts (
     INDEX idx_quiz_attempt_grila (grila_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
-$check = $con->prepare("SELECT 1 FROM grile_cpp WHERE id = ? LIMIT 1");
+$check = $con->prepare("SELECT raspuns_corect FROM grile_cpp WHERE id = ? LIMIT 1");
 if (!$check) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'error' => 'Nu pot valida grila.'], JSON_UNESCAPED_UNICODE);
@@ -70,14 +69,16 @@ if (!$check) {
 }
 $check->bind_param('i', $grilaId);
 $check->execute();
-$exists = $check->get_result()->fetch_assoc();
+$grila = $check->get_result()->fetch_assoc();
 $check->close();
 
-if (!$exists) {
+if (!$grila) {
     http_response_code(404);
     echo json_encode(['ok' => false, 'error' => 'Grila nu există.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
+
+$isCorrect = ((int)$grila['raspuns_corect'] === $selectedAnswer) ? 1 : 0;
 
 $stmt = $con->prepare("INSERT INTO quiz_attempts (user_id, grila_id, selected_answer, is_correct) VALUES (?, ?, ?, ?)");
 if (!$stmt) {
@@ -90,4 +91,4 @@ $stmt->bind_param('iiii', $userId, $grilaId, $selectedAnswer, $isCorrect);
 $ok = $stmt->execute();
 $stmt->close();
 
-echo json_encode(['ok' => (bool)$ok], JSON_UNESCAPED_UNICODE);
+echo json_encode(['ok' => (bool)$ok, 'is_correct' => (bool)$isCorrect], JSON_UNESCAPED_UNICODE);

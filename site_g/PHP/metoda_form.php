@@ -41,7 +41,7 @@ if ($id > 0) {
                 <a href="index.php?page=metode" class="btn btn--ghost btn--sm">Înapoi la listă</a>
             </div>
             
-            <form method="post" action="PHP/metoda_salveaza.php" onsubmit="return valideazaMetoda();" style="display: flex; flex-direction: column; gap: var(--space-4);">
+            <form method="post" action="PHP/metoda_salveaza.php" style="display: flex; flex-direction: column; gap: var(--space-4);">
                 <?php csrf_field(); ?>
                 <input type="hidden" name="id_metoda" value="<?php echo $id; ?>">
 
@@ -92,4 +92,3 @@ if ($id > 0) {
         </div>
     </div>
 </div>
-<script src="js/validare.js" nonce="<?= $nonce ?>"></script>

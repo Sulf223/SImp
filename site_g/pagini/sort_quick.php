@@ -47,10 +47,12 @@ $lesson = [
         ['line' => 6, 'text' => 'sortează recursiv stânga și dreapta'],
     ],
     'variables' => [
+        'low' => 'începutul subsecvenței',
+        'high' => 'finalul subsecvenței',
         'pivot' => 'valoarea care separă secvența',
         'i' => 'ultima poziție cu valoare <= pivot',
-        'j' => 'elementul analizat',
-        'range' => 'subsecvența curentă',
+        'comparisons' => 'comparații făcute',
+        'swaps' => 'interschimbări făcute',
     ],
     'cpp' => [
         'int partitionare(vector<int>& v, int low, int high) {',

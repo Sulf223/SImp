@@ -160,13 +160,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 </span>
             </div>
             <div class="benchmark-canvas-wrap">
-                <canvas id="benchmark-chart" width="980" height="340" hidden></canvas>
-                <div id="benchmark-placeholder" class="benchmark-placeholder">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
-                    </svg>
-                    Graficul apare după ce rulezi comparația.
-                </div>
+                <canvas id="benchmark-chart" width="1280" height="420" aria-label="Grafic comparativ al timpilor de rulare"></canvas>
             </div>
             <div id="benchmark-legend" class="benchmark-legend"></div>
         </article>
@@ -226,4 +220,4 @@ if (session_status() === PHP_SESSION_NONE) {
     </div>
 </div>
 
-<script nonce="<?= htmlspecialchars($nonce ?? '', ENT_QUOTES, 'UTF-8') ?>" src="JS/performance_compare.js?v=20260515-comparison-fix2"></script>
+<script nonce="<?= htmlspecialchars($nonce ?? '', ENT_QUOTES, 'UTF-8') ?>" src="JS/performance_compare.js?v=20260521-chart-fullwidth"></script>

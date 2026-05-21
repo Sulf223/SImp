@@ -45,10 +45,11 @@ $lesson = [
         ['line' => 4, 'text' => 'scrie fiecare valoare de frecvența ei ori'],
     ],
     'variables' => [
-        'count' => 'vectorul de frecvențe',
+        'i' => 'poziția citită din vector',
         'value' => 'valoarea reconstruită',
-        'k' => 'mărimea intervalului',
-        'index' => 'poziția completată în vector',
+        'idx' => 'poziția completată în vector',
+        'comparisons' => 'comparații făcute',
+        'swaps' => 'scrieri în vector',
     ],
     'cpp' => [
         'void countingSort(vector<int>& v) {',

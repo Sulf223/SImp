@@ -121,7 +121,7 @@ if ($is_logged_in && $tableExists('ai_quiz_attempts')) {
                 </ul>
             </div>
             <div style="margin-top: auto; padding-top: var(--space-4);">
-                <button onclick="document.getElementById('ai-widget-toggle').click()" class="btn btn--ghost btn--sm" style="width: 100%;">Deschide Chat Direct</button>
+                <button id="open-ai-widget-direct" type="button" class="btn btn--ghost btn--sm" style="width: 100%;">Deschide Chat Direct</button>
             </div>
         </article>
 
@@ -330,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selected = parseInt(btn.dataset.index);
                 const isCorrect = selected === q.correct;
                 
-                userSelections.push({ question: q.question, user: selected, correct: q.correct, isCorrect });
+                userSelections.push({ qIndex: currentIdx, question: q.question, user: selected, correct: q.correct, isCorrect });
 
                 // Disable all
                 optButtons.forEach(b => {
@@ -400,14 +400,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const rawFeedback = data.feedback || 'Analiză indisponibilă.';
             const normalizedFeedback = normalizeUTF8Text(fixMojibake(rawFeedback)).replace(/\*\*/g, '');
             const formattedFeedback = formatQuizText(normalizedFeedback);
+            const serverScore = Number.isFinite(Number(data.attempt?.score)) ? Number(data.attempt.score) : score;
+            const serverTotal = Number.isFinite(Number(data.attempt?.total)) ? Number(data.attempt.total) : quizData.length;
+            const serverPercent = Number.isFinite(Number(data.attempt?.percent)) ? Number(data.attempt.percent) : percent;
             const savedHtml = data.attempt_saved
-                ? `<div class="ai-score-saved">Scor salvat în profil: ${score}/${quizData.length} (${Math.round(data.attempt?.percent ?? percent)}%).</div>`
+                ? `<div class="ai-score-saved">Scor salvat în profil: ${serverScore}/${serverTotal} (${Math.round(serverPercent)}%).</div>`
                 : `<div class="ai-score-saved ai-score-saved--muted">Scorul nu a fost salvat pe cont. Autentifică-te pentru istoric și evoluție.</div>`;
             
             resultsView.innerHTML = `
                 <div class="card__head" style="justify-content: center; margin-bottom: var(--space-6);">
                     <div style="text-align: center;">
-                        <h2 style="font-size: var(--text-5xl); font-weight: 700; color: ${percent >= 50 ? 'var(--color-success)' : 'var(--color-danger)'};">${score} / ${quizData.length}</h2>
+                        <h2 style="font-size: var(--text-5xl); font-weight: 700; color: ${serverPercent >= 50 ? 'var(--color-success)' : 'var(--color-danger)'};">${serverScore} / ${serverTotal}</h2>
                         <p class="stat__sub">Scor Final</p>
                         ${savedHtml}
                     </div>
@@ -426,7 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     
                     <div class="card__actions" style="justify-content: center;">
-                        <button onclick="location.reload()" class="btn btn--primary">Încearcă din nou</button>
+                        <button type="button" data-ai-quiz-restart class="btn btn--primary">Încearcă din nou</button>
                         <a href="index.php?page=grile" class="btn btn--ghost">Grile Clasice</a>
                     </div>
                 </div>
@@ -435,9 +438,22 @@ document.addEventListener('DOMContentLoaded', () => {
             resultsView.innerHTML = `
                 <h3>Scor: ${score} / ${quizData.length}</h3>
                 <p class="card__body">${escapeHtml(e.message || 'Feedback-ul nu este disponibil momentan.')}</p>
-                <button onclick="location.reload()" class="btn btn--primary">Reia</button>
+                <button type="button" data-ai-quiz-restart class="btn btn--primary">Reia</button>
             `;
         }
     }
+
+    const openDirect = document.getElementById('open-ai-widget-direct');
+    if (openDirect) {
+        openDirect.addEventListener('click', () => {
+            document.getElementById('ai-widget-toggle')?.click();
+        });
+    }
+
+    document.addEventListener('click', (event) => {
+        const restart = event.target.closest('[data-ai-quiz-restart]');
+        if (!restart) return;
+        window.location.reload();
+    });
 });
 </script>

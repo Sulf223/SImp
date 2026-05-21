@@ -32,7 +32,7 @@ GROQ_MODEL=llama-3.3-70b-versatile
 
 Observatii:
 1. Fisierul .env este local si nu trebuie urcat in Git.
-2. Daca nu setati GROQ_API_KEY, chat-ul Profesor AI va da eroare.
+2. Daca nu setati GROQ_API_KEY, Profesor AI foloseste raspunsuri locale de rezerva bazate pe `proiect_documentatie`.
 
 ## 4. Pornire rapida cu Docker (recomandat)
 
@@ -67,7 +67,7 @@ docker compose up --build -d
 2. Se deschid paginile de sortare (Bubble, Selection, Insertion, Quick, Merge, Counting)
 3. Functioneaza pagina Comparatii: [site_g/pagini/comparatii_sortare.php](site_g/pagini/comparatii_sortare.php)
 4. Functioneaza vizualizatorul din [site_g/JS/visualizer.js](site_g/JS/visualizer.js)
-5. Profesor AI raspunde fara eroare model/API
+5. Profesor AI raspunde sau intra in fallback local fara eroare model/API
 6. phpMyAdmin se deschide la http://localhost:8081
 7. Emailurile de resetare parola apar in Mailpit la http://localhost:8025
 
@@ -110,6 +110,8 @@ docker compose down
 docker compose up -d --build
 ```
 
+Daca API-ul extern intoarce 429 sau nu raspunde, aplicatia trebuie sa ofere fallback local pe baza documentatiei proiectului, nu sa blocheze utilizatorul.
+
 ## 7. Securitate și Hardening
 
 Proiectul include măsuri de securitate P0 și P1:
@@ -129,7 +131,7 @@ Proiectul include măsuri de securitate P0 și P1:
 5. [docker-compose.yml](docker-compose.yml) - orchestrare servicii
 6. [DOCKER_README.md](DOCKER_README.md) - ghid Docker extins
 
-## 8. Comenzi utile pentru debugging
+## 9. Comenzi utile pentru debugging
 
 ```bash
 docker compose ps
@@ -138,7 +140,7 @@ docker compose logs -f db
 docker compose exec web php -v
 ```
 
-## 9. Conventie commit messages
+## 10. Conventie commit messages
 
 Folositi mesaje descriptive:
 1. feat: add benchmark live mode

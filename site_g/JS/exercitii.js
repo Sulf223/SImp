@@ -207,7 +207,7 @@
 
     function normalize(str) {
         if (typeof str !== 'string') return '';
-        return str.replace(/\s+/g, '').toLowerCase();
+        return str.replace(/\s+/g, '').replace(/;+$/g, '').toLowerCase();
     }
 
     function getLessonSlug() {
@@ -371,6 +371,20 @@
             setHint('O variantă corectă: ' + (ex.raspunsuri && ex.raspunsuri[0] ? ex.raspunsuri[0] : '-'));
         }
     };
+
+    document.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-exercise-action]');
+        if (!button) return;
+
+        const action = button.getAttribute('data-exercise-action');
+        if (action === 'check') {
+            window.verificaExercitiu();
+        } else if (action === 'hint') {
+            window.afiseazaAjutor();
+        } else if (action === 'next') {
+            window.urmatorulExercitiu();
+        }
+    });
 
     window.addEventListener('load', function () {
         const container = document.getElementById('exercitiu-container');

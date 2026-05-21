@@ -77,7 +77,7 @@ require_once __DIR__ . '/auth.php';
                     echo '<tbody>';
                     while ($row = $rez->fetch_assoc()) {
                         $url_detalii = "index.php?page=metoda&id=" . $row['id_metoda'];
-                        echo '<tr style="border-bottom: 1px solid var(--color-border); transition: background 0.2s;" onmouseover="this.style.background=\'var(--color-surface-2)\'" onmouseout="this.style.background=\'transparent\'">';
+                        echo '<tr style="border-bottom: 1px solid var(--color-border); transition: background 0.2s;">';
                         echo '<td style="padding: 1rem;"><strong><a href="'.$url_detalii.'" style="text-decoration: none; color: var(--color-primary);">'.htmlspecialchars($row['nume']).'</a></strong></td>';
                         echo '<td style="padding: 1rem;">'.htmlspecialchars($row['categorie']).'</td>';
                         echo '<td style="padding: 1rem;"><code style="background: var(--color-surface-3); padding: 0.2rem 0.4rem; border-radius: 4px;">'.htmlspecialchars($row['complexitate']).'</code></td>';
@@ -86,7 +86,7 @@ require_once __DIR__ . '/auth.php';
                         if (is_admin()) {
                             echo '<a href="index.php?page=metoda_form&id='.$row['id_metoda'].'" class="btn btn--ghost btn--sm" style="margin-left: 0.5rem;">Edit</a>';
                             // FIX [H1]: Înlocuire link ștergere cu formular POST pentru protecție CSRF
-                            echo '<form action="PHP/metoda_sterge.php" method="POST" style="display:inline;" onsubmit="return confirm(\'Sunteți sigur că doriți să ștergeți această metodă?\');">';
+                            echo '<form action="PHP/metoda_sterge.php" method="POST" style="display:inline;" data-confirm="Sunteți sigur că doriți să ștergeți această metodă?">';
                             echo csrf_field();
                             echo '<input type="hidden" name="id" value="'.$row['id_metoda'].'">';
                             echo '<button type="submit" class="btn btn--quiet btn--sm" style="color: var(--color-danger); /* FIX [UI1]: replaced inexistent --color-error */ margin-left: 0.5rem; background:none; border:none; cursor:pointer; vertical-align: middle;">Șterge</button>';                            echo '</form>';

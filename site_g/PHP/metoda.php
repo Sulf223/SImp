@@ -89,7 +89,7 @@ if (!empty($metoda['fisier_cpp'])) {
             <?php if (is_admin()): ?>
             <div class="card__actions" style="margin-top: auto; padding-top: var(--space-6);">
                 <a href="index.php?page=metoda_form&id=<?php echo $id_metoda; ?>" class="btn btn--ghost btn--sm">Editează</a>
-                <form method="post" action="PHP/metoda_sterge.php" style="display: inline;" onsubmit="return confirm('Ești sigur că vrei să ștergi această metodă?');">
+                <form method="post" action="PHP/metoda_sterge.php" style="display: inline;" data-confirm="Ești sigur că vrei să ștergi această metodă?">
                     <?php csrf_field(); ?>
                     <input type="hidden" name="id" value="<?php echo $id_metoda; ?>">
                     <button type="submit" class="btn btn--quiet btn--sm" style="color: var(--color-danger);">Șterge</button>
@@ -108,7 +108,7 @@ if (!empty($metoda['fisier_cpp'])) {
                     Cod Sursă C++
                 </span>
                 <?php if (!empty($cod_cpp)): ?>
-                <button onclick="copyCode()" id="copy-btn" class="btn btn--quiet btn--sm" aria-label="Copiază codul C++">
+                <button type="button" id="copy-btn" class="btn btn--quiet btn--sm" aria-label="Copiază codul C++">
                     <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
@@ -147,10 +147,12 @@ if (!empty($metoda['fisier_cpp'])) {
 function copyCode() {
     const code = <?php echo json_encode($cod_cpp); ?>;
     const btn = document.getElementById('copy-btn');
+    if (!btn) return;
     navigator.clipboard.writeText(code).then(() => {
         const originalHtml = btn.innerHTML;
         btn.innerHTML = '<svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
         setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
     });
 }
+document.getElementById('copy-btn')?.addEventListener('click', copyCode);
 </script>

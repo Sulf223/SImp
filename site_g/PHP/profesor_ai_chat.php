@@ -241,19 +241,13 @@ if ($response === false) {
 }
 if ($httpCode !== 200) {
     error_log("profesor_ai_chat HTTP {$httpCode}: " . substr((string)$response, 0, 500));
-    if ($httpCode === 429) {
-        echo json_encode([
-            'ok' => true,
-            'reply' => build_local_ai_fallback_reply($message, $contextText, $docContext['sources'], $httpCode),
-            'model' => 'fallback-local-documentation',
-            'sources' => $docContext['sources'],
-            'fallback' => true
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
-    }
-
-    http_response_code(502);
-    echo json_encode(['ok' => false, 'error' => 'Serviciul AI extern nu este disponibil acum (HTTP ' . $httpCode . '). Încearcă din nou peste câteva minute.']);
+    echo json_encode([
+        'ok' => true,
+        'reply' => build_local_ai_fallback_reply($message, $contextText, $docContext['sources'], $httpCode),
+        'model' => 'fallback-local-documentation',
+        'sources' => $docContext['sources'],
+        'fallback' => true
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

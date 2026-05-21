@@ -16,9 +16,8 @@ if (session_status() === PHP_SESSION_NONE) {
 // FIX [M2]: Generare nonce pentru CSP și eliminare 'unsafe-inline' pentru scripturi
 $nonce = base64_encode(random_bytes(16));
 
-// CSP compatibil cu event handlerele inline încă prezente în paginile vechi.
-// Scripturile inline propriu-zise rămân protejate cu nonce; doar atributele on* sunt permise temporar.
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-{$nonce}'; script-src-elem 'self' 'nonce-{$nonce}'; script-src-attr 'unsafe-inline'; img-src 'self' data: https://api.dicebear.com; frame-src https://onecompiler.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; object-src 'none'; base-uri 'self'; form-action 'self';");
+// CSP strict pentru scripturi: handler-ele inline on* sunt blocate, iar scripturile locale folosesc nonce.
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-{$nonce}'; script-src-elem 'self' 'nonce-{$nonce}'; script-src-attr 'none'; img-src 'self' data: https://api.dicebear.com; frame-src https://onecompiler.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; object-src 'none'; base-uri 'self'; form-action 'self';");
 
 header("X-Content-Type-Options: nosniff");
 header("X-Frame-Options: SAMEORIGIN");
@@ -99,6 +98,12 @@ if (!$is_404) {
     $guest_only_pages = ['login', 'register', 'forgot_password', 'reset_password'];
     $admin_required_pages = ['admin', 'metoda_form'];
     $needs_grila_auth = $pagina_curenta === 'grila_interactiva' && ($_GET['mode'] ?? 'db') !== 'w3';
+
+    // Logout trimite redirect și trebuie executat înainte să înceapă layout-ul HTML.
+    if ($pagina_curenta === 'logout') {
+        require __DIR__ . '/PHP/logout.php';
+        exit;
+    }
 
     if ((in_array($pagina_curenta, $auth_required_pages, true) || $needs_grila_auth) && empty($_SESSION['user_id'])) {
         header('Location: index.php?page=login&required_auth=true');
@@ -193,7 +198,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="CSS/modern_vars.css?v=20260506-security-light-mail">
     <link rel="stylesheet" href="stil.css?v=20260506-security-light-mail">
-    <link rel="stylesheet" href="CSS/dashboard_modern.css?v=20260515-explain-panel">
+    <link rel="stylesheet" href="CSS/dashboard_modern.css?v=20260521-chart-fullwidth">
     <?php if ($pagina_curenta === 'admin'): ?>
         <link rel="stylesheet" href="CSS/admin.css?v=20260506-security-light-mail">
     <?php endif; ?>
@@ -322,7 +327,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
             echo '<strong style="display: block; font-size: var(--text-sm); color: var(--color-fg);">Realizare deblocată!</strong>';
             echo '<span style="font-size: var(--text-xs); color: var(--color-fg-muted);">' . htmlspecialchars($ach['title']) . '</span>';
             echo '</div>';
-            echo '<button type="button" class="toast__close" aria-label="Închide" onclick="this.parentElement.remove()">&times;</button>';
+            echo '<button type="button" class="toast__close" aria-label="Închide">&times;</button>';
             echo '</div>';
             echo '<script nonce="' . $nonce . '">setTimeout(() => { const t = document.getElementById("toast-container-achievements"); if(t) t.remove(); }, 6000);</script>';
         }
@@ -353,7 +358,7 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
                         <svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
                         Acasă
                     </a>
-                    <a href="javascript:history.back()" class="btn btn--ghost">Înapoi</a>
+                    <button type="button" class="btn btn--ghost" data-history-back>Înapoi</button>
                 </div>
             </div>
         </div>';
@@ -458,11 +463,13 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
   setTheme(initialTheme);
 
   // Toggle on button click
-  button.addEventListener('click', () => {
-    const current = html.getAttribute('data-theme') || 'dark';
-    const next = current === 'dark' ? 'light' : 'dark';
-    setTheme(next);
-  });
+  if (button) {
+    button.addEventListener('click', () => {
+      const current = html.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      setTheme(next);
+    });
+  }
 })();
 
 // POLISH [P1]: Mobile menu toggle
@@ -476,6 +483,22 @@ $display_title = ($is_404 ? 'Pagina nu a fost găsită' : ($page_titles[$pagina_
         });
     }
 })();
+
+document.addEventListener('click', (event) => {
+    const backButton = event.target.closest('[data-history-back]');
+    if (!backButton) return;
+    history.back();
+});
+
+document.addEventListener('submit', (event) => {
+    const form = event.target.closest('form[data-confirm]');
+    if (!form) return;
+
+    const message = form.dataset.confirm || 'Confirmați acțiunea?';
+    if (!window.confirm(message)) {
+        event.preventDefault();
+    }
+});
 </script>
 </body>
 </html>

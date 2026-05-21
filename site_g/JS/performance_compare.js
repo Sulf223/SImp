@@ -565,7 +565,6 @@
 
     function resetBenchmarkOutput() {
         var canvas = document.getElementById("benchmark-chart");
-        var placeholder = document.getElementById("benchmark-placeholder");
         var legend = document.getElementById("benchmark-legend");
         var iterationInfo = document.getElementById("iteration-info");
         var liveStatus = document.getElementById("benchmark-live-status");
@@ -576,9 +575,8 @@
         if (canvas) {
             var ctx = canvas.getContext("2d");
             if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
-            canvas.hidden = true;
+            canvas.hidden = false;
         }
-        if (placeholder) placeholder.hidden = false;
         if (legend) legend.innerHTML = "";
         if (iterationInfo) iterationInfo.textContent = "";
         if (liveStatus) {
@@ -644,7 +642,6 @@
         var datasetMax = document.getElementById("dataset-max");
         var canvas = document.getElementById("benchmark-chart");
         var legend = document.getElementById("benchmark-legend");
-        var placeholder = document.getElementById("benchmark-placeholder");
         var iterationInfo = document.getElementById("iteration-info");
         var liveStatus = document.getElementById("benchmark-live-status");
         var buttons = [
@@ -696,7 +693,6 @@
             results.sort(function (a, b) { return a.time - b.time; });
             lastResults = results;
 
-            if (placeholder) placeholder.hidden = true;
             canvas.hidden = false;
 
             renderTable(results);

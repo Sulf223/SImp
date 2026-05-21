@@ -877,15 +877,15 @@ class SortingVisualizer {
         const offset = min < 0 ? -min : 0;
         const count = new Array(max + offset + 1).fill(0);
 
+        this.highlightCodeLine(1);
         for (let i = 0; i < this.array.length; i++) {
-            this.highlightCodeLine(1);
+            this.highlightCodeLine(2);
             this.updateVarInspector({ i, value: '—', idx: '—', comparisons: this.comparisons, swaps: this.swaps });
             count[this.array[i] + offset]++;
             this.draw([i]);
             await this.sleep();
         }
 
-        this.highlightCodeLine(2);
         let idx = 0;
         for (let v = 0; v < count.length; v++) {
             this.highlightCodeLine(3);
@@ -893,6 +893,8 @@ class SortingVisualizer {
             while (count[v] > 0) {
                 this.highlightCodeLine(4);
                 this.array[idx] = v - offset;
+                this.swaps++;
+                this.updateStats();
                 this.draw([idx]);
                 await this.sleep();
                 idx++;

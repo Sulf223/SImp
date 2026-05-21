@@ -48,7 +48,8 @@ $lesson = [
     'variables' => [
         'i' => 'prima poziție nesortată',
         'j' => 'poziția testată',
-        'minIndex' => 'poziția minimului curent',
+        'minIdx' => 'poziția minimului curent',
+        'comparisons' => 'comparații făcute',
         'swaps' => 'mutări ale minimului',
     ],
     'cpp' => [

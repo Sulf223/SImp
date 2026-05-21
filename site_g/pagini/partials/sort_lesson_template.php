@@ -233,9 +233,9 @@ if (!function_exists('render_sort_lesson')) {
         <div class="card__body">
             <div id="exercitiu-container" class="exercise-panel" data-lesson="<?= sort_lesson_h($lessonSlug) ?>"></div>
             <div class="exercise-actions">
-                <button class="btn btn--secondary" type="button" onclick="verificaExercitiu()">Verifică</button>
-                <button class="btn btn--secondary" type="button" onclick="afiseazaAjutor()">Ajutor</button>
-                <button class="btn btn--primary" type="button" onclick="urmatorulExercitiu()">Următorul</button>
+                <button class="btn btn--secondary" type="button" data-exercise-action="check">Verifică</button>
+                <button class="btn btn--secondary" type="button" data-exercise-action="hint">Ajutor</button>
+                <button class="btn btn--primary" type="button" data-exercise-action="next">Următorul</button>
             </div>
             <div id="hint" class="hint" style="display: none;"></div>
             <div id="feedback" style="display: none;"></div>

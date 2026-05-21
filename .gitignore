@@ -1,5 +1,6 @@
 # Workspace artifacts
 WORKSPACE_FULL_DUMP.md
+WORKSPACE_DUMP.md
 
 # Local secrets
 .env
@@ -8,7 +9,12 @@ WORKSPACE_FULL_DUMP.md
 # OS/editor temporary files
 .DS_Store
 Thumbs.db
+~$*
 *.log
 *.tmp
 .vscode/
 .idea/
+
+# Runtime logs
+site_g/logs/*
+!site_g/logs/.gitkeep

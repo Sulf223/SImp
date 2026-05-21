@@ -173,17 +173,12 @@ if ($response === false) {
 }
 if ($http_code !== 200) {
     error_log("ai_code_feedback HTTP {$http_code}: " . substr((string)$response, 0, 500));
-    if ($http_code === 429) {
-        echo json_encode([
-            'ok' => true,
-            'feedback' => local_code_feedback_fallback($code, $contextText, $docContext['sources']),
-            'fallback' => true,
-            'sources' => $docContext['sources']
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
-    }
-    http_response_code(502);
-    echo json_encode(['ok' => false, 'error' => 'AI a răspuns cu eroare (HTTP ' . $http_code . ').']);
+    echo json_encode([
+        'ok' => true,
+        'feedback' => local_code_feedback_fallback($code, $contextText, $docContext['sources']),
+        'fallback' => true,
+        'sources' => $docContext['sources']
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

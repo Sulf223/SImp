@@ -84,12 +84,15 @@ if ($action === 'reset_progress') {
     try {
         $tabele_progres = [
             "DELETE FROM progres_grile WHERE id_utilizator = ?",
+            "DELETE FROM quiz_attempts WHERE user_id = ?",
+            "DELETE FROM ai_quiz_attempts WHERE user_id = ?",
             "DELETE FROM learning_exercise_progress WHERE user_id = ?",
             "DELETE FROM learning_progress WHERE user_id = ?",
             "DELETE FROM learning_activity_history WHERE user_id = ?",
             "DELETE FROM utilizatori_progres WHERE user_id = ?",
             "DELETE FROM istoric_activitate WHERE user_id = ?",
             "DELETE FROM activity_day WHERE user_id = ?",
+            "DELETE FROM user_achievements WHERE user_id = ?",
             "UPDATE user_streak SET current_streak = 0, longest_streak = 0, last_activity_date = NULL WHERE user_id = ?",
         ];
         foreach ($tabele_progres as $sql) {
@@ -125,12 +128,16 @@ if ($action === 'delete_user') {
     try {
         $tabele_cleanup = [
             "DELETE FROM progres_grile WHERE id_utilizator = ?",
+            "DELETE FROM quiz_attempts WHERE user_id = ?",
+            "DELETE FROM ai_quiz_attempts WHERE user_id = ?",
             "DELETE FROM learning_exercise_progress WHERE user_id = ?",
             "DELETE FROM learning_progress WHERE user_id = ?",
             "DELETE FROM learning_activity_history WHERE user_id = ?",
             "DELETE FROM istoric_activitate WHERE user_id = ?",
             "DELETE FROM utilizatori_progres WHERE user_id = ?",
             "DELETE FROM activity_day WHERE user_id = ?",
+            "DELETE FROM user_achievements WHERE user_id = ?",
+            "DELETE FROM password_reset_tokens WHERE user_id = ?",
             "DELETE FROM user_streak WHERE user_id = ?",
             "DELETE FROM utilizatori WHERE id = ?",
         ];

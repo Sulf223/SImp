@@ -98,22 +98,14 @@ site_g/pagini/sort_bubble.php
 | `Makefile` | comenzi scurte pentru rulare/testare |
 | `run.bat`, `start.bat`, `start.ps1`, `start.sh` | scripturi de pornire pe Windows/Linux |
 | `README.md` | prezentare generală proiect |
-| `QUICKSTART.md` | pași rapizi de pornire |
-| `STARTUP_GUIDE.md` | ghid de pornire mai detaliat |
 | `DOCKER_README.md` | explicații dedicate pentru Docker |
-| `INDEX.md` | index de documentație al proiectului |
-| `COMENZI_CMD.txt` | comenzi utile folosite în dezvoltare |
-| `AUDIT_FULL.md`, `AUDIT_COPILOT_2026-05-04.md`, `AUDIT_R7_REPORT.md` | rapoarte de audit/verificare |
-| `PROMPT_GEMINI_AUDIT_R7.md`, `PROMPT_GEMINI_LOGIC_R8.md` | prompturi folosite pentru audit extern |
-| `GEMINI.md` | notițe legate de verificări cu Gemini |
-| `WORKSPACE_DUMP.md` | dump mare al workspace-ului, util pentru analiză, nu pentru rulare |
-| `audit.php` | fișier auxiliar de audit PHP |
+| `Audit_Revizie_2026-05-21.md` | raportul curent de audit și verificare |
 | `Prezentare_*.pptx/pdf` | prezentările proiectului |
 | `Lucrare_*.docx/pdf` | lucrarea scrisă |
 | `Intrebari_Simpozion_OffByOne.*` | set de întrebări pentru pregătirea prezentării |
 | `Ghid_*.docx/pdf/txt` | ghiduri generate pentru pregătire |
 
-Fișierele `~$...` sunt fișiere temporare create de Microsoft Office și nu fac parte din aplicație.
+Fișierele temporare de Office (`~$...`), rapoartele vechi de audit, prompturile vechi de verificare și dump-urile mari ale workspace-ului au fost eliminate din proiect deoarece nu sunt necesare pentru rulare sau prezentare.
 
 ## 6. Punctul central: `site_g/index.php`
 
@@ -669,4 +661,3 @@ Mailpit este inbox local pentru emailuri de test. Resetarea parolei trimite emai
 ## 23. Rezumat foarte scurt pentru prezentare
 
 > OffByOne Academy este o platformă educațională PHP/MySQL pentru învățarea algoritmilor C++. Are lecții structurate, vizualizări interactive pe canvas, exerciții de completare, grile, comparații de performanță și un Profesor AI conectat la documentația proiectului. Aplicația rulează în Docker cu servicii separate pentru web, MySQL, phpMyAdmin și Mailpit. Securitatea include CSRF, sesiuni, roluri, rate limit și parole hash-uite.
-

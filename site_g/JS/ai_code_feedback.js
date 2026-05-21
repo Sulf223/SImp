@@ -6,6 +6,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (!btnFeedback || !inputCode || !responsePanel) return;
 
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
     btnFeedback.addEventListener('click', async () => {
         const code = inputCode.value.trim();
         if (!code) {
@@ -37,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (!res.ok) {
-                responsePanel.innerHTML = `<div class="alert alert--danger">${data?.error || `Serverul a răspuns cu eroarea ${res.status}.`}</div>`;
+                responsePanel.innerHTML = `<div class="alert alert--danger">${escapeHtml(data?.error || `Serverul a răspuns cu eroarea ${res.status}.`)}</div>`;
                 return;
             }
 
@@ -54,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 responsePanel.innerHTML = `<div style="padding: var(--space-4); background: var(--color-surface-2); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary); color: var(--color-fg); font-size: var(--text-sm); line-height: 1.6;"><p>${html}</p></div>`;
             } else {
-                responsePanel.innerHTML = `<div class="alert alert--danger">${data.error || 'A apărut o eroare.'}</div>`;
+                responsePanel.innerHTML = `<div class="alert alert--danger">${escapeHtml(data?.error || 'A apărut o eroare.')}</div>`;
             }
         } catch (e) {
             responsePanel.innerHTML = `<div class="alert alert--danger">Eroare de rețea. Te rog încearcă din nou.</div>`;

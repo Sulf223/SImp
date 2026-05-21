@@ -114,7 +114,7 @@ if (empty($cod_sursa)) {
                     </svg>
                     Cod Sursă Referință
                 </span>
-                <button onclick="copySourceCode()" id="copy-btn" class="btn btn--primary btn--sm">
+                <button type="button" id="copy-btn" class="btn btn--primary btn--sm">
                     <svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
@@ -131,6 +131,7 @@ if (empty($cod_sursa)) {
         function copySourceCode() {
             const code = <?php echo json_encode($cod_sursa); ?>;
             const btn = document.getElementById('copy-btn');
+            if (!btn) return;
             navigator.clipboard.writeText(code).then(() => {
                 const originalHtml = btn.innerHTML;
                 btn.innerHTML = '<svg class="icon icon--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copiat!';
@@ -141,6 +142,7 @@ if (empty($cod_sursa)) {
                 }, 2000);
             });
         }
+        document.getElementById('copy-btn')?.addEventListener('click', copySourceCode);
         </script>
         <?php endif; ?>
     </div>

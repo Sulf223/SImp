@@ -185,6 +185,64 @@ function ai_quiz_save_attempt(mysqli $con, int $userId, string $pathSlug, int $s
     return ['saved' => (bool)$ok, 'id' => $id, 'percent' => $percent];
 }
 
+function ai_quiz_store_current_attempt(array $quiz, string $pathSlug): void {
+    $questions = [];
+    foreach (array_values($quiz) as $index => $question) {
+        $questions[] = [
+            'index' => $index,
+            'question' => (string)($question['question'] ?? ''),
+            'correct' => (int)($question['correct'] ?? -1),
+        ];
+    }
+
+    $_SESSION['ai_quiz_current'] = [
+        'path_slug' => mb_substr($pathSlug !== '' ? $pathSlug : 'general', 0, 80, 'UTF-8'),
+        'created_at' => time(),
+        'questions' => $questions,
+    ];
+}
+
+function ai_quiz_grade_from_session(array $answers, string $pathSlug): array {
+    $attempt = $_SESSION['ai_quiz_current'] ?? null;
+    if (!is_array($attempt) || !isset($attempt['questions']) || !is_array($attempt['questions'])) {
+        return [false, [], 'Testul a expirat. Generează un test nou înainte de evaluare.'];
+    }
+
+    if ((time() - (int)($attempt['created_at'] ?? 0)) > 7200) {
+        unset($_SESSION['ai_quiz_current']);
+        return [false, [], 'Testul a expirat. Generează un test nou înainte de evaluare.'];
+    }
+
+    $expectedPath = (string)($attempt['path_slug'] ?? 'general');
+    if ($expectedPath !== mb_substr($pathSlug !== '' ? $pathSlug : 'general', 0, 80, 'UTF-8')) {
+        return [false, [], 'Testul curent nu corespunde drumului ales. Generează un test nou.'];
+    }
+
+    $selectedByIndex = [];
+    foreach ($answers as $answer) {
+        if (!is_array($answer) || !isset($answer['qIndex'])) {
+            continue;
+        }
+        $index = (int)$answer['qIndex'];
+        $selectedByIndex[$index] = isset($answer['user']) ? (int)$answer['user'] : -1;
+    }
+
+    $graded = [];
+    foreach (array_values($attempt['questions']) as $index => $question) {
+        $correct = (int)($question['correct'] ?? -1);
+        $selected = $selectedByIndex[$index] ?? -1;
+        $graded[] = [
+            'qIndex' => $index,
+            'question' => (string)($question['question'] ?? ''),
+            'user' => $selected,
+            'correct' => $correct,
+            'isCorrect' => $selected >= 0 && $selected === $correct,
+        ];
+    }
+
+    return [true, $graded, ''];
+}
+
 function ai_quiz_fallback_questions(string $pathSlug): array {
     return [
         [
@@ -273,9 +331,11 @@ if ($action === 'generate_quiz') {
         : 'Nu există fragmente relevante disponibile în indexul proiect_documentatie.';
 
     if ($apiKeyMissing) {
+        $fallbackQuiz = ai_quiz_fallback_questions((string)$pathSlug);
+        ai_quiz_store_current_attempt($fallbackQuiz, (string)$pathSlug);
         echo json_encode([
             'ok' => true,
-            'quiz' => ai_quiz_fallback_questions((string)$pathSlug),
+            'quiz' => $fallbackQuiz,
             'sources' => $docContext['sources'],
             'fallback' => true,
             'notice' => 'Cheia AI nu este configurată. Am generat un test local de rezervă pe baza proiectului.'
@@ -346,9 +406,11 @@ Răspunde DOAR cu JSON-ul valid, fără alt text, comentarii sau markdown.";
 
     if ($res === false) {
         error_log("ai_quiz_api generate curl error #{$curlErrno}: {$curlErr}");
+        $fallbackQuiz = ai_quiz_fallback_questions((string)$pathSlug);
+        ai_quiz_store_current_attempt($fallbackQuiz, (string)$pathSlug);
         echo json_encode([
             'ok' => true,
-            'quiz' => ai_quiz_fallback_questions((string)$pathSlug),
+            'quiz' => $fallbackQuiz,
             'sources' => $docContext['sources'],
             'fallback' => true,
             'notice' => 'Serviciul AI extern nu este disponibil momentan. Am generat un test local de rezervă.'
@@ -357,17 +419,15 @@ Răspunde DOAR cu JSON-ul valid, fără alt text, comentarii sau markdown.";
     }
     if ($httpCode !== 200) {
         error_log("ai_quiz_api generate HTTP {$httpCode}: " . substr((string)$res, 0, 500));
-        if ($httpCode === 429) {
-            echo json_encode([
-                'ok' => true,
-                'quiz' => ai_quiz_fallback_questions((string)$pathSlug),
-                'sources' => $docContext['sources'],
-                'fallback' => true,
-                'notice' => 'Serviciul AI extern a atins temporar limita de cereri. Am generat un test local de rezervă.'
-            ], JSON_UNESCAPED_UNICODE);
-            exit;
-        }
-        echo json_encode(['ok' => false, 'error' => 'AI a răspuns cu eroare (HTTP ' . $httpCode . ').'], JSON_UNESCAPED_UNICODE);
+        $fallbackQuiz = ai_quiz_fallback_questions((string)$pathSlug);
+        ai_quiz_store_current_attempt($fallbackQuiz, (string)$pathSlug);
+        echo json_encode([
+            'ok' => true,
+            'quiz' => $fallbackQuiz,
+            'sources' => $docContext['sources'],
+            'fallback' => true,
+            'notice' => 'Serviciul AI extern nu este disponibil acum. Am generat un test local de rezervă.'
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -464,6 +524,8 @@ Răspunde DOAR cu JSON-ul valid, fără alt text, comentarii sau markdown.";
         echo json_encode(['ok' => false, 'error' => 'Nu s-au putut valida întrebările generate.'], JSON_UNESCAPED_UNICODE);
         exit;
     }
+
+    ai_quiz_store_current_attempt($sanitizedQuiz, (string)$pathSlug);
     
     // FIX [DB1]: Store generated questions into DB with doc link mapping
     // Helper: guess a documentation page based on question text and pathSlug
@@ -560,10 +622,18 @@ if ($action === 'grade_quiz') {
         echo json_encode(['ok' => false, 'error' => 'Răspunsuri lipsă pentru evaluare.'], JSON_UNESCAPED_UNICODE);
         exit;
     }
-    
-    $wrongQuestions = array_filter($userAnswers, fn($a) => !($a['isCorrect'] ?? false));
-    $score = count($userAnswers) - count($wrongQuestions);
-    $total = count($userAnswers);
+
+    [$gradeOk, $gradedAnswers, $gradeError] = ai_quiz_grade_from_session($userAnswers, (string)$pathSlug);
+    if (!$gradeOk) {
+        http_response_code(409);
+        echo json_encode(['ok' => false, 'error' => $gradeError], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $wrongQuestions = array_filter($gradedAnswers, fn($a) => !($a['isCorrect'] ?? false));
+    $score = count($gradedAnswers) - count($wrongQuestions);
+    $total = count($gradedAnswers);
+    unset($_SESSION['ai_quiz_current']);
     $docContext = documentation_context_for_slug((string)$pathSlug, 5000, 4);
     $sourceList = !empty($docContext['sources']) ? implode(', ', $docContext['sources']) : 'niciun fișier găsit';
     $contextText = $docContext['text'] !== ''
@@ -659,29 +729,25 @@ STIL: Pedagogic, prietenos, motivator, concis.";
     }
     if ($httpCode !== 200) {
         error_log("ai_quiz_api grade HTTP {$httpCode}: " . substr((string)$res, 0, 500));
-        if ($httpCode === 429) {
-            $feedback = ai_quiz_local_feedback($score, $total);
-            $saveResult = ['saved' => false, 'id' => null, 'percent' => $total > 0 ? round(($score / $total) * 100, 2) : 0];
-            if (!empty($_SESSION['user_id'])) {
-                $saveResult = ai_quiz_save_attempt($con, (int)$_SESSION['user_id'], (string)$pathSlug, $score, $total, $feedback, $docContext['sources']);
-            }
-
-            echo json_encode([
-                'ok' => true,
-                'feedback' => $feedback,
-                'sources' => $docContext['sources'],
-                'fallback' => true,
-                'attempt_saved' => $saveResult['saved'],
-                'attempt' => [
-                    'id' => $saveResult['id'],
-                    'score' => $score,
-                    'total' => $total,
-                    'percent' => $saveResult['percent'],
-                ],
-            ], JSON_UNESCAPED_UNICODE);
-            exit;
+        $feedback = ai_quiz_local_feedback($score, $total);
+        $saveResult = ['saved' => false, 'id' => null, 'percent' => $total > 0 ? round(($score / $total) * 100, 2) : 0];
+        if (!empty($_SESSION['user_id'])) {
+            $saveResult = ai_quiz_save_attempt($con, (int)$_SESSION['user_id'], (string)$pathSlug, $score, $total, $feedback, $docContext['sources']);
         }
-        echo json_encode(['ok' => false, 'error' => 'AI a răspuns cu eroare (HTTP ' . $httpCode . ').'], JSON_UNESCAPED_UNICODE);
+
+        echo json_encode([
+            'ok' => true,
+            'feedback' => $feedback,
+            'sources' => $docContext['sources'],
+            'fallback' => true,
+            'attempt_saved' => $saveResult['saved'],
+            'attempt' => [
+                'id' => $saveResult['id'],
+                'score' => $score,
+                'total' => $total,
+                'percent' => $saveResult['percent'],
+            ],
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 

@@ -144,7 +144,7 @@ if ($is_logged_in) {
                         <?php foreach ($grile as $grila): 
                             $is_completat = $is_logged_in && in_array($grila['id'], $progres);
                         ?>
-                            <tr style="border-bottom: 1px solid var(--color-border); transition: background 0.2s;" onmouseover="this.style.background='var(--color-surface-2)'" onmouseout="this.style.background='transparent'">
+                            <tr style="border-bottom: 1px solid var(--color-border); transition: background 0.2s;">
                                 <?php if ($is_logged_in): ?>
                                 <td style="padding: var(--space-4); text-align: center;">
                                     <?php if ($is_completat): ?>

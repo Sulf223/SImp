@@ -74,7 +74,7 @@ var helpClicksAvansat = 0;
 
 function normalizeAdvanced(str) {
     if (typeof str !== "string") return "";
-    return str.replace(/\s+/g, "").toLowerCase();
+    return str.replace(/\s+/g, "").replace(/;+$/g, "").toLowerCase();
 }
 
 function afiseazaExercitiuAvansat() {
@@ -163,5 +163,19 @@ function afiseazaAjutorAvansat() {
 
     hintElem.style.display = "block";
 }
+
+document.addEventListener("click", function (event) {
+    var button = event.target.closest("[data-advanced-exercise-action]");
+    if (!button) return;
+
+    var action = button.getAttribute("data-advanced-exercise-action");
+    if (action === "check") {
+        verificaExercitiuAvansat();
+    } else if (action === "next") {
+        urmatorulExercitiuAvansat();
+    } else if (action === "hint") {
+        afiseazaAjutorAvansat();
+    }
+});
 
 window.addEventListener("load", afiseazaExercitiuAvansat);

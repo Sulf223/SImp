@@ -23,28 +23,28 @@ if (!empty($_SESSION['user_id'])) {
         </header>
 
         <article class="card" style="box-shadow: var(--shadow-2xl); border: 1px solid var(--color-border-strong); background: var(--color-surface-1);">
-            <form method="post" action="PHP/register_post.php" onsubmit="return validatePassword()" style="display: flex; flex-direction: column; gap: var(--space-4);">
+            <form method="post" action="PHP/register_post.php" data-password-match-form style="display: flex; flex-direction: column; gap: var(--space-4);">
                 <?php csrf_field(); ?>
                 
                 <div class="form-group">
                     <label style="display: block; font-size: 11px; font-weight: 600; color: var(--color-fg-subtle); margin-bottom: 6px; text-transform: uppercase; letter-spacing: var(--tracking-wider);" for="username">Utilizator</label>
-                    <input type="text" id="username" name="username" required maxlength="64" style="width: 100%; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-surface-2); color: var(--color-fg); transition: all 0.2s ease; outline: none;" onfocus="this.style.borderColor='var(--color-primary)'; this.style.boxShadow='var(--shadow-focus)'" onblur="this.style.borderColor='var(--color-border)'; this.style.boxShadow='none'">
+                    <input type="text" id="username" name="username" required maxlength="64" style="width: 100%; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-surface-2); color: var(--color-fg); transition: all 0.2s ease; outline: none;">
                 </div>
 
                 <!-- FEATURE [F1]: Adăugare câmp email la înregistrare -->
                 <div class="form-group">
                     <label style="display: block; font-size: 11px; font-weight: 600; color: var(--color-fg-subtle); margin-bottom: 6px; text-transform: uppercase; letter-spacing: var(--tracking-wider);" for="email">Email</label>
-                    <input type="email" id="email" name="email" required maxlength="190" style="width: 100%; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-surface-2); color: var(--color-fg); transition: all 0.2s ease; outline: none;" onfocus="this.style.borderColor='var(--color-primary)'; this.style.boxShadow='var(--shadow-focus)'" onblur="this.style.borderColor='var(--color-border)'; this.style.boxShadow='none'">
+                    <input type="email" id="email" name="email" required maxlength="190" style="width: 100%; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-surface-2); color: var(--color-fg); transition: all 0.2s ease; outline: none;">
                 </div>
 
                 <div class="form-group">
                     <label style="display: block; font-size: 11px; font-weight: 600; color: var(--color-fg-subtle); margin-bottom: 6px; text-transform: uppercase; letter-spacing: var(--tracking-wider);" for="password">Parolă</label>
-                    <input type="password" id="password" name="password" required style="width: 100%; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-surface-2); color: var(--color-fg); transition: all 0.2s ease; outline: none;" onfocus="this.style.borderColor='var(--color-primary)'; this.style.boxShadow='var(--shadow-focus)'" onblur="this.style.borderColor='var(--color-border)'; this.style.boxShadow='none'">
+                    <input type="password" id="password" name="password" required style="width: 100%; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-surface-2); color: var(--color-fg); transition: all 0.2s ease; outline: none;">
                 </div>
 
                 <div class="form-group">
                     <label style="display: block; font-size: 11px; font-weight: 600; color: var(--color-fg-subtle); margin-bottom: 6px; text-transform: uppercase; letter-spacing: var(--tracking-wider);" for="password_confirm">Confirmă Parola</label>
-                    <input type="password" id="password_confirm" name="password_confirm" required style="width: 100%; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-surface-2); color: var(--color-fg); transition: all 0.2s ease; outline: none;" onfocus="this.style.borderColor='var(--color-primary)'; this.style.boxShadow='var(--shadow-focus)'" onblur="this.style.borderColor='var(--color-border)'; this.style.boxShadow='none'">
+                    <input type="password" id="password_confirm" name="password_confirm" required style="width: 100%; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-surface-2); color: var(--color-fg); transition: all 0.2s ease; outline: none;">
                 </div>
 
                 <div id="password-error" style="display:none; padding: var(--space-3); background: var(--color-danger-soft); border-radius: var(--radius-md); color: var(--color-danger); font-size: var(--text-xs);"></div>

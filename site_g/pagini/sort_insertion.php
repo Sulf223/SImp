@@ -50,7 +50,8 @@ $lesson = [
         'i' => 'elementul de inserat',
         'key' => 'valoarea salvată temporar',
         'j' => 'cursorul care merge spre stânga',
-        'shifts' => 'deplasări spre dreapta',
+        'comparisons' => 'comparații făcute',
+        'swaps' => 'deplasări spre dreapta',
     ],
     'cpp' => [
         'void insertionSort(vector<int>& v) {',

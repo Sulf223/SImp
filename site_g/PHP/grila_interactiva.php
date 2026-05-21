@@ -396,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function processAnswer(answerId, answerText) {
         // Update Drop Zone UI
-        dropZone.innerHTML = `<div style="font-weight: 600; color: var(--color-fg);">${answerText}</div>`;
+        dropZone.innerHTML = `<div style="font-weight: 600; color: var(--color-fg);">${escapeHTML(answerText)}</div>`;
         
         // FIX [M7]: Adăugare radix 10 la parseInt
         const isCorrect = (parseInt(answerId, 10) === raspunsCorect);

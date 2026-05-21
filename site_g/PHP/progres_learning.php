@@ -129,8 +129,8 @@ function recompute_progress_for_lesson(mysqli $con, int $userId, string $lessonS
         $stmt->close();
     }
 
-    $exerciseWeight = min(100, (int)round(($done / max(1, $total)) * 90));
-    $progress = max(10, min(100, $exerciseWeight));
+    $exerciseWeight = (int)round(($done / max(1, $total)) * 90);
+    $progress = max(10, min(100, 10 + $exerciseWeight));
 
     $lessons = get_fundamental_lessons();
     $title = $lessons[$lessonSlug]['title'] ?? $lessonSlug;

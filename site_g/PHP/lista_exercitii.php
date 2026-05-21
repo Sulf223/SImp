@@ -137,8 +137,8 @@ include __DIR__ . '/conexiune.php';
             <div id="exercitiu-avansat-container" class="card__body" style="background: var(--color-surface-2); padding: var(--space-3); border-radius: var(--radius-md); margin: var(--space-3) 0;"></div>
             
             <div class="card__actions">
-                <button onclick="verificaExercitiuAvansat()" class="btn btn--primary btn--sm">Verifică</button>
-                <button onclick="urmatorulExercitiuAvansat()" class="btn btn--quiet btn--sm">Următorul</button>
+                <button type="button" data-advanced-exercise-action="check" class="btn btn--primary btn--sm">Verifică</button>
+                <button type="button" data-advanced-exercise-action="next" class="btn btn--quiet btn--sm">Următorul</button>
             </div>
             <p id="feedback-avansat" class="card__meta" style="margin-top: var(--space-2);"></p>
         </article>

@@ -1,0 +1,17 @@
+parameters:
+    level: 4
+    paths:
+        - site_g/PHP
+    ignoreErrors:
+        -
+            message: '#Variable \$con might not be defined#'
+            path: site_g/PHP/*
+        -
+            message: '#Variable \$nonce might not be defined#'
+            path: site_g/PHP/*
+        -
+            message: '#Offset \d+ on array.* on left side of \?\? always exists and is not nullable#'
+            path: site_g/PHP/*
+        -
+            message: '#Variable \$(cod_sursa|username) in empty\(\) always exists and is not falsy#'
+            path: site_g/PHP/*

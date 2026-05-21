@@ -13,15 +13,7 @@ $teste_rapide = [
     ['titlu' => 'Sortări (mix)', 'descriere' => 'Bubble, Selection, Insertion, Quick, Merge.', 'set' => 'sortari', 'color' => '#6e56cf']
 ];
 
-$has_doc_link = false;
-$col_check = $con->query("SHOW COLUMNS FROM grile_cpp LIKE 'doc_link'");
-if ($col_check) {
-    $has_doc_link = $col_check->num_rows > 0;
-    $col_check->free();
-}
-
-$doc_link_select = $has_doc_link ? 'doc_link' : 'NULL AS doc_link';
-$sql_grile = "SELECT id, nume_metoda, dificultate, intrebare, {$doc_link_select} FROM grile_cpp";
+$sql_grile = "SELECT id, nume_metoda, dificultate, intrebare, doc_link FROM grile_cpp";
 $stmt_grile = $con->prepare($sql_grile);
 $grile = [];
 if ($stmt_grile && $stmt_grile->execute()) {

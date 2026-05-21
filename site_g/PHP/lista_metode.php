@@ -49,12 +49,30 @@ require_once __DIR__ . '/auth.php';
 
                 $total_sql = "SELECT COUNT(*) as count FROM metode";
                 $total_res = $con->query($total_sql);
-                $total_row = $total_res->fetch_assoc();
-                $total_rows = $total_row['count'];
+                if (!$total_res) {
+                    error_log("lista_metode.php count failed: " . $con->error);
+                    $total_rows = 0;
+                } else {
+                    $total_row = $total_res->fetch_assoc();
+                    $total_rows = (int)($total_row['count'] ?? 0);
+                    $total_res->free();
+                }
                 $total_pages = ceil($total_rows / $limit);
 
-                $sql = "SELECT * FROM metode ORDER BY id_metoda LIMIT $limit OFFSET $offset";
-                $rez = $con->query($sql);
+                $sql = "SELECT * FROM metode ORDER BY id_metoda LIMIT ? OFFSET ?";
+                $stmt_lista = $con->prepare($sql);
+                if ($stmt_lista) {
+                    $stmt_lista->bind_param("ii", $limit, $offset);
+                    if ($stmt_lista->execute()) {
+                        $rez = $stmt_lista->get_result();
+                    } else {
+                        error_log("lista_metode.php list execute failed: " . $stmt_lista->error);
+                        $rez = false;
+                    }
+                } else {
+                    error_log("lista_metode.php list prepare failed: " . $con->error);
+                    $rez = false;
+                }
 
                 if (!$rez) {
                     // FIX [M3]: Eliminare afișare eroare directă către utilizator (Error Disclosure)
@@ -110,6 +128,9 @@ require_once __DIR__ . '/auth.php';
                         }
                         echo '</div>';
                     }
+                }
+                if (isset($stmt_lista) && $stmt_lista) {
+                    $stmt_lista->close();
                 }
                 ?>
             </div>

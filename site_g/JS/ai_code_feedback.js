@@ -28,6 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
         btnFeedback.innerHTML = '<svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Analizez...';
         responsePanel.innerHTML = '<div style="color: var(--color-fg-muted); padding: var(--space-4); text-align: center;">Profesorul AI citește codul tău...</div>';
 
+        const controller = new AbortController();
+        const timeoutId = window.setTimeout(() => controller.abort(), 20000);
+
         try {
             const res = await fetch('PHP/ai_code_feedback.php', {
                 method: 'POST',
@@ -35,7 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json',
                     'X-CSRF-Token': csrfToken
                 },
-                body: JSON.stringify({ code: code })
+                body: JSON.stringify({ code: code }),
+                signal: controller.signal
             });
 
             let data = null;
@@ -63,11 +67,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 responsePanel.innerHTML = `<div style="padding: var(--space-4); background: var(--color-surface-2); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary); color: var(--color-fg); font-size: var(--text-sm); line-height: 1.6;"><p>${html}</p></div>`;
             } else {
-                responsePanel.innerHTML = `<div class="alert alert--danger">${escapeHtml(data?.error || 'A apărut o eroare.')}</div>`;
+                responsePanel.innerHTML = `<div class="alert alert--danger">${escapeHtml(data?.error || 'Răspuns invalid de la server.')}</div>`;
             }
         } catch (e) {
-            responsePanel.innerHTML = `<div class="alert alert--danger">Eroare de rețea. Te rog încearcă din nou.</div>`;
+            const message = e?.name === 'AbortError'
+                ? 'Cererea a durat prea mult. Te rog încearcă din nou.'
+                : 'Eroare de rețea. Te rog încearcă din nou.';
+            responsePanel.innerHTML = `<div class="alert alert--danger">${message}</div>`;
         } finally {
+            window.clearTimeout(timeoutId);
             btnFeedback.disabled = false;
             btnFeedback.innerHTML = '<svg class="icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h.01"/><path d="M12 2v14"/><path d="m15 13-3 3-3-3"/></svg> Cere feedback AI';
         }

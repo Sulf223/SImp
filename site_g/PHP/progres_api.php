@@ -46,7 +46,7 @@ $lesson = trim((string)($payload['lesson'] ?? ''));
 $userId = (int)$_SESSION['user_id'];
 $lessons = get_fundamental_lessons();
 
-if ($lesson !== '' && !isset($lessons[$lesson])) {
+if ($lesson === '' || !preg_match('/^[a-z0-9_-]{1,80}$/', $lesson) || !isset($lessons[$lesson])) {
     http_response_code(400);
     echo json_encode(['ok' => false, 'error' => 'Lectie necunoscuta']);
     exit;
@@ -67,9 +67,9 @@ if ($action === 'mark_lesson_visit') {
 
 if ($action === 'mark_exercise_complete') {
     $exerciseKey = trim((string)($payload['exerciseKey'] ?? ''));
-    if ($exerciseKey === '') {
+    if ($exerciseKey === '' || !preg_match('/^[a-z0-9_-]{1,120}$/', $exerciseKey)) {
         http_response_code(400);
-        echo json_encode(['ok' => false, 'error' => 'exerciseKey lipsa']);
+        echo json_encode(['ok' => false, 'error' => 'exerciseKey invalid']);
         exit;
     }
 

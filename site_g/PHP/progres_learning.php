@@ -75,6 +75,15 @@ function track_lesson_visit(mysqli $con, int $userId, string $lessonSlug, string
     }
 
     update_streak($con, $userId);
+    if (function_exists('check_and_award_achievements')) {
+        $newly_unlocked = check_and_award_achievements($con, $userId);
+        if (!empty($newly_unlocked)) {
+            if (!isset($_SESSION['new_achievements'])) {
+                $_SESSION['new_achievements'] = [];
+            }
+            $_SESSION['new_achievements'] = array_merge($_SESSION['new_achievements'], $newly_unlocked);
+        }
+    }
 }
 
 function track_exercise_completion(mysqli $con, int $userId, string $lessonSlug, string $exerciseKey): int {
@@ -241,26 +250,8 @@ function ensure_streak_tables(mysqli $con): void {
     }
     $checked = true;
 
-    $profileColumns = [
-        'display_name' => '`display_name` VARCHAR(64) NULL AFTER `rol`',
-        'bio' => '`bio` VARCHAR(280) NULL AFTER `display_name`',
-        'avatar_seed' => '`avatar_seed` VARCHAR(64) NULL AFTER `bio`',
-        'theme_pref' => "`theme_pref` ENUM('dark','light','auto') DEFAULT 'dark' AFTER `avatar_seed`",
-        'onboarded_at' => '`onboarded_at` TIMESTAMP NULL AFTER `theme_pref`',
-    ];
-
-    foreach ($profileColumns as $column => $definition) {
-        $safeColumn = $con->real_escape_string($column);
-        $result = $con->query("SHOW COLUMNS FROM `utilizatori` LIKE '{$safeColumn}'");
-        if ($result && $result->num_rows === 0) {
-            if (!$con->query("ALTER TABLE `utilizatori` ADD COLUMN {$definition}")) {
-                error_log("ensure_streak_tables: failed to add {$column}: " . $con->error);
-            }
-        }
-        if ($result) {
-            $result->free();
-        }
-    }
+    // Coloanele de profil sunt provisionate de upgrade_profile_streak.sql / schema inițială.
+    // Nu verificăm schema la fiecare request.
 
     $tables = [
         "CREATE TABLE IF NOT EXISTS user_streak (

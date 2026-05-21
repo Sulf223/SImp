@@ -6,6 +6,33 @@ require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/conexiune.php';
 require_once __DIR__ . '/helpers.php';
 
+const ADMIN_PROGRESS_CLEANUP_SQL = [
+    "DELETE FROM progres_grile WHERE id_utilizator = ?",
+    "DELETE FROM quiz_attempts WHERE user_id = ?",
+    "DELETE FROM ai_quiz_attempts WHERE user_id = ?",
+    "DELETE FROM learning_exercise_progress WHERE user_id = ?",
+    "DELETE FROM learning_progress WHERE user_id = ?",
+    "DELETE FROM learning_activity_history WHERE user_id = ?",
+    "DELETE FROM utilizatori_progres WHERE user_id = ?",
+    "DELETE FROM istoric_activitate WHERE user_id = ?",
+    "DELETE FROM activity_day WHERE user_id = ?",
+    "DELETE FROM user_achievements WHERE user_id = ?",
+];
+
+function run_admin_user_cleanup(mysqli $con, string $sql, int $user_id, string $context): void {
+    $stmt = $con->prepare($sql);
+    if (!$stmt) {
+        error_log("admin_actions {$context} prepare failed: {$con->error}; sql={$sql}");
+        return;
+    }
+
+    $stmt->bind_param("i", $user_id);
+    if (!$stmt->execute()) {
+        error_log("admin_actions {$context} execute failed: {$stmt->error}; sql={$sql}");
+    }
+    $stmt->close();
+}
+
 // FIX [A2]: Session timeout pentru AJAX/POST handlers
 enforce_session_timeout_ajax();
 
@@ -82,27 +109,10 @@ if ($action === 'reset_progress') {
     // Tranzacție: șterge progresul din toate tabelele
     $con->begin_transaction();
     try {
-        $tabele_progres = [
-            "DELETE FROM progres_grile WHERE id_utilizator = ?",
-            "DELETE FROM quiz_attempts WHERE user_id = ?",
-            "DELETE FROM ai_quiz_attempts WHERE user_id = ?",
-            "DELETE FROM learning_exercise_progress WHERE user_id = ?",
-            "DELETE FROM learning_progress WHERE user_id = ?",
-            "DELETE FROM learning_activity_history WHERE user_id = ?",
-            "DELETE FROM utilizatori_progres WHERE user_id = ?",
-            "DELETE FROM istoric_activitate WHERE user_id = ?",
-            "DELETE FROM activity_day WHERE user_id = ?",
-            "DELETE FROM user_achievements WHERE user_id = ?",
-            "UPDATE user_streak SET current_streak = 0, longest_streak = 0, last_activity_date = NULL WHERE user_id = ?",
-        ];
-        foreach ($tabele_progres as $sql) {
-            if ($stmt = $con->prepare($sql)) {
-                $stmt->bind_param("i", $user_id);
-                $stmt->execute();
-                $stmt->close();
-            }
-            // Tabele opționale care pot lipsi -> ignorăm eroarea silențios
+        foreach (ADMIN_PROGRESS_CLEANUP_SQL as $sql) {
+            run_admin_user_cleanup($con, $sql, $user_id, 'reset_progress');
         }
+        run_admin_user_cleanup($con, "UPDATE user_streak SET current_streak = 0, longest_streak = 0, last_activity_date = NULL WHERE user_id = ?", $user_id, 'reset_progress');
         $con->commit();
         log_admin_action($con, 'reset_progress', $user_id, $target_user['username']);
         set_flash("success", "Progresul utilizatorului „{$target_user['username']}” a fost resetat.");
@@ -126,28 +136,12 @@ if ($action === 'delete_user') {
     // iar tabelele legacy fără FK trebuie curățate manual.
     $con->begin_transaction();
     try {
-        $tabele_cleanup = [
-            "DELETE FROM progres_grile WHERE id_utilizator = ?",
-            "DELETE FROM quiz_attempts WHERE user_id = ?",
-            "DELETE FROM ai_quiz_attempts WHERE user_id = ?",
-            "DELETE FROM learning_exercise_progress WHERE user_id = ?",
-            "DELETE FROM learning_progress WHERE user_id = ?",
-            "DELETE FROM learning_activity_history WHERE user_id = ?",
-            "DELETE FROM istoric_activitate WHERE user_id = ?",
-            "DELETE FROM utilizatori_progres WHERE user_id = ?",
-            "DELETE FROM activity_day WHERE user_id = ?",
-            "DELETE FROM user_achievements WHERE user_id = ?",
-            "DELETE FROM password_reset_tokens WHERE user_id = ?",
-            "DELETE FROM user_streak WHERE user_id = ?",
-            "DELETE FROM utilizatori WHERE id = ?",
-        ];
-        foreach ($tabele_cleanup as $sql) {
-            if ($stmt = $con->prepare($sql)) {
-                $stmt->bind_param("i", $user_id);
-                $stmt->execute();
-                $stmt->close();
-            }
+        foreach (ADMIN_PROGRESS_CLEANUP_SQL as $sql) {
+            run_admin_user_cleanup($con, $sql, $user_id, 'delete_user');
         }
+        run_admin_user_cleanup($con, "DELETE FROM password_reset_tokens WHERE user_id = ?", $user_id, 'delete_user');
+        run_admin_user_cleanup($con, "DELETE FROM user_streak WHERE user_id = ?", $user_id, 'delete_user');
+        run_admin_user_cleanup($con, "DELETE FROM utilizatori WHERE id = ?", $user_id, 'delete_user');
         $con->commit();
         // Log AFTER commit dar cu username snapshot, deoarece user-ul nu mai există
         log_admin_action($con, 'delete_user', $user_id, $target_user['username'],

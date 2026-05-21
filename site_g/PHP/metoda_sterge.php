@@ -1,49 +1,53 @@
 <?php
 require_once __DIR__ . '/conexiune.php';
-require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/helpers.php';
-require_role('admin');
+
+header('Content-Type: application/json; charset=UTF-8');
+
+function metoda_sterge_json(int $status, array $payload): void {
+    http_response_code($status);
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+    exit;
+}
 
 // Verificăm că request-ul este POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('Metodă invalidă. Folosește formularul de ștergere.');
+    metoda_sterge_json(400, ['ok' => false, 'error' => 'Metodă invalidă.']);
 }
 
-// Verificăm CSRF
-verify_csrf();
+enforce_session_timeout_ajax();
 
-// Verificăm dacă primim un ID și dacă este un număr întreg valid
-if (isset($_POST['id']) && filter_var($_POST['id'], FILTER_VALIDATE_INT)) {
-    $id = $_POST['id'];
-
-    // --- Securizare cu Prepared Statements ---
-
-    // 1. Pregătim interogarea SQL cu un placeholder (?) în loc de valoarea directă.
-    // Acest lucru separă logica SQL de date, prevenind interpretarea datelor ca fiind cod SQL.
-    $sql = "DELETE FROM metode WHERE id_metoda = ?";
-
-    if ($stmt = $con->prepare($sql)) {
-        // 2. Legăm variabila PHP ($id) la placeholder-ul din interogare.
-        // "i" specifică faptul că variabila este de tip integer (întreg).
-        $stmt->bind_param("i", $id);
-
-        // 3. Executăm interogarea pregătită.
-        if ($stmt->execute()) {
-            // Ștergerea a avut succes.
-        } else {
-            // A apărut o eroare la execuție (de ex. probleme de permisiuni, etc.)
-            error_log("Eroare la ștergere metoda ID $id: " . $stmt->error);
-        }
-
-        // 4. Închidem statement-ul.
-        $stmt->close();
-    } else {
-        // A apărut o eroare la pregătirea interogării
-        error_log("Eroare pregătire ștergere: " . $con->error);
-    }
+if (empty($_SESSION['user_id']) || ($_SESSION['rol'] ?? 'user') !== 'admin') {
+    metoda_sterge_json(403, ['ok' => false, 'error' => 'Acces interzis.']);
 }
 
-// La final, redirecționăm utilizatorul înapoi la lista de metode.
-// Folosim noul sistem de paginare.
-header("Location: ../index.php?page=metode");
-exit;
+// Verificăm CSRF fără redirect/text plain.
+$requestToken = get_csrf_token_from_request();
+$sessionToken = $_SESSION['csrf_token'] ?? '';
+if (!is_string($sessionToken) || $sessionToken === '' || $requestToken === '' || !hash_equals($sessionToken, $requestToken)) {
+    metoda_sterge_json(403, ['ok' => false, 'error' => 'Token CSRF invalid.']);
+}
+
+$id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+if (!$id || $id <= 0) {
+    metoda_sterge_json(400, ['ok' => false, 'error' => 'ID metodă invalid.']);
+}
+
+// --- Securizare cu Prepared Statements ---
+$sql = "DELETE FROM metode WHERE id_metoda = ?";
+$stmt = $con->prepare($sql);
+if (!$stmt) {
+    error_log("Eroare pregătire ștergere: " . $con->error);
+    metoda_sterge_json(500, ['ok' => false, 'error' => 'Nu pot pregăti ștergerea metodei.']);
+}
+
+$stmt->bind_param("i", $id);
+if (!$stmt->execute()) {
+    error_log("Eroare la ștergere metoda ID $id: " . $stmt->error);
+    $stmt->close();
+    metoda_sterge_json(500, ['ok' => false, 'error' => 'Nu pot șterge metoda.']);
+}
+
+$deleted = $stmt->affected_rows;
+$stmt->close();
+metoda_sterge_json(200, ['ok' => true, 'deleted' => $deleted]);

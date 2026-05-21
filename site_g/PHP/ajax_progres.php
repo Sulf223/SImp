@@ -18,14 +18,14 @@ enforce_session_timeout_ajax();
 // Verificăm dacă utilizatorul este logat
 if (!is_logged_in()) {
     http_response_code(403); // Forbidden
-    echo json_encode(['success' => false, 'error' => 'Utilizatorul nu este logat.']);
+    echo json_encode(['ok' => false, 'error' => 'Utilizatorul nu este logat.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 // Verificăm CSRF pentru cereri AJAX
 if (!verify_csrf_ajax()) {
     http_response_code(403);
-    echo json_encode(['success' => false, 'error' => 'Token CSRF invalid.']);
+    echo json_encode(['ok' => false, 'error' => 'Token CSRF invalid.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -50,11 +50,16 @@ if ($id_grila > 0) {
         $check_res = $check_stmt->get_result();
         if (!$check_res->fetch_assoc()) {
             http_response_code(404);
-            echo json_encode(['success' => false, 'error' => 'Grila nu există.']);
+            echo json_encode(['ok' => false, 'error' => 'Grila nu există.'], JSON_UNESCAPED_UNICODE);
             $check_stmt->close();
             exit;
         }
         $check_stmt->close();
+    } else {
+        error_log("ajax_progres.php check prepare failed: " . $con->error);
+        http_response_code(500);
+        echo json_encode(['ok' => false, 'error' => 'Eroare la validarea grilei.'], JSON_UNESCAPED_UNICODE);
+        exit;
     }
 
     // Inserăm progresul în baza de date, ignorând duplicatele
@@ -73,19 +78,19 @@ if ($id_grila > 0) {
                 $_SESSION['new_achievements'] = array_merge($_SESSION['new_achievements'], $newly_unlocked);
             }
 
-            echo json_encode(['success' => true, 'message' => 'Progres salvat.']);
+            echo json_encode(['ok' => true, 'message' => 'Progres salvat.'], JSON_UNESCAPED_UNICODE);
         } else {
             http_response_code(500); // Internal Server Error
-            echo json_encode(['success' => false, 'error' => 'Eroare la salvarea progresului.']);
+            echo json_encode(['ok' => false, 'error' => 'Eroare la salvarea progresului.'], JSON_UNESCAPED_UNICODE);
         }
         $stmt->close();
     } else {
         http_response_code(500);
-        echo json_encode(['success' => false, 'error' => 'Eroare la pregătirea interogării.']);
+        echo json_encode(['ok' => false, 'error' => 'Eroare la pregătirea interogării.'], JSON_UNESCAPED_UNICODE);
     }
 } else {
     http_response_code(400); // Bad Request
-    echo json_encode(['success' => false, 'error' => 'ID grilă invalid.']);
+    echo json_encode(['ok' => false, 'error' => 'ID grilă invalid.'], JSON_UNESCAPED_UNICODE);
 }
 
 $con->close();

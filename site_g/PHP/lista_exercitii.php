@@ -37,16 +37,34 @@ include __DIR__ . '/conexiune.php';
 
             $total_sql = "SELECT COUNT(*) as count FROM exercitii";
             $total_res = $con->query($total_sql);
-            $total_row = $total_res->fetch_assoc();
-            $total_rows = $total_row['count'];
+            if (!$total_res) {
+                error_log("lista_exercitii.php count failed: " . $con->error);
+                $total_rows = 0;
+            } else {
+                $total_row = $total_res->fetch_assoc();
+                $total_rows = (int)($total_row['count'] ?? 0);
+                $total_res->free();
+            }
             $total_pages = ceil($total_rows / $limit);
 
             $sql = "SELECT e.id_exercitiu, e.titlu, e.nivel, m.nume AS metoda
                     FROM exercitii e
                     JOIN metode m ON e.id_metoda = m.id_metoda
                     ORDER BY e.id_exercitiu
-                    LIMIT $limit OFFSET $offset";
-            $rez = $con->query($sql);
+                    LIMIT ? OFFSET ?";
+            $stmt_lista = $con->prepare($sql);
+            if ($stmt_lista) {
+                $stmt_lista->bind_param("ii", $limit, $offset);
+                if ($stmt_lista->execute()) {
+                    $rez = $stmt_lista->get_result();
+                } else {
+                    error_log("lista_exercitii.php list execute failed: " . $stmt_lista->error);
+                    $rez = false;
+                }
+            } else {
+                error_log("lista_exercitii.php list prepare failed: " . $con->error);
+                $rez = false;
+            }
 
             if (!$rez): 
                 // FIX [M3]: Eliminare afișare eroare directă către utilizator (Error Disclosure)
@@ -93,6 +111,11 @@ include __DIR__ . '/conexiune.php';
                 <?php endif; ?>
 
             <?php endif; ?>
+            <?php
+            if (isset($stmt_lista) && $stmt_lista) {
+                $stmt_lista->close();
+            }
+            ?>
         </article>
 
         <!-- Laborator Vizual -->

@@ -546,25 +546,11 @@ Răspunde DOAR cu JSON-ul valid, fără alt text, comentarii sau markdown.";
 
     // Prepare DB insertion (if $con available)
     if (isset($con) && $con instanceof mysqli) {
-        $hasDocLink = false;
-        $colCheck = $con->query("SHOW COLUMNS FROM grile_cpp LIKE 'doc_link'");
-        if ($colCheck) {
-            $hasDocLink = $colCheck->num_rows > 0;
-            $colCheck->free();
-        }
-
         $checkStmt = $con->prepare("SELECT 1 FROM grile_cpp WHERE intrebare = ? LIMIT 1");
-        if ($hasDocLink) {
-            $insStmt = $con->prepare(
-                "INSERT INTO grile_cpp (nume_metoda, dificultate, intrebare, cod_exemplu, varianta_1, varianta_2, varianta_3, varianta_4, raspuns_corect, explicatie, doc_link)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-            );
-        } else {
-            $insStmt = $con->prepare(
-                "INSERT INTO grile_cpp (nume_metoda, dificultate, intrebare, cod_exemplu, varianta_1, varianta_2, varianta_3, varianta_4, raspuns_corect, explicatie)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-            );
-        }
+        $insStmt = $con->prepare(
+            "INSERT INTO grile_cpp (nume_metoda, dificultate, intrebare, cod_exemplu, varianta_1, varianta_2, varianta_3, varianta_4, raspuns_corect, explicatie, doc_link)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        );
 
         foreach ($sanitizedQuiz as $sq) {
             if (!$checkStmt || !$insStmt) {
@@ -593,11 +579,7 @@ Răspunde DOAR cu JSON-ul valid, fără alt text, comentarii sau markdown.";
             $correct = ((int)$sq['correct']) + 1;
             $exp = $sq['explanation'];
 
-            if ($hasDocLink) {
-                $insStmt->bind_param('ssssssssiss', $nume_metoda, $dificultate, $qtext, $codeExample, $opt1, $opt2, $opt3, $opt4, $correct, $exp, $docLink);
-            } else {
-                $insStmt->bind_param('ssssssssis', $nume_metoda, $dificultate, $qtext, $codeExample, $opt1, $opt2, $opt3, $opt4, $correct, $exp);
-            }
+            $insStmt->bind_param('ssssssssiss', $nume_metoda, $dificultate, $qtext, $codeExample, $opt1, $opt2, $opt3, $opt4, $correct, $exp, $docLink);
             // Note: bind_param types must match: s=string, i=integer. We'll attempt with fallback
             // Use an execution attempt; ignore failures but log them
             try {

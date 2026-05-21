@@ -76,7 +76,9 @@ CREATE TABLE IF NOT EXISTS `grile_cpp` (
   `varianta_4` varchar(255) NOT NULL,
   `raspuns_corect` int(11) NOT NULL COMMENT 'Numărul variantei corecte (1-4)',
   `explicatie` text,
-  PRIMARY KEY (`id`)
+  `doc_link` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_grile_doc_link` (`doc_link`(191))
 ) ENGINE=InnoDB AUTO_INCREMENT=66 DEFAULT CHARSET=utf8mb4;
 
 --

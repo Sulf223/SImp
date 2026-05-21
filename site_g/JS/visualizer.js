@@ -73,7 +73,8 @@ class SortingVisualizer {
         // FIX [A6]: Cleanup audio context on page unload
         window.addEventListener("beforeunload", () => this.destroy());
 
-        // Pixel Perfect Hook: Hide skeleton and set global instance
+        // Public hook consumed by legacy inline panels and browser smoke tests that need
+        // access to the current SortingVisualizer instance after initialization.
         window.visualizerInstance = this;
         const skeleton = document.getElementById('skeleton-loader');
         if (skeleton) {
@@ -1887,4 +1888,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+// Default value before DOMContentLoaded; overwritten by SortingVisualizer constructor.
 window.visualizerInstance = null;

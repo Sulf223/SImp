@@ -50,17 +50,6 @@ if ($grilaId <= 0 || $selectedAnswer < 1 || $selectedAnswer > 4) {
     exit;
 }
 
-$con->query("CREATE TABLE IF NOT EXISTS quiz_attempts (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    grila_id INT NOT NULL,
-    selected_answer TINYINT NOT NULL,
-    is_correct TINYINT(1) NOT NULL DEFAULT 0,
-    attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_quiz_attempt_user_time (user_id, attempted_at),
-    INDEX idx_quiz_attempt_grila (grila_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-
 $check = $con->prepare("SELECT raspuns_corect FROM grile_cpp WHERE id = ? LIMIT 1");
 if (!$check) {
     http_response_code(500);
@@ -91,4 +80,18 @@ $stmt->bind_param('iiii', $userId, $grilaId, $selectedAnswer, $isCorrect);
 $ok = $stmt->execute();
 $stmt->close();
 
-echo json_encode(['ok' => (bool)$ok, 'is_correct' => (bool)$isCorrect], JSON_UNESCAPED_UNICODE);
+if (!$ok) {
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => 'Nu pot salva încercarea.'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+$newly_unlocked = check_and_award_achievements($con, $userId);
+if (!empty($newly_unlocked)) {
+    if (!isset($_SESSION['new_achievements'])) {
+        $_SESSION['new_achievements'] = [];
+    }
+    $_SESSION['new_achievements'] = array_merge($_SESSION['new_achievements'], $newly_unlocked);
+}
+
+echo json_encode(['ok' => true, 'is_correct' => (bool)$isCorrect], JSON_UNESCAPED_UNICODE);

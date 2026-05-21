@@ -9,43 +9,8 @@ if (function_exists('ensure_learning_tables')) {
     ensure_learning_tables($con);
 }
 
-// Fetch user info
-$columnExists = function (string $table, string $column) use ($con): bool {
-    $safeColumn = $con->real_escape_string($column);
-    $result = $con->query("SHOW COLUMNS FROM `{$table}` LIKE '{$safeColumn}'");
-    if (!$result) {
-        return false;
-    }
-    $exists = $result->num_rows > 0;
-    $result->free();
-    return $exists;
-};
-
-$tableExists = function (string $table) use ($con): bool {
-    $safeTable = $con->real_escape_string($table);
-    $result = $con->query("SHOW TABLES LIKE '{$safeTable}'");
-    if (!$result) {
-        return false;
-    }
-    $exists = $result->num_rows > 0;
-    $result->free();
-    return $exists;
-};
-
-$profileFields = [
-    'display_name' => $columnExists('utilizatori', 'display_name'),
-    'bio' => $columnExists('utilizatori', 'bio'),
-    'avatar_seed' => $columnExists('utilizatori', 'avatar_seed'),
-    'theme_pref' => $columnExists('utilizatori', 'theme_pref'),
-];
-$selectFields = ['username'];
-foreach ($profileFields as $field => $exists) {
-    $selectFields[] = $exists ? $field : "NULL AS {$field}";
-}
-$selectFields[] = 'created_at';
-
 $user = [];
-$stmt = $con->prepare("SELECT " . implode(', ', $selectFields) . " FROM utilizatori WHERE id = ?");
+$stmt = $con->prepare("SELECT username, display_name, bio, avatar_seed, theme_pref, created_at FROM utilizatori WHERE id = ?");
 if ($stmt) {
     $stmt->bind_param('i', $userId);
     $stmt->execute();
@@ -110,7 +75,7 @@ if ($stmt = $con->prepare("SELECT COUNT(*) AS c FROM progres_grile WHERE id_util
     $solvedGrile = (int)($stmt->get_result()->fetch_assoc()['c'] ?? 0);
     $stmt->close();
 }
-if ($tableExists('quiz_attempts') && ($stmt = $con->prepare("SELECT COUNT(*) AS attempts, SUM(is_correct = 1) AS correct FROM quiz_attempts WHERE user_id = ?"))) {
+if ($stmt = $con->prepare("SELECT COUNT(*) AS attempts, SUM(is_correct = 1) AS correct FROM quiz_attempts WHERE user_id = ?")) {
     $stmt->bind_param('i', $userId);
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc() ?: [];
@@ -118,29 +83,33 @@ if ($tableExists('quiz_attempts') && ($stmt = $con->prepare("SELECT COUNT(*) AS 
     $quizCorrect = (int)($row['correct'] ?? 0);
     $quizAccuracy = $quizAttempts > 0 ? (int)round(($quizCorrect / $quizAttempts) * 100) : 0;
     $stmt->close();
+} else {
+    error_log('profil.php: failed to load quiz attempts: ' . $con->error);
 }
-if ($tableExists('ai_quiz_attempts')) {
-    if ($stmt = $con->prepare("SELECT COUNT(*) AS total, AVG(percent) AS avg_percent, MAX(percent) AS best_percent FROM ai_quiz_attempts WHERE user_id = ?")) {
-        $stmt->bind_param('i', $userId);
-        $stmt->execute();
-        $row = $stmt->get_result()->fetch_assoc() ?: [];
-        $aiQuizStats['total'] = (int)($row['total'] ?? 0);
-        $aiQuizStats['avg_percent'] = (int)round((float)($row['avg_percent'] ?? 0));
-        $aiQuizStats['best_percent'] = (int)round((float)($row['best_percent'] ?? 0));
-        $stmt->close();
+if ($stmt = $con->prepare("SELECT COUNT(*) AS total, AVG(percent) AS avg_percent, MAX(percent) AS best_percent FROM ai_quiz_attempts WHERE user_id = ?")) {
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc() ?: [];
+    $aiQuizStats['total'] = (int)($row['total'] ?? 0);
+    $aiQuizStats['avg_percent'] = (int)round((float)($row['avg_percent'] ?? 0));
+    $aiQuizStats['best_percent'] = (int)round((float)($row['best_percent'] ?? 0));
+    $stmt->close();
+} else {
+    error_log('profil.php: failed to load AI quiz stats: ' . $con->error);
+}
+if ($stmt = $con->prepare("SELECT path_slug, score, total, percent, created_at FROM ai_quiz_attempts WHERE user_id = ? ORDER BY created_at DESC LIMIT 10")) {
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+        $aiQuizHistory[] = $row;
     }
-    if ($stmt = $con->prepare("SELECT path_slug, score, total, percent, created_at FROM ai_quiz_attempts WHERE user_id = ? ORDER BY created_at DESC LIMIT 10")) {
-        $stmt->bind_param('i', $userId);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        while ($row = $res->fetch_assoc()) {
-            $aiQuizHistory[] = $row;
-        }
-        $stmt->close();
-    }
-    if (!empty($aiQuizHistory)) {
-        $aiQuizStats['latest_percent'] = (int)round((float)$aiQuizHistory[0]['percent']);
-    }
+    $stmt->close();
+} else {
+    error_log('profil.php: failed to load AI quiz history: ' . $con->error);
+}
+if (!empty($aiQuizHistory)) {
+    $aiQuizStats['latest_percent'] = (int)round((float)$aiQuizHistory[0]['percent']);
 }
 
 $nextProfileRecommendation = 'Continuă lecțiile de sortare și rulează câteva grile după fiecare algoritm.';
@@ -158,7 +127,7 @@ $sql_ach = "SELECT a.*, ua.unlocked_at IS NOT NULL AS unlocked
             LEFT JOIN user_achievements ua ON ua.achievement_id = a.id AND ua.user_id = ?
             ORDER BY ua.unlocked_at DESC, a.id ASC";
 $achievements = [];
-if ($tableExists('achievements') && $tableExists('user_achievements') && ($stmt = $con->prepare($sql_ach))) {
+if ($stmt = $con->prepare($sql_ach)) {
     $stmt->bind_param('i', $userId);
     $stmt->execute();
     $res = $stmt->get_result();
@@ -166,6 +135,8 @@ if ($tableExists('achievements') && $tableExists('user_achievements') && ($stmt 
         $achievements[] = $row;
     }
     $stmt->close();
+} else {
+    error_log('profil.php: failed to load achievements: ' . $con->error);
 }
 ?>
 
